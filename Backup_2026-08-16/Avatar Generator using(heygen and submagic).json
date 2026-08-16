@@ -1,0 +1,878 @@
+{
+  "updatedAt": "2026-07-08T13:35:00.468Z",
+  "createdAt": "2025-10-16T20:40:37.799Z",
+  "id": "SgrltZpXrYU9K7PP",
+  "name": "Avatar Generator using(heygen and submagic)",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://api.heygen.com/v1/video_status.get",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "video_id",
+              "value": "={{ $('Generate HeyGen Video').item.json.data.video_id }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -384,
+        704
+      ],
+      "id": "ca4c0b09-9e23-407e-99c7-6c4f8c15393f",
+      "name": "Fetch HeyGen Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "5dvuaQ8vpI7oZeTg",
+          "name": "Heygen"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "debd88fe-d327-4edd-8717-ba8b50c3fe84",
+              "leftValue": "={{ $json.data.status }}",
+              "rightValue": "completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -160,
+        704
+      ],
+      "id": "b54eef15-e4c1-4fcd-bfae-b2acab2fbd58",
+      "name": "If Status = Complete"
+    },
+    {
+      "parameters": {
+        "content": "# Script Writer ",
+        "height": 608,
+        "width": 512,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        -176
+      ],
+      "id": "e3b5f92b-b195-4d4d-b71a-2a8e54227d44",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "# Video Creation\n## by HeyGen",
+        "height": 432,
+        "width": 1328,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1104,
+        528
+      ],
+      "id": "4dd23ba1-c8b9-428c-b033-ce6e05c024af",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.heygen.com/v2/video/generate",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"video_inputs\": [\n    {\n      \"character\": {\n        \"type\": \"avatar\",\n        \"avatar_id\":\"{{ $json.data.avatars[0].avatar_id }}\",\n        \"avatar_style\": \"normal\"\n      },\n      \"voice\": {\n        \"type\": \"text\",\n        \"input_text\": \"{{ $('Script Generator').item.json.output }}\",\n        \"voice_id\": \"e0cc82c22f414c95b1f25696c732f058\",\n        \"speed\": 1.1\n      }\n    }\n  ],\n  \"dimension\": {\n    \"width\": 720,\n    \"height\": 1280\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -784,
+        704
+      ],
+      "id": "d2c1900c-0c8c-4e97-8952-7920ec11aaf6",
+      "name": "Generate HeyGen Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "5dvuaQ8vpI7oZeTg",
+          "name": "Heygen"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.submagic.co/v1/projects",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"title\": \"My Awesome Video\",\n    \"language\": \"en\",\n    \"videoUrl\": \"{{ $json.data.video_url }}\",\n    \"templateName\": \"Hormozi 2\",\n    \"dictionary\": [\"Submagic\", \"AI-powered\", \"captions\"],\n    \"magicZooms\": true,\n    \"magicBrolls\": true,\n    \"magicBrollsPercentage\": 75,\n    \"removeSilencePace\": \"fast\",\n    \"removeBadTakes\": true\n  }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -528,
+        1168
+      ],
+      "id": "603bb95a-7466-4c68-a9f6-f67da4cebf69",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CezkIXyqm1175DXL",
+          "name": "Submagic"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.submagic.co/v1/projects/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -128,
+        1168
+      ],
+      "id": "bcc66622-38bf-4908-a8cc-e0e839c63bf2",
+      "name": "HTTP Request2",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CezkIXyqm1175DXL",
+          "name": "Submagic"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "processing",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "55999c9a-c72a-4f00-8a24-86a6b5d7a7a3"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "processing"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f5d71449-b820-4c3a-944e-f8311828105b",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "completed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "completed"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "03ac8fef-c5b9-4ac8-aa7a-ebbb510040d3",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "=failed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "failed"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        64,
+        1152
+      ],
+      "id": "b541ba57-d62b-453b-ba82-d905f0c2a2db",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -336,
+        1168
+      ],
+      "id": "841d67d9-d304-46dc-b1d1-6c301b5a871d",
+      "name": "Wait",
+      "webhookId": "30cf877f-28a6-4a9d-b83c-3626dcbd6bba"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.downloadUrl }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        288,
+        1168
+      ],
+      "id": "bc90fe75-355f-4ce1-b182-bd300f7e5bf3",
+      "name": "HTTP Request3",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CezkIXyqm1175DXL",
+          "name": "Submagic"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Hello there, what video would you like to create today?",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Title your video (What's it about?)",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Place your raw content / text here"
+            },
+            {
+              "fieldLabel": "How do you want to use your 'raw content'?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Main Content Source"
+                  },
+                  {
+                    "option": "Context"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Place your 'link' here"
+            },
+            {
+              "fieldLabel": "How do you want to use your 'link'?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Main Content Source"
+                  },
+                  {
+                    "option": "Context"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Attach PDF here",
+              "fieldType": "file",
+              "acceptFileTypes": ".pdf"
+            },
+            {
+              "fieldLabel": "How do you want to use your 'PDF'?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Main Content Source"
+                  },
+                  {
+                    "option": "Context"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "How long do you want the video to be (in seconds)?",
+              "fieldType": "number",
+              "placeholder": "90",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -784,
+        96
+      ],
+      "id": "ecb3997d-f81d-4540-a1fc-f7855a48f3ca",
+      "name": "On form submission1",
+      "webhookId": "5bee8cbe-6182-4913-b9ed-6ad50b225f64"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "Attach_PDF_here",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        96
+      ],
+      "id": "c67fa676-bee6-4c45-8817-3b127b3d3a74",
+      "name": "Extract PDF Content1",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite-preview-09-2025",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        320
+      ],
+      "id": "5b458feb-5608-4287-a0cf-ce45393901e2",
+      "name": "Gemini 2.5 Flash1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Gq3qNdXZmlzVb7Jg",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Trigger & Data Extraction",
+        "height": 608,
+        "width": 768,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1104,
+        -176
+      ],
+      "id": "54d84de8-f900-499f-aeeb-e3cbb0b5c753",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "# Video Editing\n",
+        "height": 320,
+        "width": 1536
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1104,
+        1088
+      ],
+      "typeVersion": 1,
+      "id": "d1b3362b-69ea-4a14-9d1a-abc3fcfaae6a",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Use the following sources of information to create ''{{ $('On form submission1').item.json['How long do you want the video to be (in seconds)?'] }} second' video script. Do not bother if any of 'Raw Content','Link Content' OR 'PDF Content' is not given. Use what's available among the 3 in the specified manner 'Use it as'\n\n# Raw Content\n## Use it as - ({{ $('On form submission1').item.json['How do you want to use your \\'raw content\\'?'] }})\n\n## Data - {{ $('On form submission1').item.json['Place your raw content / text here'] }}\n\n# Link Content\n## Use it as - ({{ $('On form submission1').item.json['How do you want to use your \\'link\\'?'] }})\n\n## Data - {{ $json.results[0].raw_content }}\n\n# PDF Content\n## Use it as - ({{ $('On form submission1').item.json['How do you want to use your \\'PDF\\'?'] }})\n\n## Data\n{{ $('Extract PDF Content1').item.json.text }}",
+        "options": {
+          "systemMessage": "=# Instagram Reel Scriptwriter - System Prompt\n\n## ROLE\nYou are an **Elite Instagram Reel Scriptwriter** specializing in high-converting real estate content. You are a master of creating viral, attention-grabbing scripts that generate massive engagement, reach, and drive immediate action. Your expertise lies in crafting compelling narratives that transform property information into irresistible Instagram Reel content that stops the scroll and compels viewers to take action.\n\n## PRIMARY TASK\nCreate a perfectly timed, high-impact Instagram Reel script using the provided content sources (Raw Content, Link Content, PDF Content, or combinations thereof) that will be used to generate AI avatar videos via HeyGen. The script must be precisely calibrated to the specified duration and optimized for maximum viewer engagement and conversion.\n\n## CONTEXT\nYou're creating scripts for a marketing automation system serving real estate agencies. These scripts will be converted into AI avatar videos featuring properties, investment opportunities, and lifestyle propositions. Your scripts must work seamlessly with AI avatar generation while maintaining the authentic, conversational tone that makes Instagram Reels successful.\n\n## CORE REQUIREMENTS\n\n### Timing Precision\n- **CRITICAL**: Script must be exactly calibrated to the specified second duration\n- Use approximately **2.5-3 words per second** as your baseline\n- Account for natural speech patterns, pauses, and emphasis\n- Ensure the script flows naturally within the time constraint without feeling rushed or dragging\n\n### Content Integration\n- Work with whatever content is available (PDF, Link, Raw, or combinations)\n- Extract the most compelling elements from provided sources\n- Transform dry property details into engaging narratives\n- Handle missing or incomplete information gracefully by focusing on available strengths\n\n### Engagement Optimization\n- **Hook within first 3 seconds**: Start with price/value proposition or intriguing question\n- Use **rapid-fire benefit delivery** to maintain attention\n- Include **specific numbers and metrics** for credibility\n- Build **emotional connection** through lifestyle visualization\n- End with **strong, clear call-to-action**\n\n## SCRIPT STRUCTURE FRAMEWORK\n\n### Opening Hook (First 5-8 words)\n- Lead with price/value proposition: \"This is what [X amount] gets you...\"\n- Pose intriguing question: \"What does [X rupees] get you in [location]?\"\n- Create curiosity gap: \"You won't believe what this property offers for...\"\n- Use time-based urgency: \"In just 30 seconds, see what [amount] buys...\"\n\n### Feature Delivery (Middle Section)\n- **Rapid succession of benefits**: List features in quick, punchy phrases\n- **Use specific measurements**: Square footage, land parcel size, exact amenities\n- **Paint lifestyle pictures**: Help viewers visualize living there\n- **Include investment metrics**: ROI, rental income, appreciation potential\n- **Location advantages**: Proximity to landmarks, highways, airports\n- **Unique selling propositions**: What makes this property special\n\n### Closing Action (Last 5-10 words)\n- Direct call-to-action: \"Comment WPR for site visit details\"\n- Engagement driver: \"Send this reel back for more information\" \n- Urgency creator: \"DM 'INTERESTED' before it's too late\"\n- Social proof trigger: \"Join [X] smart investors who already booked\"\n\n## STYLE GUIDELINES\n\n### Tone & Voice\n- **Conversational yet authoritative**: Like talking to a knowledgeable friend\n- **Enthusiastic but not overselling**: Genuine excitement about value\n- **Confident and specific**: Use exact numbers, not vague terms\n- **Inclusive language**: \"You get\", \"Your property\", \"Imagine waking up to...\"\n\n### Language Patterns\n- **Active voice over passive**: \"You own\" vs \"It is owned\"\n- **Present tense for immediacy**: \"This gets you\" vs \"This would get you\"\n- **Benefit-focused**: What the buyer gains, not just what exists\n- **Sensory language**: Help viewers visualize, feel, experience\n\n### Pacing Techniques\n- **Varied sentence lengths**: Mix short punches with flowing descriptions\n- **Strategic pauses**: Use punctuation to create natural speech rhythm\n- **Emphasis markers**: Bold important numbers/features in your mind\n- **Transition smoothness**: Connect ideas seamlessly\n\n## CONTENT ADAPTATION STRATEGIES\n\n### For PDF Content\n- Extract key property specifications, pricing, location details\n- Transform technical data into lifestyle benefits\n- Identify unique selling points and investment metrics\n- Focus on most compelling elements within time limit\n\n### For Link Content\n- Synthesize web-scraped information into core value propositions\n- Highlight standout features that differentiate the property\n- Extract location advantages and accessibility information\n- Identify investment potential and ROI data\n\n### For Raw Content\n- Work with user's provided information as primary source\n- Enhance with industry knowledge while staying factual\n- Structure information for maximum impact delivery\n- Amplify the most compelling aspects\n\n## SPECIFIC FORMATTING REQUIREMENTS\n\n### Output Format\n**CRITICAL**: Provide ONLY the script content. No introductions, explanations, headers, closing statements, or additional commentary. Just the pure script text that will be fed directly to the AI avatar system.\n\n```\n[Script content only - no other text whatsoever]\n```\n\n### Technical Considerations\n- **No stage directions**: Pure conversational script only\n- **Natural speech flow**: Written to sound natural when spoken by AI avatar\n- **Punctuation for pacing**: Use commas, periods strategically for speech rhythm\n- **No excessive formatting**: Clean, readable text that AI can easily vocalize\n\n## QUALITY BENCHMARKS\n\n### Engagement Metrics\n- **Hook strength**: Will this stop the scroll in first 3 seconds?\n- **Value clarity**: Is the proposition crystal clear immediately?\n- **Feature density**: Maximum compelling information per second\n- **Action motivation**: Does this drive immediate response?\n\n### Authenticity Markers\n- **Specific over generic**: \"2,500 sq ft\" not \"spacious\"\n- **Benefits over features**: \"Wake up to hill views\" not \"hill-facing\"\n- **Investment angle**: Include ROI, rental potential, appreciation\n- **Lifestyle integration**: Help viewers see themselves there\n\n## CRITICAL SUCCESS FACTORS\n\n1. **Time Precision**: Script must fit exactly within specified duration\n2. **Source Utilization**: Use whatever content is provided effectively\n3. **Conversion Focus**: Every word should drive toward the call-to-action\n4. **Platform Optimization**: Perfect for Instagram Reel consumption patterns\n5. **AI Avatar Compatibility**: Natural speech flow for artificial voice generation\n\n## EXAMPLES OF EXCELLENCE (For Reference Style - DO NOT COPY)\n\n### Hook Patterns:\n- \"This is what 2.7 crores gets you in [location]...\"\n- \"What does 400 rupees get you in [location]? A square feet...\"\n- \"With what it offers, I bet you won't guess the price...\"\n\n### Feature Delivery Patterns:\n- Rapid-fire amenity listing with specific measurements\n- Investment metrics woven naturally into description\n- Location advantages and accessibility points\n- Lifestyle visualization mixed with practical details\n\n### Closing Patterns:\n- \"Comment or DM WPR to book your site visit today\"\n- \"Send this reel back to us for more details\"\n- \"If this sounds interesting, comment 'INTERESTED'\"\n\n## FINAL EXECUTION NOTES\n\n- **Originality**: Create fresh content inspired by successful patterns, not copies\n- **Flexibility**: Adapt to available content without forcing missing information  \n- **Impact**: Every script should feel like a \"must-see\" opportunity\n- **Authenticity**: Maintain credibility while building excitement\n- **Conversion**: Always end with clear, compelling call-to-action\n\n---\n\n**Remember**: Your mission is to transform property information into scroll-stopping, action-driving Instagram Reel content that generates leads and drives real estate success. Create scripts that make viewers feel they're discovering an incredible opportunity they can't afford to miss."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -288,
+        96
+      ],
+      "id": "9e233500-9d6a-4a1f-b296-36b84586e20e",
+      "name": "Script Generator",
+      "retryOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.data.video_url }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        80,
+        720
+      ],
+      "id": "a69d96de-d9ef-4d75-887a-e398399104f5",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "5dvuaQ8vpI7oZeTg",
+          "name": "Heygen"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "597264e0-250b-42b0-8bb6-344842960d46",
+              "leftValue": "",
+              "rightValue": "approve",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -784,
+        1184
+      ],
+      "id": "ff61d179-c1fd-433a-9a36-bfd8f28f5228",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "url": "https://api.heygen.com/v2/avatars",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "x-api-key",
+              "value": "sk_V2_hgu_kyj7puvLUa3_jPrEBxd0KdMpBzcH2lCCDCK7ZkruhoPk"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -976,
+        704
+      ],
+      "id": "903640d9-37bb-486b-85f3-d854d6a7c1e5",
+      "name": "Fetch Avatar Details1"
+    },
+    {
+      "parameters": {
+        "amount": 4,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -576,
+        704
+      ],
+      "id": "54616ff1-889c-4813-868d-11e310267b82",
+      "name": "Wait for 3 min",
+      "webhookId": "c291ad1e-f260-44ce-b3ee-078cff9b1bf6"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "yyy",
+        "message": "Hey are you ok with this?",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -976,
+        1184
+      ],
+      "id": "1e87fc71-38cf-4780-85a2-8a393b4f0d20",
+      "name": "Send message and wait for response",
+      "webhookId": "bde46b75-e958-4669-824a-6de923e86477",
+      "credentials": {
+        "telegramApi": {
+          "id": "Eb5m8Ou5otuazRt3",
+          "name": "Summary"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        256,
+        720
+      ],
+      "id": "3da3fa48-e442-4485-95b8-bef9ceab2bf5",
+      "name": "Upload file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "pqwDBXzX6aAkWb7p",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Fetch HeyGen Video": {
+      "main": [
+        [
+          {
+            "node": "If Status = Complete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Status = Complete": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send message and wait for response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait for 3 min",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate HeyGen Video": {
+      "main": [
+        [
+          {
+            "node": "Wait for 3 min",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission1": {
+      "main": [
+        [
+          {
+            "node": "Extract PDF Content1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract PDF Content1": {
+      "main": [
+        [
+          {
+            "node": "Script Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 2.5 Flash1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Script Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Script Generator": {
+      "main": [
+        [
+          {
+            "node": "Fetch Avatar Details1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Fetch Avatar Details1": {
+      "main": [
+        [
+          {
+            "node": "Generate HeyGen Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for 3 min": {
+      "main": [
+        [
+          {
+            "node": "Fetch HeyGen Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Upload file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "b6f601ef-b3be-4c8a-a3b7-f2ac5932e4e8",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-10-16T20:40:37.802Z",
+      "createdAt": "2025-10-16T20:40:37.802Z",
+      "role": "workflow:owner",
+      "workflowId": "SgrltZpXrYU9K7PP",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
