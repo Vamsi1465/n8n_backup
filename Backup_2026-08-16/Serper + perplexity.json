@@ -1,0 +1,315 @@
+{
+  "updatedAt": "2026-02-04T18:54:16.733Z",
+  "createdAt": "2026-02-04T18:22:25.370Z",
+  "id": "a0y1BYvbys6PI90d",
+  "name": "Serper + perplexity",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        -128
+      ],
+      "id": "54dbbc8b-efa1-4e98-aa34-6c7b1d4959dd",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://google.serper.dev/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "site:zillow.com/profile \\\"Real Estate Agent\\\" \\\"United States\\\"\\"
+            },
+            {
+              "name": "num",
+              "value": "20"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -256,
+        -128
+      ],
+      "id": "17a8a9e0-5836-42d4-bcb2-d67bbb1630e1",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "dWwSaZarHSNtrkeJ",
+          "name": "Serper API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.perplexity.ai/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"sonar\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are an expert lead researcher specialized in finding verified professional work emails.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"The person below is a VERIFIED real estate agent in the United States.\\n\\nInputs:\\n- Full Name:{{ $json.agent_name }}\\\\n- Zillow Profile URL:{{ $json.zillow_url }}\\n\\nTasks:\\n1. Analyze the Zillow profile to confirm the agent’s identity, brokerage, team name, and location.\\n2. Research the agent’s official online presence, including personal websites, team or brokerage pages, and LinkedIn.\\n3. Find the agent’s DIRECT professional work email address.\\n\\nStrict rules:\\n- Return ONLY a personal work email belonging to this agent.\\n- DO NOT return generic emails such as info@, contact@, hello@, sales@, support@.\\n- Infer an email only if a clear business domain and naming pattern are confirmed.\\n- If multiple valid emails exist, return the most authoritative one.\\n- If no valid personal work email is found, return null.\\n\\nOutput format:\\nReturn valid JSON only with these fields:\\n{\\n  \\\"email\\\": string or null,\\n  \\\"confidence\\\": number between 0 and 1,\\n  \\\"source\\\": string\\n}\"\n    }\n  ]\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        624,
+        -112
+      ],
+      "id": "454818da-ba51-4cef-ab72-5ce132e29ff0",
+      "name": "HTTP Request1",
+      "credentials": {
+        "perplexityApi": {
+          "id": "jhGHTH1JzuNkTyXO",
+          "name": "Perplexity account"
+        },
+        "httpHeaderAuth": {
+          "id": "QlPcvJsd96n8zLKX",
+          "name": "Perplexity"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items[0].json.organic.map(o => {\n  const title = o.title || \"\";\n  const agentName = title.split(\" - \")[0].trim();\n\n  return {\n    agent_name: agentName,\n    zillow_url: o.link,\n    snippet: o.snippet || \"\"\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        -128
+      ],
+      "id": "9bc23109-22db-4504-9c67-3cde66025ffa",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        368,
+        -128
+      ],
+      "id": "0eb07273-fd2d-45d0-93b6-69da11e5ea85",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "maxItems": 4
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        160,
+        -128
+      ],
+      "id": "9c805c1b-612e-4e67-abf1-97c695772103",
+      "name": "Limit"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "When clicking ‘Execute workflow’": [
+      {
+        "json": {}
+      }
+    ],
+    "HTTP Request": [
+      {
+        "json": {
+          "searchParameters": {
+            "q": "site:zillow.com/profile \\\"Real Estate Agent\\\" \\\"United States\\\"\\",
+            "type": "search",
+            "num": 20,
+            "engine": "google"
+          },
+          "organic": [
+            {
+              "title": "Real Estate Agent in united states, AS - Reviews",
+              "link": "https://www.zillow.com/profile/smirnofalex",
+              "snippet": "Visit dawidsimpsond dawidsimpsond's profile on Zillow to find ratings and reviews. Find great united states, AS real estate professionals on Zillow like",
+              "position": 1
+            },
+            {
+              "title": "Broker Patty Da Silva - Real Estate Agent in Davie, FL",
+              "link": "https://www.zillow.com/profile/PattyDaSilva",
+              "snippet": "Real estate agent scripts · Listing flyer templates · Manage rentals. Open ... Ranked among the top 0.05% of agents in the United States, Patty leads a ...",
+              "rating": 5,
+              "ratingCount": 374,
+              "position": 2
+            },
+            {
+              "title": "Jantina Hanna - Real Estate Agent in Naples, FL - Reviews",
+              "link": "https://www.zillow.com/profile/GoJantina",
+              "snippet": "Real estate agent scripts · Listing flyer templates · Manage rentals. Open ... I raised a family of 4 boys there until 1996 when I moved to the United States.",
+              "rating": 5,
+              "ratingCount": 1,
+              "position": 3
+            },
+            {
+              "title": "Ben Faber - Real Estate Agent in Mill Valley, CA - Reviews",
+              "link": "https://www.zillow.com/profile/faberrealestateteam",
+              "snippet": "2024 Real Trends Verified Best Real Estate Small Teams in United States California Sides R... ... Ben is a well-rounded real estate agent we have trusted for the ...",
+              "rating": 5,
+              "ratingCount": 65,
+              "position": 4
+            },
+            {
+              "title": "Gate Arty - Real Estate Agent in Lakeland, FL - Reviews",
+              "link": "https://www.zillow.com/profile/gatearty",
+              "snippet": "Real estate agent scripts · Listing flyer templates · Manage rentals. Open Manage ... United States in 1978. I graduated Lake Gibson High School in 1992. Go ...",
+              "rating": 5,
+              "ratingCount": 363,
+              "position": 5
+            },
+            {
+              "title": "David Po Wei Tair - Real Estate Agent in Great Neck, NY",
+              "link": "https://www.zillow.com/profile/davidpoweitair",
+              "snippet": "-Top 10 Individual Residential Brokers in the United States, 2010 & 2013 & 2020 ... David is the best real estate agent I have ever worked with. His ...",
+              "rating": 5,
+              "ratingCount": 65,
+              "position": 6
+            },
+            {
+              "title": "Ranee Lounsbury - Real Estate Agent in San Diego, CA",
+              "link": "https://www.zillow.com/profile/raneel",
+              "snippet": "Her formal education and training in the United States and Thailand, in ... Ranee Lounsbury is the most professional real estate agent that I have had the ...",
+              "rating": 5,
+              "ratingCount": 12,
+              "position": 7
+            },
+            {
+              "title": "Leonard Lushi - Real Estate Agent in United States, NY",
+              "link": "https://www.zillow.com/profile/leonard%20lushi",
+              "snippet": "Visit Leonard Lushi's profile on Zillow to find ratings and reviews. Find great United States ... Real estate agent scripts · Listing flyer templates · Manage ...",
+              "position": 8
+            },
+            {
+              "title": "Christian Brenner - Real Estate Agent in Chandler, AZ ...",
+              "link": "https://www.zillow.com/profile/christianbrenner%20re",
+              "snippet": "Visit Christian Brenner's profile on Zillow to find ratings and reviews. Find great Chandler, AZ 85225 United States, AZ real estate professionals on Zillow",
+              "rating": 5,
+              "ratingCount": 1,
+              "position": 9
+            },
+            {
+              "title": "Pamela Wolf - Real Estate Agent in United States, NY - Reviews",
+              "link": "https://www.zillow.com/profile/cpBitesizeB",
+              "snippet": "Visit Pamela Wolf's profile on Zillow to find ratings and reviews. Find great United States, NY real estate professionals on Zillow like Pamela Wolf of Bitesize",
+              "position": 10
+            }
+          ],
+          "credits": 1
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "8516a4b2-2801-437c-918a-304b035cadb1",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-02-04T18:22:25.374Z",
+      "createdAt": "2026-02-04T18:22:25.374Z",
+      "role": "workflow:owner",
+      "workflowId": "a0y1BYvbys6PI90d",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
