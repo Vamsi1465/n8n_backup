@@ -1,0 +1,755 @@
+{
+  "updatedAt": "2025-09-15T15:55:45.000Z",
+  "createdAt": "2025-09-15T15:33:05.440Z",
+  "id": "Oh1GZnKK8TGhfXyP",
+  "name": "Lead Magnet Sender",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "68a9b4a4-98be-4e21-aa0a-1a20aa2fd77b",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -672,
+        96
+      ],
+      "id": "a3db0336-43fc-481b-a1af-f23b370a2d9e",
+      "name": "Webhook",
+      "webhookId": "68a9b4a4-98be-4e21-aa0a-1a20aa2fd77b"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d95972ab-a7f0-4113-8800-0c1743dc9fe7",
+              "leftValue": "={{ $json.Email }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -16,
+        96
+      ],
+      "id": "c666be97-9b58-47d2-9e8c-02df484d0bd2",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1pS-C1M6HUXT9OrlSjMHZYyStPFymbjXcpTIAhG1xysg",
+          "mode": "list",
+          "cachedResultName": "Lead Magnet Agent",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pS-C1M6HUXT9OrlSjMHZYyStPFymbjXcpTIAhG1xysg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pS-C1M6HUXT9OrlSjMHZYyStPFymbjXcpTIAhG1xysg/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Webhook').item.json.body.name }}",
+            "Email": "={{ $('Webhook').item.json.body.email }}",
+            "LeadMagnetID": "={{ $('Webhook').item.json.body.lead_magnet }}",
+            "Status": "Pending",
+            "Timestamp": "={{ $now }}",
+            "Duplicate": "No"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "LeadMagnetID",
+              "displayName": "LeadMagnetID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Duplicate",
+              "displayName": "Duplicate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        480,
+        -144
+      ],
+      "id": "36d10d02-d9bb-4a1c-91c9-3aac5a5489dd",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1pS-C1M6HUXT9OrlSjMHZYyStPFymbjXcpTIAhG1xysg",
+          "mode": "list",
+          "cachedResultName": "Lead Magnet Agent",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pS-C1M6HUXT9OrlSjMHZYyStPFymbjXcpTIAhG1xysg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pS-C1M6HUXT9OrlSjMHZYyStPFymbjXcpTIAhG1xysg/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $json.Email }}"
+            },
+            {
+              "lookupColumn": "LeadMagnetID",
+              "lookupValue": "={{ $json.LeadMagnetID }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        688,
+        -144
+      ],
+      "id": "669d8f1a-ff08-443d-8c5c-16a53b8858b3",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1pS-C1M6HUXT9OrlSjMHZYyStPFymbjXcpTIAhG1xysg",
+          "mode": "list",
+          "cachedResultName": "Lead Magnet Agent",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pS-C1M6HUXT9OrlSjMHZYyStPFymbjXcpTIAhG1xysg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 964686390,
+          "mode": "list",
+          "cachedResultName": "Lead magents",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pS-C1M6HUXT9OrlSjMHZYyStPFymbjXcpTIAhG1xysg/edit#gid=964686390"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "LeadMagnetID",
+              "lookupValue": "={{ $json.LeadMagnetID }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        912,
+        -144
+      ],
+      "id": "ba91969d-a3ba-412f-97b2-cf0f24a3bd89",
+      "name": "Get row(s) in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Get row(s) in sheet').item.json.Email }}",
+        "subject": "Your lead Magnet",
+        "message": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Your Free Guide</title>\n</head>\n<body style=\"margin:0; padding:0; font-family: Arial, sans-serif; background-color:#f7f7f7;\">\n\n  <!-- Container -->\n  <table align=\"center\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:600px; background:#ffffff; border-radius:8px; overflow:hidden;\">\n    \n    <!-- Header -->\n    <tr>\n      <td style=\"background: linear-gradient(90deg, #5CCEFF, #7BE0F6); padding:20px; text-align:center; color:#fff; font-size:22px; font-weight:bold;\">\n        🎉 Your Free Guide is Here!\n      </td>\n    </tr>\n\n    <!-- Body -->\n    <tr>\n      <td style=\"padding:30px; text-align:center; color:#333;\">\n        <h2 style=\"margin:0; font-size:20px; font-weight:600;\">Unlock Exclusive Insights</h2>\n        <p style=\"font-size:15px; line-height:22px; margin:20px 0;\">\n          Thanks for joining our community! As promised, here’s your free \n          <strong>Lead Magnet</strong> – packed with tips, strategies, and insights to help you succeed.\n        </p>\n        <p style=\"font-size:15px; line-height:22px;\">Click the button below to download instantly:</p>\n        \n        <!-- Button -->\n        <a href=\"{{ $json.URL }}\" style=\"display:inline-block; margin:20px 0; padding:14px 28px; background:linear-gradient(90deg, #ff6a95, #ff9a6c); color:#fff; font-size:16px; font-weight:bold; border-radius:40px; text-decoration:none;\">\n          ⬇️ Download Now\n        </a>\n      </td>\n    </tr>\n\n    <!-- Pro Tip Section -->\n    <tr>\n      <td style=\"background:#f2f9ff; padding:20px; text-align:center; font-size:14px; color:#555;\">\n        💡 <strong>Pro Tip</strong><br>\n        Bookmark this guide – you’ll want to refer back often!\n      </td>\n    </tr>\n\n  </table>\n\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1376,
+        -144
+      ],
+      "id": "e342b823-5d7b-4c16-985c-265c3a495faf",
+      "name": "Send a message",
+      "webhookId": "22934b4b-75f4-4a2a-a0c7-23518614e238",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UbWO1LFfZ6s8MzMA",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1pS-C1M6HUXT9OrlSjMHZYyStPFymbjXcpTIAhG1xysg",
+          "mode": "list",
+          "cachedResultName": "Lead Magnet Agent",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pS-C1M6HUXT9OrlSjMHZYyStPFymbjXcpTIAhG1xysg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pS-C1M6HUXT9OrlSjMHZYyStPFymbjXcpTIAhG1xysg/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Sent",
+            "row_number": "={{ $('Get row(s) in sheet').item.json.row_number }}",
+            "Duplicate": "No"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "LeadMagnetID",
+              "displayName": "LeadMagnetID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Duplicate",
+              "displayName": "Duplicate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1792,
+        -144
+      ],
+      "id": "a39927ee-96fd-4b43-b9a4-70d867f73578",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1pS-C1M6HUXT9OrlSjMHZYyStPFymbjXcpTIAhG1xysg",
+          "mode": "list",
+          "cachedResultName": "Lead Magnet Agent",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pS-C1M6HUXT9OrlSjMHZYyStPFymbjXcpTIAhG1xysg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pS-C1M6HUXT9OrlSjMHZYyStPFymbjXcpTIAhG1xysg/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $json.body.email }}"
+            },
+            {
+              "lookupColumn": "LeadMagnetID",
+              "lookupValue": "={{ $json.body.lead_magnet }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -448,
+        96
+      ],
+      "id": "f040d200-ae55-4057-8746-21c9732b4118",
+      "name": "Get row(s) in sheet2",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1pS-C1M6HUXT9OrlSjMHZYyStPFymbjXcpTIAhG1xysg",
+          "mode": "list",
+          "cachedResultName": "Lead Magnet Agent",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pS-C1M6HUXT9OrlSjMHZYyStPFymbjXcpTIAhG1xysg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pS-C1M6HUXT9OrlSjMHZYyStPFymbjXcpTIAhG1xysg/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Webhook').item.json.body.name }}",
+            "Email": "={{ $('Webhook').item.json.body.email }}",
+            "Status": "=Not sent",
+            "LeadMagnetID": "={{ $('Webhook').item.json.body.lead_magnet }}",
+            "Timestamp": "={{ $now }}",
+            "Duplicate": "Yes"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LeadMagnetID",
+              "displayName": "LeadMagnetID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Duplicate",
+              "displayName": "Duplicate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        256,
+        256
+      ],
+      "id": "adcc7a0d-55f1-40b1-b21e-91d92b5f7734",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -240,
+        96
+      ],
+      "id": "20f61790-6539-446d-961b-4590f88cf62c",
+      "name": "Wait",
+      "webhookId": "7e353feb-25d8-4bd7-9890-57e4cef8a1ff"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        -144
+      ],
+      "id": "575d8cdc-2918-455f-9615-540301be1b54",
+      "name": "Wait1",
+      "webhookId": "2aa229b2-17e5-4d44-8208-6ee7e53fe642"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1136,
+        -144
+      ],
+      "id": "e6976604-70c3-443f-94eb-5ebfbbfb1921",
+      "name": "Wait2",
+      "webhookId": "387995fa-5c3e-48d6-94d9-e170fa1bb995"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1584,
+        -144
+      ],
+      "id": "529d81bd-45c7-48db-99ce-ea161eb56dc7",
+      "name": "Wait3",
+      "webhookId": "d0457a4b-9312-4d2c-98fc-a64c9e65adb1"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Wait3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet2": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait3": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "d9042d67-76a7-4d40-a903-cd6edce97189",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-15T15:33:05.442Z",
+      "createdAt": "2025-09-15T15:33:05.442Z",
+      "role": "workflow:owner",
+      "workflowId": "Oh1GZnKK8TGhfXyP",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
