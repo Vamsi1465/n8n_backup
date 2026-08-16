@@ -1,0 +1,2355 @@
+{
+  "updatedAt": "2026-07-02T07:49:48.453Z",
+  "createdAt": "2026-07-02T05:08:54.798Z",
+  "id": "nIpyoICdCjpHmzhO",
+  "name": "02 - Perplexity Research, OpenAI Email, Instantly Send",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "469f9ba7-f358-4d4a-89f1-40d789281c44",
+      "name": "Every 6 Hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        304
+      ],
+      "notes": "Adjust cadence. 4x/day is enough for press-release + job-posting signals."
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/tag/venture-capital/feed/",
+        "options": {}
+      },
+      "id": "cfced2bf-03ec-4c9b-be03-fcd8a0f31e67",
+      "name": "RSS - Funding News",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "notes": "CONFIGURE: add PR Newswire / Crunchbase News feed URLs too - chain more RSS Feed Read nodes into the same Tag node if you add more."
+    },
+    {
+      "parameters": {
+        "url": "https://www.google.com/alerts/feeds/YOUR_ALERT_ID/YOUR_FEED_ID",
+        "options": {}
+      },
+      "id": "ab4e02e1-d666-42a3-9e1a-583934fcfacd",
+      "name": "RSS - Restructuring News",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        608
+      ],
+      "notes": "CONFIGURE: set up a Google Alert for restructuring/layoffs/cost optimization startup and use its RSS feed URL."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/powerai~linkedin-jobs-scraper/run-sync-get-dataset-items",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "={{$env.APIFY_TOKEN}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"title\": \"Controller OR VP Finance OR Finance Director OR Head of Finance\",\n  \"location\": \"United States\",\n  \"rows\": 100\n}",
+        "options": {}
+      },
+      "id": "bc87b49b-12a8-4135-af02-3404012145b9",
+      "name": "Apify - LinkedIn Jobs Scraper (Finance Hiring)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        160
+      ],
+      "notes": "CONFIGURE: set APIFY_TOKEN env var on your VPS, and swap in a real LinkedIn Jobs Scraper actor ID from Apify Store."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/bebity~linkedin-premium-actor/run-sync-get-dataset-items",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "={{$env.APIFY_TOKEN}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"searchTerms\": [\"hiring surge\", \"new office\", \"international expansion\"],\n  \"industries\": [\"SaaS\",\"AI\",\"B2B Software\",\"Enterprise Software\",\"Cloud Infrastructure\",\"Cybersecurity\",\"FinTech\"],\n  \"rows\": 100\n}",
+        "options": {}
+      },
+      "id": "aab33df6-fd75-4c1e-b686-a8169a1c8d1a",
+      "name": "Apify - LinkedIn Company Scraper (Expansion)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        304
+      ],
+      "notes": "CONFIGURE: swap in a real LinkedIn Company Scraper actor ID."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/supreme_coder~builtwith-scraper/run-sync-get-dataset-items",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "={{$env.APIFY_TOKEN}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"technologies\": [\"NetSuite\",\"Sage Intacct\",\"Workday Adaptive\",\"Rippling\"],\n  \"signal\": \"newly_installed\",\n  \"rows\": 100\n}",
+        "options": {}
+      },
+      "id": "140fd4d2-5c17-42f2-bf0f-a75d5f6a4d71",
+      "name": "Apify - BuiltWith Tech Detector (ERP Signal)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        464
+      ],
+      "notes": "CONFIGURE: swap in a real BuiltWith/tech-detection actor ID. Catches companies newly implementing an ERP - a strong finance-leadership-needed signal."
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const j = item.json;\n  return {\n    json: {\n      company_name: (j.title || j.creator || '').split(' raises')[0].split(' announces')[0].trim(),\n      domain: null,\n      signal_type: 'funding',\n      signal_detail: j.title || '',\n      source_url: j.link || '',\n      detected_date: j.pubDate || new Date().toISOString()\n    }\n  };\n});"
+      },
+      "id": "cb4dab16-06ae-4433-a08e-e21b1c5d50e8",
+      "name": "Tag Funding Signals",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const j = item.json;\n  return {\n    json: {\n      company_name: (j.title || j.creator || '').trim(),\n      domain: null,\n      signal_type: 'turnaround',\n      signal_detail: j.title || j.contentSnippet || '',\n      source_url: j.link || '',\n      detected_date: j.pubDate || new Date().toISOString()\n    }\n  };\n});"
+      },
+      "id": "156804a4-ea4b-4ec7-9eb2-c016e5ac1c3e",
+      "name": "Tag Turnaround Signals",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = items[0]?.json?.items || items;\nreturn raw.map(r => {\n  const j = r.json || r;\n  return {\n    json: {\n      company_name: j.companyName || j.company || '',\n      domain: j.companyWebsite || j.domain || null,\n      signal_type: 'finance_hiring',\n      signal_detail: j.jobTitle || j.title || 'Hiring finance leadership',\n      source_url: j.jobUrl || j.url || '',\n      detected_date: new Date().toISOString()\n    }\n  };\n});"
+      },
+      "id": "eb1a62a5-8535-43bd-a19d-c473dd534438",
+      "name": "Tag Hiring Signals",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = items[0]?.json?.items || items;\nreturn raw.map(r => {\n  const j = r.json || r;\n  return {\n    json: {\n      company_name: j.companyName || j.name || '',\n      domain: j.website || j.domain || null,\n      signal_type: 'expansion',\n      signal_detail: j.reason || 'Team/office growth detected',\n      source_url: j.linkedinUrl || '',\n      detected_date: new Date().toISOString()\n    }\n  };\n});"
+      },
+      "id": "e1e7ba56-cf88-4de7-91db-218845d8b2be",
+      "name": "Tag Expansion Signals",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = items[0]?.json?.items || items;\nreturn raw.map(r => {\n  const j = r.json || r;\n  return {\n    json: {\n      company_name: j.companyName || j.domain || '',\n      domain: j.domain || null,\n      signal_type: 'erp_infra',\n      signal_detail: 'Newly implemented: ' + (j.technology || j.tech || 'ERP/finance system'),\n      source_url: j.domain ? ('https://' + j.domain) : '',\n      detected_date: new Date().toISOString()\n    }\n  };\n});"
+      },
+      "id": "cfa272c9-c368-4119-af2b-dd99de430681",
+      "name": "Tag ERP Signals",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "numberInputs": 5
+      },
+      "id": "746bdd87-27d2-443c-98bb-8cf120045d22",
+      "name": "Merge All Signals",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        480,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const groups = {};\nfor (const item of items) {\n  const j = item.json;\n  const key = (j.domain || j.company_name || '').toLowerCase().replace(/[^a-z0-9.]/g,'');\n  if (!key) continue;\n  if (!groups[key]) {\n    groups[key] = {\n      company_name: j.company_name,\n      domain: j.domain,\n      signals: [],\n      signal_types: new Set()\n    };\n  }\n  groups[key].signals.push({ type: j.signal_type, detail: j.signal_detail, source: j.source_url, date: j.detected_date });\n  groups[key].signal_types.add(j.signal_type);\n}\nreturn Object.values(groups).map(g => ({\n  json: {\n    company_name: g.company_name,\n    domain: g.domain,\n    signals: g.signals,\n    signal_count: g.signal_types.size,\n    signal_types: Array.from(g.signal_types).join(', ')\n  }\n}));"
+      },
+      "id": "c529be6f-f606-42e6-8ead-629b7c2c417b",
+      "name": "Dedupe & Group by Company",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "value": "YOUR_AIRTABLE_BASE_ID"
+        },
+        "table": {
+          "value": "Leads"
+        },
+        "options": {}
+      },
+      "id": "b32a51d2-ab8d-4911-9ad9-84adc3eb6a96",
+      "name": "Get Existing Companies",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        960,
+        304
+      ],
+      "notes": "CONFIGURE: set your real Airtable Base ID. Pulls every company already tracked so we don't re-process it."
+    },
+    {
+      "parameters": {
+        "jsCode": "const existingDomains = new Set(\n  $('Get Existing Companies').all().map(i => (i.json.fields?.Domain || '').toLowerCase())\n);\nreturn items.filter(item => {\n  const d = (item.json.domain || '').toLowerCase();\n  return d && !existingDomains.has(d);\n});"
+      },
+      "id": "d602b18a-3510-4dfa-804e-7db9c835d878",
+      "name": "Filter Out Already-Tracked",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.apollo.io/v1/organizations/enrich",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "={{$env.APOLLO_API_KEY}}"
+            },
+            {
+              "name": "domain",
+              "value": "={{$json.domain}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9ca89bf9-a5d1-42d1-80db-03801d67da1b",
+      "name": "Enrich Company (Firmographics)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1440,
+        304
+      ],
+      "notes": "CONFIGURE: APOLLO_API_KEY env var. Returns industry, employee count, HQ location, funding stage."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{$json.organization.country}}",
+              "rightValue": "United States",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "60c36db1-4fb2-45d2-9f3b-935fa0c2349a"
+            },
+            {
+              "leftValue": "={{$json.organization.industry}}",
+              "rightValue": "SaaS|AI|Software|Cloud|Cybersecurity|FinTech|Healthcare|Manufacturing",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              },
+              "id": "1dafa831-c5ed-460e-a242-0196165c9958"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "51f2a4b1-bc18-4006-b44f-72d4ce0ec136",
+      "name": "Matches ICP?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1680,
+        304
+      ],
+      "notes": "Add headcount / funding-stage thresholds once you confirm what Apollo returns for your test batch."
+    },
+    {
+      "parameters": {
+        "url": "https://api.hunter.io/v2/domain-search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "domain",
+              "value": "={{$json.domain}}"
+            },
+            {
+              "name": "api_key",
+              "value": "={{$env.HUNTER_API_KEY}}"
+            },
+            {
+              "name": "seniority",
+              "value": "executive"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "aa5df630-7da5-4940-8ef6-2c10dce64ca9",
+      "name": "Find Decision-Maker Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1952,
+        208
+      ],
+      "notes": "CONFIGURE: HUNTER_API_KEY env var. Filter results for titles matching your ICP decision-maker list."
+    },
+    {
+      "parameters": {
+        "url": "https://api.millionverifier.com/api/v3/",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api",
+              "value": "={{$env.MILLIONVERIFIER_API_KEY}}"
+            },
+            {
+              "name": "email",
+              "value": "={{$json.data.emails[0].value}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7f1d6bee-f6ce-495b-87fc-89db799e2f84",
+      "name": "Verify Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2208,
+        208
+      ],
+      "notes": "CONFIGURE: MILLIONVERIFIER_API_KEY env var."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{$json.result}}",
+              "rightValue": "ok",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "82c5bd2d-b002-4d12-ac53-83769e6ab484",
+      "name": "Email Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2448,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const j = item.json;\n  const count = j.signal_count || 1;\n  let priority = 'Low';\n  if (count >= 2) priority = 'High';\n  if (count >= 3) priority = 'Top';\n  return { json: { ...j, priority } };\n});"
+      },
+      "id": "2ff4a3dd-caba-4997-88e8-f0866174c7d2",
+      "name": "Calculate Priority Score",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2688,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "value": "YOUR_AIRTABLE_BASE_ID"
+        },
+        "table": {
+          "value": "Leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Company Name": "={{$json.company_name}}",
+            "Domain": "={{$json.domain}}",
+            "Signal Types": "={{$json.signal_types}}",
+            "Priority": "={{$json.priority}}",
+            "Decision Maker Email": "={{$('Find Decision-Maker Contact').item.json.data.emails[0].value}}",
+            "Decision Maker Name": "={{$('Find Decision-Maker Contact').item.json.data.emails[0].first_name}} {{$('Find Decision-Maker Contact').item.json.data.emails[0].last_name}}",
+            "Decision Maker Title": "={{$('Find Decision-Maker Contact').item.json.data.emails[0].position}}",
+            "Status": "ready_for_outreach",
+            "Created Date": "={{$now.toISO()}}"
+          }
+        },
+        "options": {}
+      },
+      "id": "f639ebf4-4847-458d-a85a-7bc2b1cba476",
+      "name": "Create Qualified Lead Record",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2928,
+        208
+      ],
+      "notes": "This row is what Workflow 2 (AI Research + Send) picks up next. Status field is the handoff mechanism between all 5 workflows."
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      },
+      "id": "58f138df-0fee-4486-af09-bc1de98dccc4",
+      "name": "Check Every 2 Hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -576,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "value": "YOUR_AIRTABLE_BASE_ID"
+        },
+        "table": {
+          "value": "Leads"
+        },
+        "filterByFormula": "={Status}='ready_for_outreach'",
+        "options": {}
+      },
+      "id": "085e42d4-1dc7-4a66-af9b-2be31c5d083f",
+      "name": "Get Ready-For-Outreach Leads",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -336,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "5cc97ada-de27-43f4-b9fd-4db9d1c04d9d",
+      "name": "Process One Company At A Time",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -96,
+        880
+      ],
+      "notes": "Deliberately serial (batchSize:1) so you stay inside Claude/Instantly rate limits and can watch cost per run in the executions log."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{$env.ANTHROPIC_API_KEY}}"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-sonnet-5\",\n  \"max_tokens\": 1200,\n  \"system\": \"You are a research analyst supporting a Fractional CFO advisory practice. You analyze companies strictly from a CFO's perspective: financial complexity, growth-stage risk, and the specific operational gaps a fractional CFO would be brought in to solve. Ground every claim in something findable via web search - cite the source inline as (source: X). Never invent funding amounts, headcount, or financial figures you have not found. If you cannot verify something, say so explicitly rather than guessing. Output under 350 words, plain prose, no headers or bullet lists.\",\n  \"messages\": [ { \"role\": \"user\", \"content\": \"Research this company for a Fractional CFO outreach brief:\\n\\nCompany: {{$json.fields['Company Name']}}\\nDomain: {{$json.fields['Domain']}}\\nDetected signals: {{$json.fields['Signal Types']}}\\nPriority: {{$json.fields['Priority']}}\\n\\nAnswer specifically: (1) What is the most recent funding round or growth milestone you can verify, and when? (2) What is the company's approximate stage - headcount, revenue stage if public, or funding stage? (3) What finance-relevant challenge is this company plausibly facing right now, given the detected signal type (e.g. board reporting readiness after a raise, multi-entity complexity from expansion, need for FP&A after rapid hiring, cash runway pressure if turnaround-flagged)? (4) One specific, recent, citable fact about the company (product launch, hire, press mention) that a personalized email could reference naturally.\" } ],\n  \"tools\": [ { \"type\": \"web_search_20250305\", \"name\": \"web_search\" } ]\n}",
+        "options": {}
+      },
+      "id": "07c2295b-f35f-487b-8dde-4735fafa717b",
+      "name": "Claude - Company Research",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        144,
+        880
+      ],
+      "notes": "CONFIGURE: ANTHROPIC_API_KEY env var. Uses claude-sonnet-5 with the web_search tool so research is grounded, not hallucinated."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Anthropic responses mix text and web_search tool-use/tool-result blocks - keep only text blocks\nconst content = items[0].json.content || [];\nconst researchText = content.filter(b => b.type === 'text').map(b => b.text).join('\\n');\nreturn [{ json: { research: researchText } }];"
+      },
+      "id": "d9b3d766-3c6e-47a3-9986-dca9b9e5dc05",
+      "name": "Extract Research Text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "company_name",
+              "value": "={{$('Process One Company At A Time').item.json.fields['Company Name']}}",
+              "type": "string"
+            },
+            {
+              "name": "domain",
+              "value": "={{$('Process One Company At A Time').item.json.fields['Domain']}}",
+              "type": "string"
+            },
+            {
+              "name": "decision_maker_name",
+              "value": "={{$('Process One Company At A Time').item.json.fields['Decision Maker Name']}}",
+              "type": "string"
+            },
+            {
+              "name": "decision_maker_title",
+              "value": "={{$('Process One Company At A Time').item.json.fields['Decision Maker Title']}}",
+              "type": "string"
+            },
+            {
+              "name": "decision_maker_email",
+              "value": "={{$('Process One Company At A Time').item.json.fields['Decision Maker Email']}}",
+              "type": "string"
+            },
+            {
+              "name": "airtable_record_id",
+              "value": "={{$('Process One Company At A Time').item.json.id}}",
+              "type": "string"
+            },
+            {
+              "name": "research",
+              "value": "={{$json.research}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bf5150d4-7c49-43dc-b09e-9e933d9a708e",
+      "name": "Carry Lead Context Forward",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        880
+      ],
+      "notes": "n8n Set node - keeps company/contact fields alongside the research text so the email-generation node has everything it needs in one place."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{$env.ANTHROPIC_API_KEY}}"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-sonnet-5\",\n  \"max_tokens\": 500,\n  \"system\": \"You write cold outreach emails on behalf of {{$env.CLIENT_NAME}}, a Fractional CFO with {{$env.CLIENT_YEARS_EXPERIENCE}} years of executive finance experience. Positioning: {{$env.CLIENT_BIO_SUMMARY}}.\\n\\nVoice rules: direct, peer-to-peer, zero flattery, zero hype words (never 'excited', 'thrilled', 'passionate', 'synergy'). Write like one experienced finance executive emailing another - because that's what this is.\\n\\nStructural rules: 90-130 words total. Reference exactly ONE specific fact from the research provided - not a summary of the company, one fact. Name the specific financial-operations challenge implied by that fact (not a generic 'scaling is hard' line). End with a low-pressure, specific question - not 'let me know if you're interested' but something like 'worth a 20-minute call before your next board cycle?' No links, no attachments, no bullet points, no subject line repetition inside the body. Sign off with just a first name.\\n\\nOutput ONLY the email body text. No preamble, no explanation, no subject line.\",\n  \"messages\": [ { \"role\": \"user\", \"content\": \"Recipient: {{$json.decision_maker_name}}, {{$json.decision_maker_title}} at {{$json.company_name}}\\n\\nResearch brief:\\n{{$json.research}}\\n\\nWrite Email 1.\" } ]\n}",
+        "options": {}
+      },
+      "id": "643b1df5-2f51-4d02-8bee-47c7c1de5b88",
+      "name": "Claude - Generate Email 1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        864,
+        880
+      ],
+      "notes": "CONFIGURE: set env vars CLIENT_NAME, CLIENT_YEARS_EXPERIENCE, CLIENT_BIO_SUMMARY on your VPS - this is the 'trained on 20 years experience' step from the spec, done via system prompt rather than fine-tuning."
+    },
+    {
+      "parameters": {
+        "jsCode": "const content = items[0].json.content || [];\nconst emailBody = content.filter(b => b.type === 'text').map(b => b.text).join('\\n').trim();\nreturn [{ json: { ...items[0].json, email_1_body: emailBody } }];"
+      },
+      "id": "012cf6c4-4b8d-46b1-892f-35773ca2d630",
+      "name": "Extract Email Draft",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.instantly.ai/api/v2/leads",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$env.INSTANTLY_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"campaign\": \"{{$env.INSTANTLY_CAMPAIGN_ID}}\",\n  \"email\": \"{{$json.decision_maker_email}}\",\n  \"first_name\": \"{{$json.decision_maker_name.split(' ')[0]}}\",\n  \"last_name\": \"{{$json.decision_maker_name.split(' ').slice(1).join(' ')}}\",\n  \"company_name\": \"{{$json.company_name}}\",\n  \"job_title\": \"{{$json.decision_maker_title}}\",\n  \"personalization\": {{JSON.stringify($json.email_1_body)}}\n}",
+        "options": {}
+      },
+      "id": "bd2207b9-65c3-498b-8edc-523a14b0458a",
+      "name": "Instantly - Add Lead & Launch Email 1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1344,
+        880
+      ],
+      "notes": "CONFIGURE: INSTANTLY_API_KEY, INSTANTLY_CAMPAIGN_ID env vars. Adding a lead to an active campaign auto-enrolls them in the sequence; the 'personalization' field is what your Email 1 template should reference as {{personalization}} inside Instantly's campaign editor so the AI-written body actually gets sent."
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "value": "YOUR_AIRTABLE_BASE_ID"
+        },
+        "table": {
+          "value": "Leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "email_1_sent",
+            "Last Touch Date": "={{$now.toISO()}}",
+            "Email 1 Body": "={{$json.email_1_body}}"
+          }
+        },
+        "options": {}
+      },
+      "id": "b3cfaa26-eeb0-407f-950f-3fa4d1141258",
+      "name": "Update Lead Status",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1584,
+        880
+      ],
+      "notes": "This status flip is what Workflow 3 watches for to start the no-reply/follow-up clock."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/powerai~linkedin-jobs-scraper/run-sync-get-dataset-items",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "={{$env.APIFY_TOKEN}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"title\": \"Controller OR VP Finance OR Finance Director OR Head of Finance OR FP&A Director\",\n  \"location\": \"United States\",\n  \"rows\": 100\n}",
+        "options": {}
+      },
+      "id": "38d5d786-da35-4b42-a0e1-6d10e5d4456b",
+      "name": "Apify - Jobs Scraper (Hiring Signal)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -304,
+        1872
+      ],
+      "notes": "CONFIGURE: APIFY_TOKEN env var. Actor slug verified live: powerai/linkedin-jobs-scraper."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/bebity~linkedin-premium-actor/run-sync-get-dataset-items",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "={{$env.APIFY_TOKEN}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"queries\": [\"hiring surge SaaS\", \"new office expansion fintech\", \"international expansion enterprise software\"],\n  \"type\": \"company\",\n  \"limit\": 100\n}",
+        "options": {}
+      },
+      "id": "e405fabc-0da3-4d84-9ae9-af09c4cedb31",
+      "name": "Apify - Company Scraper (Expansion Signal)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -304,
+        2064
+      ],
+      "notes": "CONFIGURE: verify 'queries'/'type'/'limit' field names against this actor's current input schema in Apify Console before first run - Store actor schemas change between versions."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/supreme_coder~builtwith-scraper/run-sync-get-dataset-items",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "={{$env.APIFY_TOKEN}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"technologies\": [\"NetSuite\",\"Sage Intacct\",\"Workday Adaptive\",\"Rippling\"],\n  \"rows\": 100\n}",
+        "options": {}
+      },
+      "id": "e49a410a-5b93-4b63-9f00-6a36dd2c9dd8",
+      "name": "Apify - Tech Detector (ERP Signal)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -304,
+        2272
+      ],
+      "notes": "CONFIGURE: verify input schema in Apify Console (builtwith-scraper)."
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "mode": "id",
+          "value": "YOUR_GOOGLE_SHEET_ID"
+        },
+        "sheetName": {
+          "mode": "name",
+          "value": "Leads"
+        },
+        "options": {}
+      },
+      "id": "05a4a5f9-bfba-4f30-921c-e23cf72f6674",
+      "name": "Read Existing Leads Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        624,
+        2112
+      ],
+      "notes": "CONFIGURE: your real Google Sheet ID. Sheet must have a tab literally named 'Leads' with header row: Company Name, Domain, Signal Types, Priority, Decision Maker Name, Decision Maker Title, Decision Maker Email, Email Status, Status, Created Date, Last Touch Date, Email 1 Body."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apollo.io/api/v1/mixed_people/api_search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "={{$env.APOLLO_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"q_organization_domains\": \"{{$json.domain}}\",\n  \"person_titles\": [\"Founder\",\"Co-Founder\",\"CEO\",\"President\",\"COO\",\"Controller\",\"Finance Director\",\"VP Finance\",\"Head of Finance\",\"Director of Finance\",\"FP&A Director\",\"Finance Manager\"],\n  \"person_locations\": [\"United States\"],\n  \"per_page\": 5,\n  \"page\": 1\n}",
+        "options": {}
+      },
+      "id": "85f5db5c-26a4-447c-9773-a4a917973346",
+      "name": "Apollo - People Search (Find Decision-Maker)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1600,
+        2112
+      ],
+      "notes": "Uses /mixed_people/api_search (NOT /mixed_people/search, which 403s on Basic plan). Does not consume credits - returns candidates without email."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{$json.people?.length || 0}}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f195bc46-d104-427a-984b-7807776e0505",
+      "name": "Any Candidates Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        2112
+      ],
+      "notes": "Guard node - without this, a company with zero Apollo matches would break the batch loop (empty output halts downstream execution for that iteration)."
+    },
+    {
+      "parameters": {
+        "jsCode": "const people = items[0].json.people || [];\nconst priority = ['Founder','Co-Founder','CEO','President','COO','Controller','VP Finance','Finance Director','Head of Finance','Director of Finance','FP&A Director','Finance Manager'];\npeople.sort((a,b) => {\n  const ai = priority.findIndex(t => (a.title||'').toLowerCase().includes(t.toLowerCase()));\n  const bi = priority.findIndex(t => (b.title||'').toLowerCase().includes(t.toLowerCase()));\n  return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);\n});\nconst best = people[0];\nreturn [{ json: { apollo_person_id: best.id, candidate_name: best.name, candidate_title: best.title } }];"
+      },
+      "id": "23a9e255-46ab-483f-825b-c2973444ccbb",
+      "name": "Pick Best-Matching Decision-Maker",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2080,
+        1968
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apollo.io/api/v1/people/match",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "={{$env.APOLLO_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"id\": \"{{$json.apollo_person_id}}\",\n  \"reveal_personal_emails\": false\n}",
+        "options": {}
+      },
+      "id": "27c60a3a-9487-4eb0-bbc5-89e1155e6b9c",
+      "name": "Apollo - Reveal Email (1 credit)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2320,
+        1968
+      ],
+      "notes": "This is the only credit-consuming call in the pipeline - 1 credit per email revealed. Basic plan (~900 credits/yr) covers ~75/month."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{$json.person.email}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e7a18045-929c-486e-bc1b-b4097855a772",
+      "name": "Email Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2560,
+        1968
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "mode": "id",
+          "value": "YOUR_GOOGLE_SHEET_ID"
+        },
+        "sheetName": {
+          "mode": "name",
+          "value": "Leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Company Name": "={{$('Process One Company At A Time1').item.json.company_name}}",
+            "Domain": "={{$('Process One Company At A Time1').item.json.domain}}",
+            "Signal Types": "={{$('Process One Company At A Time1').item.json.signal_types}}",
+            "Priority": "={{$('Process One Company At A Time1').item.json.signal_count >= 3 ? 'Top' : ($('Process One Company At A Time1').item.json.signal_count >= 2 ? 'High' : 'Low')}}",
+            "Decision Maker Name": "={{$json.person.name}}",
+            "Decision Maker Title": "={{$json.person.title}}",
+            "Decision Maker Email": "={{$json.person.email}}",
+            "Email Status": "={{$json.person.email_status}}",
+            "Status": "ready_for_outreach",
+            "Created Date": "={{$now.toISO()}}"
+          }
+        },
+        "options": {}
+      },
+      "id": "234b2047-fbfc-4b30-b56b-4e113440e6f6",
+      "name": "Append Qualified Lead to Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2800,
+        1872
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "id": "21880c3f-7744-4706-82d6-d11758dd9ca9",
+      "name": "Wait (Rate Limit Buffer)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2912,
+        2112
+      ],
+      "webhookId": "ab31b095-78ba-4da9-9ee1-a03c85062706",
+      "notes": "Small pause before next loop iteration - keeps Apollo/Apify calls from bursting."
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "8c3d3051-5519-4298-a70d-c66353f06907",
+      "name": "Every 6 Hours1",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -544,
+        2064
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/tag/venture-capital/feed/",
+        "options": {}
+      },
+      "id": "ee30bf8e-5dd2-4f21-b336-633abd84262f",
+      "name": "RSS - Funding News1",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -304,
+        1712
+      ],
+      "notes": "CONFIGURE: add PR Newswire / Crunchbase News feeds too, chained into the same Tag node."
+    },
+    {
+      "parameters": {
+        "url": "https://www.google.com/alerts/feeds/YOUR_ALERT_ID/YOUR_FEED_ID",
+        "options": {}
+      },
+      "id": "0c880a89-0d10-486f-a746-ce3a08f1ee50",
+      "name": "RSS - Restructuring News1",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -304,
+        2416
+      ],
+      "notes": "CONFIGURE: Google Alert RSS feed for restructuring/layoffs/cost-optimization + startup."
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const j = item.json;\n  return { json: {\n    company_name: (j.title || j.creator || '').split(' raises')[0].split(' announces')[0].trim(),\n    domain: null,\n    signal_type: 'funding',\n    signal_detail: j.title || '',\n    source_url: j.link || '',\n    detected_date: j.pubDate || new Date().toISOString()\n  } };\n});"
+      },
+      "id": "c65355ab-17af-4495-902a-cb16433e8006",
+      "name": "Tag Funding Signals1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        1712
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const j = item.json;\n  return { json: {\n    company_name: (j.title || j.creator || '').trim(),\n    domain: null,\n    signal_type: 'turnaround',\n    signal_detail: j.title || j.contentSnippet || '',\n    source_url: j.link || '',\n    detected_date: j.pubDate || new Date().toISOString()\n  } };\n});"
+      },
+      "id": "5382bd81-6d2e-4223-b000-f95b2ff51f2c",
+      "name": "Tag Turnaround Signals1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        2416
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = items[0]?.json?.items || items;\nreturn raw.map(r => {\n  const j = r.json || r;\n  return { json: {\n    company_name: j.companyName || j.company || '',\n    domain: j.companyWebsite || j.domain || null,\n    signal_type: 'finance_hiring',\n    signal_detail: j.jobTitle || j.title || 'Hiring finance leadership',\n    source_url: j.jobUrl || j.url || '',\n    detected_date: new Date().toISOString()\n  } };\n});"
+      },
+      "id": "15bb230c-f928-49e5-83ca-5c97be12e28f",
+      "name": "Tag Hiring Signals1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        1872
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = items[0]?.json?.items || items;\nreturn raw.map(r => {\n  const j = r.json || r;\n  return { json: {\n    company_name: j.companyName || j.name || '',\n    domain: j.website || j.domain || null,\n    signal_type: 'expansion',\n    signal_detail: j.reason || 'Team/office growth detected',\n    source_url: j.linkedinUrl || '',\n    detected_date: new Date().toISOString(),\n    industry: j.industry || null,\n    employee_count: j.employeeCount || j.companySize || null,\n    hq_country: j.hqCountry || j.country || null\n  } };\n});"
+      },
+      "id": "1ae22069-b55c-48b9-bbb7-d08ee4b410a7",
+      "name": "Tag Expansion Signals1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        2064
+      ],
+      "notes": "Also captures firmographics from the company actor - reused later so we don't need a separate Apollo org-enrichment call."
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = items[0]?.json?.items || items;\nreturn raw.map(r => {\n  const j = r.json || r;\n  return { json: {\n    company_name: j.companyName || j.domain || '',\n    domain: j.domain || null,\n    signal_type: 'erp_infra',\n    signal_detail: 'Newly implemented: ' + (j.technology || j.tech || 'ERP/finance system'),\n    source_url: j.domain ? ('https://' + j.domain) : '',\n    detected_date: new Date().toISOString()\n  } };\n});"
+      },
+      "id": "9118e462-cebe-46f0-830e-fb56a2c1caae",
+      "name": "Tag ERP Signals1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        2272
+      ]
+    },
+    {
+      "parameters": {
+        "numberInputs": 5
+      },
+      "id": "cb7d4803-658d-41f8-8ae5-572274f97902",
+      "name": "Merge All Signals1",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        240,
+        2064
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const groups = {};\nfor (const item of items) {\n  const j = item.json;\n  const key = (j.domain || j.company_name || '').toLowerCase().replace(/[^a-z0-9.]/g,'');\n  if (!key) continue;\n  if (!groups[key]) {\n    groups[key] = { company_name: j.company_name, domain: j.domain, industry: j.industry || null, employee_count: j.employee_count || null, hq_country: j.hq_country || null, signals: [], signal_types: new Set() };\n  }\n  if (j.industry) groups[key].industry = j.industry;\n  if (j.employee_count) groups[key].employee_count = j.employee_count;\n  if (j.hq_country) groups[key].hq_country = j.hq_country;\n  groups[key].signals.push({ type: j.signal_type, detail: j.signal_detail, source: j.source_url, date: j.detected_date });\n  groups[key].signal_types.add(j.signal_type);\n}\nreturn Object.values(groups).map(g => ({ json: {\n  company_name: g.company_name,\n  domain: g.domain,\n  industry: g.industry,\n  employee_count: g.employee_count,\n  hq_country: g.hq_country,\n  signal_count: g.signal_types.size,\n  signal_types: Array.from(g.signal_types).join(', ')\n} }));"
+      },
+      "id": "10b63215-5cd6-4894-a162-39228a92558a",
+      "name": "Dedupe & Group by Company1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        2112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const existingDomains = new Set($('Read Existing Leads Sheet').all().map(i => (i.json.Domain || '').toLowerCase()));\nreturn items.filter(item => {\n  const d = (item.json.domain || '').toLowerCase();\n  return d && !existingDomains.has(d);\n});"
+      },
+      "id": "5c3650cf-981d-469e-9b0f-e265c3848d08",
+      "name": "Filter Out Already-Tracked1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        2112
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{$json.hq_country}}",
+              "rightValue": "United States|USA|US",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "leftValue": "={{$json.industry}}",
+              "rightValue": "SaaS|AI|Software|Cloud|Cybersecurity|FinTech|Healthcare|Manufacturing|Machine Learning",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "1002363e-04b9-4e92-849c-87b88a2c305f",
+      "name": "Matches ICP?1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        2112
+      ],
+      "notes": "Runs on firmographics already captured from the Apify company actor. Companies from funding/hiring/erp-only signals with no firmographics yet will fail this - add a fallback Apify company lookup for those if you see too many false negatives in testing."
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "38a0ce38-f953-49fc-814b-c746b265fa84",
+      "name": "Process One Company At A Time1",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1344,
+        2096
+      ],
+      "notes": "Serial processing - deliberate, to respect Apollo rate limits and avoid burning credits on a bad run."
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "mode": "id",
+          "value": "YOUR_GOOGLE_SHEET_ID"
+        },
+        "sheetName": {
+          "mode": "name",
+          "value": "Leads"
+        },
+        "options": {}
+      },
+      "id": "d8d2246d-113a-4337-bbcd-838de3ae5539",
+      "name": "Read Leads Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -256,
+        2800
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.filter(i => i.json.Status === 'ready_for_outreach').map(i => ({ json: {\n  row_number: i.json.row_number,\n  company_name: i.json['Company Name'],\n  domain: i.json['Domain'],\n  signal_types: i.json['Signal Types'],\n  priority: i.json['Priority'],\n  decision_maker_name: i.json['Decision Maker Name'],\n  decision_maker_title: i.json['Decision Maker Title'],\n  decision_maker_email: i.json['Decision Maker Email']\n} }));"
+      },
+      "id": "c7dcefd3-01f6-4387-b201-a4d0ce127e4f",
+      "name": "Filter Status = ready_for_outreach",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        2800
+      ],
+      "notes": "n8n's Google Sheets node returns a 'row_number' field automatically - used later to update the exact row."
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "65f64f59-9eed-46c3-83a7-c404259db81e",
+      "name": "Process One Lead At A Time",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        256,
+        2800
+      ],
+      "notes": "Serial - respects Perplexity/OpenAI/Instantly rate limits and keeps per-run cost visible in the execution log."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.perplexity.ai/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$env.PERPLEXITY_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"sonar-pro\",\n  \"messages\": [\n    { \"role\": \"system\", \"content\": \"You are a research analyst supporting a Fractional CFO advisory practice. Analyze companies strictly from a CFO's perspective: financial complexity, growth-stage risk, and the specific operational gaps a fractional CFO would be brought in to solve. Ground every claim in your web search results - never invent funding amounts, headcount, or financial figures. If something can't be verified, say so explicitly. Answer in under 300 words, plain prose, no headers or bullet lists.\" },\n    { \"role\": \"user\", \"content\": \"Research this company for a Fractional CFO outreach brief:\\n\\nCompany: {{$json.company_name}}\\nDomain: {{$json.domain}}\\nDetected signals: {{$json.signal_types}}\\n\\nAnswer specifically: (1) The most recent funding round or growth milestone you can verify, and when. (2) The company's approximate stage - headcount, revenue stage if public, or funding stage. (3) What finance-relevant challenge this company plausibly faces right now given the detected signal type (board reporting readiness after a raise, multi-entity complexity from expansion, need for FP&A after rapid hiring, cash runway pressure if turnaround-flagged). (4) One specific, recent, citable fact about the company a personalized email could reference naturally.\" }\n  ],\n  \"web_search_options\": { \"search_context_size\": \"low\" }\n}",
+        "options": {}
+      },
+      "id": "541ff331-e079-4d10-903e-c482779f9c67",
+      "name": "Perplexity - Company Research",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        512,
+        2800
+      ],
+      "notes": "CONFIGURE: PERPLEXITY_API_KEY env var. sonar-pro with search_context_size:low keeps the per-request search fee at the cheap end of Perplexity's published range."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$env.OPENAI_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-5.4-mini\",\n  \"messages\": [\n    { \"role\": \"system\", \"content\": \"You write cold outreach emails on behalf of {{$env.CLIENT_NAME}}, a Fractional CFO with {{$env.CLIENT_YEARS_EXPERIENCE}} years of executive finance experience. Positioning: {{$env.CLIENT_BIO_SUMMARY}}.\\n\\nVoice rules: direct, peer-to-peer, zero flattery, zero hype words (never 'excited', 'thrilled', 'passionate', 'synergy'). Write like one experienced finance executive emailing another.\\n\\nStructural rules: 90-130 words total. Reference exactly ONE specific fact from the research - not a summary, one fact. Name the specific financial-operations challenge implied by that fact. End with a low-pressure, specific question (e.g. 'worth a 20-minute call before your next board cycle?'), not 'let me know if interested'. No links, no attachments, no bullet points. Sign off with just a first name.\\n\\nOutput ONLY the email body. No preamble, no subject line.\" },\n    { \"role\": \"user\", \"content\": \"Recipient: {{$json.decision_maker_name}}, {{$json.decision_maker_title}} at {{$json.company_name}}\\n\\nResearch brief:\\n{{$json.research}}\\n\\nWrite Email 1.\" }\n  ],\n  \"max_tokens\": 400,\n  \"temperature\": 0.7\n}",
+        "options": {}
+      },
+      "id": "6b2757b7-388f-4511-9925-f9907d0f0103",
+      "name": "OpenAI - Generate Email 1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1232,
+        2800
+      ],
+      "notes": "CONFIGURE: OPENAI_API_KEY, CLIENT_NAME, CLIENT_YEARS_EXPERIENCE, CLIENT_BIO_SUMMARY env vars. gpt-5.4-mini is intentionally the cheap tier - short-form email copy doesn't need flagship reasoning."
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "mode": "id",
+          "value": "YOUR_GOOGLE_SHEET_ID"
+        },
+        "sheetName": {
+          "mode": "name",
+          "value": "Leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "row_number"
+          ],
+          "value": {
+            "row_number": "={{$('Carry Lead Context Forward1').item.json.row_number}}",
+            "Status": "email_1_sent",
+            "Last Touch Date": "={{$now.toISO()}}",
+            "Email 1 Body": "={{$('Extract Email Draft1').item.json.email_1_body}}"
+          }
+        },
+        "options": {}
+      },
+      "id": "28881b8b-d242-4a69-811b-94de7a507491",
+      "name": "Update Row Status",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1952,
+        2800
+      ],
+      "notes": "This status flip is the handoff point for the follow-up/reply workflow."
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      },
+      "id": "e188d01a-6dbb-448c-b604-d219a9756d98",
+      "name": "Check Every 2 Hours1",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -496,
+        2800
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const research = items[0].json.choices?.[0]?.message?.content || '';\nreturn [{ json: { research } }];"
+      },
+      "id": "2e0921f4-5405-473f-a0d3-2a66ae4b83e2",
+      "name": "Extract Research Text1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        752,
+        2800
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "company_name",
+              "value": "={{$('Process One Lead At A Time').item.json.company_name}}",
+              "type": "string"
+            },
+            {
+              "name": "row_number",
+              "value": "={{$('Process One Lead At A Time').item.json.row_number}}",
+              "type": "number"
+            },
+            {
+              "name": "decision_maker_name",
+              "value": "={{$('Process One Lead At A Time').item.json.decision_maker_name}}",
+              "type": "string"
+            },
+            {
+              "name": "decision_maker_title",
+              "value": "={{$('Process One Lead At A Time').item.json.decision_maker_title}}",
+              "type": "string"
+            },
+            {
+              "name": "decision_maker_email",
+              "value": "={{$('Process One Lead At A Time').item.json.decision_maker_email}}",
+              "type": "string"
+            },
+            {
+              "name": "research",
+              "value": "={{$json.research}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cae980b5-2a01-4899-8707-7b45018f2f73",
+      "name": "Carry Lead Context Forward1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        992,
+        2800
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const emailBody = (items[0].json.choices?.[0]?.message?.content || '').trim();\nreturn [{ json: { ...items[0].json, email_1_body: emailBody } }];"
+      },
+      "id": "475de228-27b7-4966-97a1-fc9b42d0e458",
+      "name": "Extract Email Draft1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1472,
+        2800
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.instantly.ai/api/v2/leads",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$env.INSTANTLY_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"campaign\": \"{{$env.INSTANTLY_CAMPAIGN_ID}}\",\n  \"email\": \"{{$('Carry Lead Context Forward1').item.json.decision_maker_email}}\",\n  \"first_name\": \"{{$('Carry Lead Context Forward1').item.json.decision_maker_name.split(' ')[0]}}\",\n  \"last_name\": \"{{$('Carry Lead Context Forward1').item.json.decision_maker_name.split(' ').slice(1).join(' ')}}\",\n  \"company_name\": \"{{$('Carry Lead Context Forward1').item.json.company_name}}\",\n  \"job_title\": \"{{$('Carry Lead Context Forward1').item.json.decision_maker_title}}\",\n  \"personalization\": {{JSON.stringify($json.email_1_body)}}\n}",
+        "options": {}
+      },
+      "id": "6bed4d5a-f9ab-4f64-9405-81e76b0bc521",
+      "name": "Instantly - Add Lead & Launch Email ",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1712,
+        2800
+      ],
+      "notes": "CONFIGURE: INSTANTLY_API_KEY, INSTANTLY_CAMPAIGN_ID env vars. Your Instantly campaign's Email 1 template body must literally be {{personalization}} for the AI draft to actually go out."
+    },
+    {
+      "parameters": {},
+      "id": "7fbee361-6e4b-4584-8c79-ebc0cc8c82c6",
+      "name": "Wait (Rate Limit Buffer)1",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2192,
+        2800
+      ],
+      "webhookId": "e587c4e6-f2e7-4780-86c4-c5dc7e01e2eb"
+    }
+  ],
+  "connections": {
+    "Every 6 Hours": {
+      "main": [
+        [
+          {
+            "node": "RSS - Funding News",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS - Restructuring News",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Apify - LinkedIn Jobs Scraper (Finance Hiring)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Apify - LinkedIn Company Scraper (Expansion)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Apify - BuiltWith Tech Detector (ERP Signal)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS - Funding News": {
+      "main": [
+        [
+          {
+            "node": "Tag Funding Signals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS - Restructuring News": {
+      "main": [
+        [
+          {
+            "node": "Tag Turnaround Signals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apify - LinkedIn Jobs Scraper (Finance Hiring)": {
+      "main": [
+        [
+          {
+            "node": "Tag Hiring Signals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apify - LinkedIn Company Scraper (Expansion)": {
+      "main": [
+        [
+          {
+            "node": "Tag Expansion Signals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apify - BuiltWith Tech Detector (ERP Signal)": {
+      "main": [
+        [
+          {
+            "node": "Tag ERP Signals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag Funding Signals": {
+      "main": [
+        [
+          {
+            "node": "Merge All Signals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag Turnaround Signals": {
+      "main": [
+        [
+          {
+            "node": "Merge All Signals",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Tag Hiring Signals": {
+      "main": [
+        [
+          {
+            "node": "Merge All Signals",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Tag Expansion Signals": {
+      "main": [
+        [
+          {
+            "node": "Merge All Signals",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Tag ERP Signals": {
+      "main": [
+        [
+          {
+            "node": "Merge All Signals",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Merge All Signals": {
+      "main": [
+        [
+          {
+            "node": "Dedupe & Group by Company",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedupe & Group by Company": {
+      "main": [
+        [
+          {
+            "node": "Get Existing Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Existing Companies": {
+      "main": [
+        [
+          {
+            "node": "Filter Out Already-Tracked",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Out Already-Tracked": {
+      "main": [
+        [
+          {
+            "node": "Enrich Company (Firmographics)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enrich Company (Firmographics)": {
+      "main": [
+        [
+          {
+            "node": "Matches ICP?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Matches ICP?": {
+      "main": [
+        [
+          {
+            "node": "Find Decision-Maker Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Decision-Maker Contact": {
+      "main": [
+        [
+          {
+            "node": "Verify Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Email": {
+      "main": [
+        [
+          {
+            "node": "Email Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Valid?": {
+      "main": [
+        [
+          {
+            "node": "Calculate Priority Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Priority Score": {
+      "main": [
+        [
+          {
+            "node": "Create Qualified Lead Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Every 2 Hours": {
+      "main": [
+        [
+          {
+            "node": "Get Ready-For-Outreach Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Ready-For-Outreach Leads": {
+      "main": [
+        [
+          {
+            "node": "Process One Company At A Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process One Company At A Time": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Claude - Company Research",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude - Company Research": {
+      "main": [
+        [
+          {
+            "node": "Extract Research Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Research Text": {
+      "main": [
+        [
+          {
+            "node": "Carry Lead Context Forward",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Carry Lead Context Forward": {
+      "main": [
+        [
+          {
+            "node": "Claude - Generate Email 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude - Generate Email 1": {
+      "main": [
+        [
+          {
+            "node": "Extract Email Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Email Draft": {
+      "main": [
+        [
+          {
+            "node": "Instantly - Add Lead & Launch Email 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instantly - Add Lead & Launch Email 1": {
+      "main": [
+        [
+          {
+            "node": "Update Lead Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Lead Status": {
+      "main": [
+        [
+          {
+            "node": "Process One Company At A Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apify - Jobs Scraper (Hiring Signal)": {
+      "main": [
+        [
+          {
+            "node": "Tag Hiring Signals1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apify - Company Scraper (Expansion Signal)": {
+      "main": [
+        [
+          {
+            "node": "Tag Expansion Signals1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apify - Tech Detector (ERP Signal)": {
+      "main": [
+        [
+          {
+            "node": "Tag ERP Signals1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Existing Leads Sheet": {
+      "main": [
+        [
+          {
+            "node": "Filter Out Already-Tracked1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apollo - People Search (Find Decision-Maker)": {
+      "main": [
+        [
+          {
+            "node": "Any Candidates Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Any Candidates Found?": {
+      "main": [
+        [
+          {
+            "node": "Pick Best-Matching Decision-Maker",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait (Rate Limit Buffer)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Best-Matching Decision-Maker": {
+      "main": [
+        [
+          {
+            "node": "Apollo - Reveal Email (1 credit)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apollo - Reveal Email (1 credit)": {
+      "main": [
+        [
+          {
+            "node": "Email Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Found?": {
+      "main": [
+        [
+          {
+            "node": "Append Qualified Lead to Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait (Rate Limit Buffer)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append Qualified Lead to Sheet": {
+      "main": [
+        [
+          {
+            "node": "Wait (Rate Limit Buffer)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait (Rate Limit Buffer)": {
+      "main": [
+        [
+          {
+            "node": "Process One Company At A Time1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every 6 Hours1": {
+      "main": [
+        [
+          {
+            "node": "RSS - Funding News1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS - Restructuring News1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Apify - Jobs Scraper (Hiring Signal)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Apify - Company Scraper (Expansion Signal)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Apify - Tech Detector (ERP Signal)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS - Funding News1": {
+      "main": [
+        [
+          {
+            "node": "Tag Funding Signals1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS - Restructuring News1": {
+      "main": [
+        [
+          {
+            "node": "Tag Turnaround Signals1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag Funding Signals1": {
+      "main": [
+        [
+          {
+            "node": "Merge All Signals1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag Turnaround Signals1": {
+      "main": [
+        [
+          {
+            "node": "Merge All Signals1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Tag Hiring Signals1": {
+      "main": [
+        [
+          {
+            "node": "Merge All Signals1",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Tag Expansion Signals1": {
+      "main": [
+        [
+          {
+            "node": "Merge All Signals1",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Tag ERP Signals1": {
+      "main": [
+        [
+          {
+            "node": "Merge All Signals1",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Merge All Signals1": {
+      "main": [
+        [
+          {
+            "node": "Dedupe & Group by Company1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedupe & Group by Company1": {
+      "main": [
+        [
+          {
+            "node": "Read Existing Leads Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Out Already-Tracked1": {
+      "main": [
+        [
+          {
+            "node": "Matches ICP?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Matches ICP?1": {
+      "main": [
+        [
+          {
+            "node": "Process One Company At A Time1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process One Company At A Time1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Apollo - People Search (Find Decision-Maker)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Leads Sheet": {
+      "main": [
+        [
+          {
+            "node": "Filter Status = ready_for_outreach",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Status = ready_for_outreach": {
+      "main": [
+        [
+          {
+            "node": "Process One Lead At A Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process One Lead At A Time": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Perplexity - Company Research",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Perplexity - Company Research": {
+      "main": [
+        [
+          {
+            "node": "Extract Research Text1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - Generate Email 1": {
+      "main": [
+        [
+          {
+            "node": "Extract Email Draft1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Row Status": {
+      "main": [
+        [
+          {
+            "node": "Wait (Rate Limit Buffer)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Every 2 Hours1": {
+      "main": [
+        [
+          {
+            "node": "Read Leads Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Research Text1": {
+      "main": [
+        [
+          {
+            "node": "Carry Lead Context Forward1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Carry Lead Context Forward1": {
+      "main": [
+        [
+          {
+            "node": "OpenAI - Generate Email 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Email Draft1": {
+      "main": [
+        [
+          {
+            "node": "Instantly - Add Lead & Launch Email ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instantly - Add Lead & Launch Email ": {
+      "main": [
+        [
+          {
+            "node": "Update Row Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait (Rate Limit Buffer)1": {
+      "main": [
+        [
+          {
+            "node": "Process One Lead At A Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "99faafe4-2776-43d0-a298-19005a806666",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-07-02T05:08:54.806Z",
+      "createdAt": "2026-07-02T05:08:54.806Z",
+      "role": "workflow:owner",
+      "workflowId": "nIpyoICdCjpHmzhO",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
