@@ -1,0 +1,1171 @@
+{
+  "updatedAt": "2025-11-10T16:58:01.000Z",
+  "createdAt": "2025-10-26T09:36:34.714Z",
+  "id": "MDAetUkHp3uFkRup",
+  "name": "Invoice Remainder(Lawyer)",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1zCLinEgwbDkAuU8ienagUgG5DTQbMhqMZJCW04HrIAU",
+          "mode": "list",
+          "cachedResultName": "Invoice Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zCLinEgwbDkAuU8ienagUgG5DTQbMhqMZJCW04HrIAU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zCLinEgwbDkAuU8ienagUgG5DTQbMhqMZJCW04HrIAU/edit#gid=0"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1328,
+        -256
+      ],
+      "id": "50f05b3f-0911-437b-bde3-674c02e9222e",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "jiy4CLauc0aInJpJ",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -208,
+        -448
+      ],
+      "id": "8dbe07e1-143c-4e1b-b869-f3219cad133a",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1zCLinEgwbDkAuU8ienagUgG5DTQbMhqMZJCW04HrIAU",
+          "mode": "list",
+          "cachedResultName": "Invoice Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zCLinEgwbDkAuU8ienagUgG5DTQbMhqMZJCW04HrIAU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zCLinEgwbDkAuU8ienagUgG5DTQbMhqMZJCW04HrIAU/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Paid (Yes/No)",
+              "lookupValue": "Unpaid"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        0,
+        -448
+      ],
+      "id": "9b7463f1-cf85-415b-9928-47319c21396c",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const out = [];\nfunction normalizeDate(d) {\n  const dt = new Date(d);\n  dt.setHours(0,0,0,0);\n  return dt.toISOString().slice(0,10);\n}\nconst today = normalizeDate(new Date());\n\nfor (const r of items) {\n  const row = r.json;\n  const paid = (row[\"Paid (Yes/No)\"] || \"\").toLowerCase().trim();\n  if (paid === \"paid\" || paid === \"yes\") continue;\n\n  const nextF = (row[\"Next Follow-up Date\"] || \"\").toString().trim();\n  if (!nextF) {\n    out.push({ json: row });\n  } else {\n    const nf = normalizeDate(new Date(nextF));\n    if (nf <= today) out.push({ json: row });\n  }\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        -448
+      ],
+      "id": "90813f86-647d-4247-9aa6-1bde381df5cb",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        416,
+        -448
+      ],
+      "id": "d34780f2-7a50-4698-b6c8-f0fe19edeb4c",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "sendTo": "aitoday128@gmail.com",
+        "subject": "new",
+        "message": "due",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        656,
+        -432
+      ],
+      "id": "ef4c4244-c528-41ba-8d98-3cbe92936009",
+      "name": "Send a message",
+      "webhookId": "5a144c6c-5456-48c2-a627-f9f0e6541db2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "OEcIZm1duf4dQunn",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const row = items[0].json;\nfunction format(d) { d.setHours(0,0,0,0); return d.toISOString().slice(0,10); }\nconst today = new Date();\nconst todayISO = format(today);\n\nlet count = parseInt(row[\"Follow-up Count\"] || \"0\") || 0;\ncount++;\n\nconst next = new Date();\nnext.setDate(next.getDate() + 3);\nconst nextISO = format(next);\n\nreturn [{\n  json: {\n    \"Client Name\": row[\"Client Name\"],\n    \"Follow-up Count\": count,\n    \"Last Follow-up Date\": todayISO,\n    \"Next Follow-up Date\": nextISO,\n    \"Reminder Status\": \"Follow-up Sent\"\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        -432
+      ],
+      "id": "d8b48af8-79c0-4e70-a506-58bd05eeb1a9",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1zCLinEgwbDkAuU8ienagUgG5DTQbMhqMZJCW04HrIAU",
+          "mode": "list",
+          "cachedResultName": "Invoice Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zCLinEgwbDkAuU8ienagUgG5DTQbMhqMZJCW04HrIAU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zCLinEgwbDkAuU8ienagUgG5DTQbMhqMZJCW04HrIAU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client Name": "={{ $('Get row(s) in sheet').item.json['Client Name'] }}",
+            "Follow-up Count": "={{ $json['Follow-up Count'] }}",
+            "Last Follow-up Date": "={{ $json['Last Follow-up Date'] }}",
+            "Next Follow-up Date": "={{ $json['Next Follow-up Date'] }}",
+            "Reminder Status": "={{ $json['Reminder Status'] }}"
+          },
+          "matchingColumns": [
+            "Client Name"
+          ],
+          "schema": [
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email/ Whatsappp",
+              "displayName": "Email/ Whatsappp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Case/ Service",
+              "displayName": "Case/ Service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Invoice Date",
+              "displayName": "Invoice Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Paid (Yes/No)",
+              "displayName": "Paid (Yes/No)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Payment Date",
+              "displayName": "Payment Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Payment Due Date",
+              "displayName": "Payment Due Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Mode (UPI/Card)",
+              "displayName": "Mode (UPI/Card)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Reminder Status",
+              "displayName": "Reminder Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Follow-up Count",
+              "displayName": "Follow-up Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last Follow-up Date",
+              "displayName": "Last Follow-up Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Next Follow-up Date",
+              "displayName": "Next Follow-up Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Invoice Link",
+              "displayName": "Invoice Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1040,
+        -432
+      ],
+      "id": "7ad645f7-6f4b-42ac-804d-8fa40208abe7",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1zCLinEgwbDkAuU8ienagUgG5DTQbMhqMZJCW04HrIAU",
+          "mode": "list",
+          "cachedResultName": "Invoice Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zCLinEgwbDkAuU8ienagUgG5DTQbMhqMZJCW04HrIAU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zCLinEgwbDkAuU8ienagUgG5DTQbMhqMZJCW04HrIAU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client Name": "={{ $json['Client Name'] }}",
+            "Reminder Status": "Pending",
+            "Follow-up Count": "0",
+            "Paid (Yes/No)": "Unpaid"
+          },
+          "matchingColumns": [
+            "Client Name"
+          ],
+          "schema": [
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email/ Whatsappp",
+              "displayName": "Email/ Whatsappp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Case/ Service",
+              "displayName": "Case/ Service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Invoice Date",
+              "displayName": "Invoice Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Paid (Yes/No)",
+              "displayName": "Paid (Yes/No)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Payment Date",
+              "displayName": "Payment Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Payment Due Date",
+              "displayName": "Payment Due Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Mode (UPI/Card)",
+              "displayName": "Mode (UPI/Card)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Reminder Status",
+              "displayName": "Reminder Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Follow-up Count",
+              "displayName": "Follow-up Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last Follow-up Date",
+              "displayName": "Last Follow-up Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Next Follow-up Date",
+              "displayName": "Next Follow-up Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Invoice Link",
+              "displayName": "Invoice Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -864,
+        -256
+      ],
+      "id": "c95134e6-f743-4f22-8181-93eb612946ec",
+      "name": "Append or update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function Node: Set First Follow-up Dates\nconst out = [];\n\nfor (const item of items) {\n  const row = item.json;\n  let nextFollowUp = \"\";\n\n  const invoiceDate = row[\"Invoice Date\"];\n  if (invoiceDate) {\n    // Split DD/MM/YY or DD/MM/YYYY\n    const parts = invoiceDate.split(\"/\");\n    if (parts.length === 3) {\n      let day = parseInt(parts[0], 10);\n      let month = parseInt(parts[1], 10) - 1; // JS months 0-11\n      let year = parseInt(parts[2], 10);\n      // If year is 2 digits, convert to 20XX\n      if (year < 100) year += 2000;\n\n      const dt = new Date(year, month, day);\n      dt.setDate(dt.getDate() + 3); // Add 3 days\n      nextFollowUp = dt.toISOString().slice(0,10);\n    }\n  }\n\n  out.push({\n    json: {\n      \"Client Name\": row[\"Client Name\"],\n      \"Follow-up Count\": 0,\n      \"Last Follow-up Date\": \"\",\n      \"Next Follow-up Date\": nextFollowUp,\n      \"Reminder Status\": \"Pending\"\n    }\n  });\n}\n\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1120,
+        -256
+      ],
+      "id": "ca8d8d49-4cad-4e6f-b104-e3ee87c24a83",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        832
+      ],
+      "id": "261854d9-040f-437f-9664-ac31c61180ff",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1zCLinEgwbDkAuU8ienagUgG5DTQbMhqMZJCW04HrIAU",
+          "mode": "list",
+          "cachedResultName": "Invoice Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zCLinEgwbDkAuU8ienagUgG5DTQbMhqMZJCW04HrIAU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zCLinEgwbDkAuU8ienagUgG5DTQbMhqMZJCW04HrIAU/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Paid (Yes/No)",
+              "lookupValue": "Unpaid"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -32,
+        832
+      ],
+      "id": "c41c7490-b847-424d-b2ff-76e19580d7ad",
+      "name": "Get row(s) in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Initialize output array\nconst out = [];\n\n// Loop over all items from previous node (unpaid invoices)\nfor (const item of items) {\n  const row = item.json;\n\n  // Skip if already Paid\n  const paidStatus = (row[\"Paid (Yes/No)\"] || \"\").toLowerCase().trim();\n  if (paidStatus === \"paid\" || paidStatus === \"yes\") continue;\n\n  // Build verification payload\n  const payload = {\n    client: row[\"Client Name\"] || \"Unknown\",\n    amount: row[\"Amount\"] || 0,\n    invoice: row[\"Invoice ID\"] || row[\"Invoice Number\"] || \"Unknown\",\n    mode: row[\"Mode (UPI/Card)\"] || \"Unknown\",\n    rowId: row[\"Client Name\"] + \"_\" + row[\"Invoice ID\"] || Date.now() // unique identifier\n  };\n\n  out.push({ json: payload });\n}\n\n// Return all payloads\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        832
+      ],
+      "id": "d11d0566-6ac9-45e4-913c-bc8930d2dc4f",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "8417171830",
+        "message": "={{ $json.client }}\n{{ $json.amount }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "✅ Payment Received",
+            "disapproveLabel": "❌ Payment Not Received"
+          }
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        624,
+        848
+      ],
+      "id": "7ec073bb-fe32-47ad-bfa0-5c9e58b92b61",
+      "name": "Send a text message",
+      "webhookId": "adb8a0b8-025e-40bf-954e-fb852f253bac",
+      "credentials": {
+        "telegramApi": {
+          "id": "gwHBxrkrPXY0I5Fk",
+          "name": "Normal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "65fbfa4b-8c8c-43f6-b812-b734b5d7ca57",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        832,
+        848
+      ],
+      "id": "7b6c1971-95fb-4550-9e89-3b3cd9cd9fad",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        384,
+        832
+      ],
+      "id": "1861beb5-b098-4fdc-a2fd-47d1a2ac7ba3",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1zCLinEgwbDkAuU8ienagUgG5DTQbMhqMZJCW04HrIAU",
+          "mode": "list",
+          "cachedResultName": "Invoice Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zCLinEgwbDkAuU8ienagUgG5DTQbMhqMZJCW04HrIAU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zCLinEgwbDkAuU8ienagUgG5DTQbMhqMZJCW04HrIAU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client Name": "={{ $('Get row(s) in sheet1').item.json['Client Name'] }}",
+            "Paid (Yes/No)": "Paid",
+            "Payment Date": "={{ $now }}",
+            "Reminder Status": "Completed"
+          },
+          "matchingColumns": [
+            "Client Name"
+          ],
+          "schema": [
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email/ Whatsappp",
+              "displayName": "Email/ Whatsappp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Case/ Service",
+              "displayName": "Case/ Service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Invoice Date",
+              "displayName": "Invoice Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Paid (Yes/No)",
+              "displayName": "Paid (Yes/No)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Payment Date",
+              "displayName": "Payment Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Payment Due Date",
+              "displayName": "Payment Due Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Mode (UPI/Card)",
+              "displayName": "Mode (UPI/Card)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Reminder Status",
+              "displayName": "Reminder Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Follow-up Count",
+              "displayName": "Follow-up Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Last Follow-up Date",
+              "displayName": "Last Follow-up Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Next Follow-up Date",
+              "displayName": "Next Follow-up Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Invoice Link",
+              "displayName": "Invoice Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1072,
+        832
+      ],
+      "id": "50090b8c-3fd6-4bbc-ac99-1ded21f679f2",
+      "name": "Append or update row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# 1. Google Sheets Trigger\n\n\nWatches your “Invoice Tracker” Google Sheet.\n\n\n# Runs every minute.\n\n\nWhen a new row (invoice) is added, it starts the workflow.\n\n\n\n# 2. Code in JavaScript2\n\n\nTakes the new invoice data from the sheet.\n\n\nReads the “Invoice Date”.\n\n\nAdds 3 days to that date to create a “Next Follow-up Date”.\n\n\nSets:\n\n\nClient Name\n\n\nFollow-up Count = 0\n\n\nLast Follow-up Date = empty\n\n\nNext Follow-up Date = invoice date + 3 days\n\n\nReminder Status = Pending\n\n\n\n\n\n# 3. Append or Update Row in Sheet1\n\n\nGoes back to the same Google Sheet.\n\n\nLooks for the same “Client Name”.\n\n\nIf found, updates that row.\n\n\nIf not found, adds a new row.\n\n\nFills these values:\n\n\nClient Name\n\n\nReminder Status → Pending\n\n\nFollow-up Count → 0\n\n\nPaid (Yes/No) → Unpaid\n\n\n\n\n\n# Result\n\n\nEach new invoice entry in the sheet automatically gets follow-up info filled in.\n\n\nEverything stays updated with reminder and payment status ready for tracking.\n\n",
+        "height": 1616,
+        "width": 1184
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1840,
+        -928
+      ],
+      "typeVersion": 1,
+      "id": "6e5d0aff-c593-4c29-89a9-9076b32f64d5",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# 1. Schedule Trigger\n\nStarts the workflow on a schedule (for example, once a day or every few hours).\n\nUsed to check unpaid invoices automatically at regular times.\n\n# 2. Get row(s) in sheet\n\nConnects to your Google Sheet named “Invoice Tracker”.\n\nLooks inside Sheet1.\n\nFilters and only pulls rows where Paid (Yes/No) is “Unpaid”.\n\nSo it gets a list of all clients who have not paid yet.\n\n# 3. Code in JavaScript\n\nGoes through all the unpaid invoices.\n\nChecks if the Next Follow-up Date is today or earlier.\n\nIf the date has come (or no follow-up date exists), it keeps that row for follow-up.\n\nSkips clients who already paid or whose follow-up date is in the future.\n\n# 4. Loop Over Items\n\nTakes each unpaid client from the list and processes them one by one.\n\nHelps to send messages and update sheets for each client separately.\n\n# 5. Send a message\n\nSends an email reminder (currently set to “aitoday128@gmail.com\n”) to notify about the due payment.\n\nYou can replace the email and message content with real client info later.\n\n# 6. Code in JavaScript1\n\nAfter sending the reminder, it updates tracking info for that client:\n\nIncreases Follow-up Count by +1.\n\nSets Last Follow-up Date to today’s date.\n\nSets Next Follow-up Date to 3 days from now.\n\nUpdates Reminder Status to “Follow-up Sent”.\n\n# 7. Append or update row in sheet\n\nGoes back to the same Google Sheet.\n\nFinds the same Client Name.\n\nUpdates that client’s row with new follow-up details.\n\nThis keeps your sheet fully up to date with follow-up activity.\n\nFinal Output\n\nEvery day, the workflow checks for unpaid clients.\n\nSends reminder emails to those whose next follow-up date has arrived.\n\nAutomatically updates their record with follow-up count and next follow-up date.",
+        "height": 1664,
+        "width": 1904
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -624,
+        -976
+      ],
+      "typeVersion": 1,
+      "id": "351ae1ef-f226-40d7-be42-4cdf59bce4dd",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "# 1. Schedule Trigger1\n\nRuns the workflow automatically at set time intervals.\n\nIt starts the full process to check for unpaid invoices in your Google Sheet.\n\n# 2. Get row(s) in sheet1\n\nConnects to your Google Sheet named “Invoice Tracker”.\n\nLooks inside Sheet1.\n\nFinds and collects all rows where Paid (Yes/No) is “Unpaid”.\n\nSends this list of unpaid invoices to the next step.\n\n# 3. Code in JavaScript3\n\nCleans and prepares data for each unpaid client.\n\nFor every invoice, it picks:\n\nClient Name\n\nAmount\n\nInvoice ID or Number\n\nPayment Mode (UPI or Card)\n\nCreates a unique ID for tracking each client’s invoice.\n\nSends all these details forward for follow-up.\n\n# 4. Loop Over Items1\n\nTakes each unpaid client one by one from the list.\n\nMakes sure that the next steps (message sending and update) happen for each client individually.\n\n# 5. Send a text message\n\nSends a message on Telegram to your admin account (chat ID: 8417171830).\n\nThe message shows:\n\nClient Name\n\nAmount due\n\nIncludes two buttons for quick response:\n\n✅ Payment Received\n\n❌ Payment Not Received\n\nWaits for you to choose one of the two options.\n\n# 6. If\n\nChecks which option you selected in Telegram.\n\nIf you clicked ✅ Payment Received, it moves forward to update the Google Sheet.\n\nIf you clicked ❌ Payment Not Received, it skips the update and loops back to check the next client.\n\n# 7. Append or update row in sheet2\n\nOpens the same Google Sheet (Invoice Tracker → Sheet1).\n\nFinds the matching Client Name.\n\nUpdates that row with:\n\nPaid (Yes/No) → “Paid”\n\nPayment Date → Current date and time\n\nReminder Status → “Completed”\n\nThis keeps your sheet updated with all successful payments.\n\nFinal Workflow Summary\n\nThe workflow automatically checks unpaid invoices.\n\nSends each client’s details to Telegram for confirmation.\n\nYou confirm payment directly from Telegram.\n\nThe Google Sheet updates instantly with the new payment status and date.",
+        "height": 1776,
+        "width": 1936
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -736,
+        704
+      ],
+      "typeVersion": 1,
+      "id": "3967e266-cee9-4acd-ab3b-10d8204b184a",
+      "name": "Sticky Note2"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "35530798-9b68-4d65-ac17-682a35153c63",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-26T09:36:34.717Z",
+      "createdAt": "2025-10-26T09:36:34.717Z",
+      "role": "workflow:owner",
+      "workflowId": "MDAetUkHp3uFkRup",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
