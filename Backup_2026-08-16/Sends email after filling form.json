@@ -1,0 +1,231 @@
+{
+  "updatedAt": "2025-10-05T11:53:10.000Z",
+  "createdAt": "2025-10-05T06:30:06.161Z",
+  "id": "Z8PvOiX7BISNorSs",
+  "name": "Sends email after filling form",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "n8n test",
+        "formDescription": "Fill this form and you receive mail ",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name",
+              "placeholder": "Enter your name"
+            },
+            {
+              "fieldLabel": "Email",
+              "placeholder": "Enter your email"
+            },
+            {
+              "fieldLabel": "Are you looking for which service?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "AI"
+                  },
+                  {
+                    "option": "Marketing"
+                  },
+                  {
+                    "option": "Advertising"
+                  },
+                  {
+                    "option": "Business"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -176,
+        0
+      ],
+      "id": "c7b521ee-05d1-4e32-b5ef-19913e1e073f",
+      "name": "On form submission",
+      "webhookId": "76d0a7e0-40ef-443d-a751-c1d7e6e0f8ab"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash-lite-preview-06-17",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash-lite-preview-06-17"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=AI Prompt:\n\n*\"You are an email automation assistant. A new lead has just submitted a form on our website. Generate a professional, friendly, and concise response that includes:\n\nSubject line – a short, engaging subject for the email.\n\nEmail body/summary – the main email content that:\n\nThanks the lead for submitting the form.\n\nConfirms their information was received.\n\nLets them know someone from our team will contact them soon.\n\nOptionally, includes a brief line about our services/value proposition.\n\nKeep the tone warm, approachable, and professional. Limit the email body to 3–5 sentences. Provide the subject line and body clearly as separate outputs.\"*"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        16,
+        0
+      ],
+      "id": "619280e9-3654-4274-8665-19fec18345d6",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Gq3qNdXZmlzVb7Jg",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "={{ $json.subject }}",
+        "message": "= {{ $json.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        800,
+        0
+      ],
+      "id": "9e9f34ac-7cab-4ace-bfc3-9b9ee3e4afb6",
+      "name": "Send a message",
+      "webhookId": "dd589c06-fc51-4358-949f-01b9df2db820",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UbWO1LFfZ6s8MzMA",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5f9e58a1-cd5e-4339-a779-e9975cb6f6f6",
+              "name": "Email",
+              "value": "={{ $('On form submission').item.json.Email }}",
+              "type": "string"
+            },
+            {
+              "id": "2e2f492b-a608-46be-afd9-31f75d947a16",
+              "name": "subject",
+              "value": "={{ $json.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "7cf20b57-546b-4a9f-845a-58a6f50e81dc",
+              "name": "body",
+              "value": "={{ $json.body }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        592,
+        0
+      ],
+      "id": "7975238c-74a0-402a-ae29-7f9aa2ec2e70",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Function Node\n\n// Example input: $json contains lead info from form\nconst leadName = $json[\"name\"] || \"there\"; // fallback if name is missing\nconst service = \"AI Automation Services\"; // replace with your service/product\n\n// Generate subject and email body\nconst emailSubject = \"Thanks for Reaching Out! We'll Be in Touch Soon!\";\nconst emailBody = `Hi ${leadName},\\n\\nThank you for submitting the form on our website! We've received your information and are excited to connect with you. A member of our team will be reaching out shortly to discuss how we can help you achieve your goals. We look forward to showing you the value our ${service} can bring.\\n\\nBest regards,\\nYour Team`;\n\n// Return as JSON so it can be used in next node (like Send Email)\nreturn [\n  {\n    json: {\n      subject: emailSubject,\n      body: emailBody\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        368,
+        0
+      ],
+      "id": "464fe7e1-ede6-4b36-803f-c54de3d3b416",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "ecd358b6-eba3-465e-b806-1a219996b3f9",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-05T06:30:06.185Z",
+      "createdAt": "2025-10-05T06:30:06.185Z",
+      "role": "workflow:owner",
+      "workflowId": "Z8PvOiX7BISNorSs",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
