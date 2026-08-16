@@ -1,0 +1,439 @@
+{
+  "updatedAt": "2025-10-09T16:48:08.000Z",
+  "createdAt": "2025-10-09T15:41:25.481Z",
+  "id": "SQ7UrmkehpNGz4hE",
+  "name": "Customer support",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -496,
+        -32
+      ],
+      "id": "cb83abe0-3158-45d8-8821-f5853b98e089",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UbWO1LFfZ6s8MzMA",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Customer Support",
+              "description": "A Email that is related to Meetings"
+            },
+            {
+              "category": "Others",
+              "description": "Any email that is not meeting related"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        -240,
+        -32
+      ],
+      "id": "6b93752f-17a7-40ff-9a10-df03ad923747",
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        160
+      ],
+      "id": "05310700-a3dd-4d6d-ad84-df5d8b8b60bc",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Gq3qNdXZmlzVb7Jg",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        16,
+        240
+      ],
+      "id": "47a8d672-e6dd-4b26-9a04-13eceb478141",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Gmail Trigger').item.json.text }}",
+        "options": {
+          "systemMessage": "You are my email assistant. Your job is to handle all meeting-related emails intelligently. For every email:\n\nUnderstand the content fully.\n\nDetermine the type of email:\n\nMeeting update request → reply with a professional confirmation or suggest new time slots.\n\nMeeting already scheduled → confirm the existing meeting politely.\n\nMeeting to be booked / new meeting request → propose available time slots and confirm once agreed.\n\nLead / inquiry email → respond professionally or flag for follow-up.\n\nCompose concise, professional, and context-aware replies.\n\nAlways act as my personal email assistant, handling scheduling, updates, and confirmations automatically."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        128,
+        -176
+      ],
+      "id": "b6e0613a-0a20-4459-93de-da64ee37a942",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        112,
+        48
+      ],
+      "id": "c951ae56-03ec-4405-bdc1-6ccc674b4fd8",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Gq3qNdXZmlzVb7Jg",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "call this tool to access any output \nnote: don't go to next step without calling this tool",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "options": {
+          "pineconeNamespace": "Lawyer"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        352,
+        80
+      ],
+      "id": "8a8e6a82-f3a3-47cf-bdfd-5173ff16864d",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "1vz29s1Fhrm477mb",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        256
+      ],
+      "id": "977d3da7-c232-4848-848e-8c7c38d171fa",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "8cTwctTGeEBOJeUq",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.text }}",
+        "contextWindowLength": "=10"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        48
+      ],
+      "id": "f03d0ff0-0875-4842-bd04-9800a49a0547",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.output }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Subject",
+              "description": "Subject should be taken out",
+              "required": true
+            },
+            {
+              "name": "Body",
+              "description": "Body should be taken out",
+              "required": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        -176
+      ],
+      "id": "af4200a5-1565-4b90-9359-5eeab15227a8",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        640,
+        16
+      ],
+      "id": "9dea2f8d-6827-4f9d-8811-05d4f69b655a",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Gq3qNdXZmlzVb7Jg",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "=vvv",
+        "subject": "={{ $json.output.Subject }}",
+        "message": "={{ $json.output.Body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1040,
+        -176
+      ],
+      "id": "a7dc1040-304a-4bc9-a158-720a61ccc44b",
+      "name": "Send a message",
+      "webhookId": "a79cf383-7eaf-4a7c-b4e9-ea3afb79d934",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1QwcjDBuN1A03jNT",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": [
+          "IMPORTANT"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        832,
+        -176
+      ],
+      "id": "96d5fbf9-2a3a-483d-a249-497bd8b2771e",
+      "name": "Add label to message",
+      "webhookId": "b22f2275-d66c-4dcc-aa8a-d0432e2ee486",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UbWO1LFfZ6s8MzMA",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Add label to message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add label to message": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "f09fc7f8-96e6-4357-8a68-9fe99bfb5567",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-09T15:41:25.484Z",
+      "createdAt": "2025-10-09T15:41:25.484Z",
+      "role": "workflow:owner",
+      "workflowId": "SQ7UrmkehpNGz4hE",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
