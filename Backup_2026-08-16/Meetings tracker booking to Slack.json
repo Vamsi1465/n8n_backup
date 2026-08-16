@@ -1,0 +1,1793 @@
+{
+  "updatedAt": "2026-06-02T08:05:34.000Z",
+  "createdAt": "2025-10-26T16:42:01.702Z",
+  "id": "TbSZSUI9mq7bXTOL",
+  "name": "Meetings tracker booking to Slack",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "events": [
+          "BOOKING_CREATED",
+          "BOOKING_CANCELLED",
+          "BOOKING_RESCHEDULED",
+          "MEETING_ENDED"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.calTrigger",
+      "typeVersion": 2,
+      "position": [
+        -896,
+        -256
+      ],
+      "id": "b9e997c0-eb52-47be-99a3-beb55f4e4cfb",
+      "name": "Cal.com Trigger",
+      "webhookId": "fc67fb11-f949-40ff-98d7-40930815bf99",
+      "credentials": {
+        "calApi": {
+          "id": "zFkcqYJ0VHewc1Xm",
+          "name": "Lumoscale"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "79f66929-3483-41f2-accf-f14f991d5807",
+              "name": "Client Name",
+              "value": "={{ $json.attendees[0].name }}",
+              "type": "string"
+            },
+            {
+              "id": "319f561a-db86-4d4d-aed3-ee06eca6bfde",
+              "name": "Client Email",
+              "value": "={{ $json.attendees[0].email }}",
+              "type": "string"
+            },
+            {
+              "id": "353926b3-9490-43b1-b63d-6197d32db4cf",
+              "name": "Website",
+              "value": "={{ $json.responses.Website_name.value }}",
+              "type": "string"
+            },
+            {
+              "id": "d862683c-be74-4c7c-9790-5cdb58ba6220",
+              "name": "Url",
+              "value": "={{ $json.responses.URL.value }}",
+              "type": "string"
+            },
+            {
+              "id": "df7749a7-d034-4813-b44a-18b06d749935",
+              "name": "Notes",
+              "value": "={{ $json.responses.notes.value }}",
+              "type": "string"
+            },
+            {
+              "id": "24e1393c-aa1b-4ed4-9d80-0b6c324e074d",
+              "name": "startTime",
+              "value": "={{ new Date($json.startTime).toLocaleString(\"en-IN\", { timeZone: \"Asia/Kolkata\" }) }}",
+              "type": "string"
+            },
+            {
+              "id": "b3c3df5d-8bc8-4c6b-92eb-0bee8a5ecc0d",
+              "name": "metadata.videoCallUrl",
+              "value": "={{ $json.metadata.videoCallUrl }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -688,
+        -256
+      ],
+      "id": "4ad3b0e8-6f42-4a7e-89a9-80da0620657b",
+      "name": "Required Fields"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Cal.com Trigger').item.json.triggerEvent }}",
+                    "rightValue": "BOOKING_CREATED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "8d9c1f1c-fef0-4a3a-b031-be8319db02ef"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "BOOKING_CREATED"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b8d8ebde-6da3-49e8-b746-130f7fd4c0f2",
+                    "leftValue": "={{ $('Cal.com Trigger').item.json.triggerEvent }}",
+                    "rightValue": "BOOKING_CANCELLED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "BOOKING_CANCELLED"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "7a853818-326a-477e-87bd-7f5e8c928b4f",
+                    "leftValue": "={{ $('Cal.com Trigger').item.json.triggerEvent }}",
+                    "rightValue": "BOOKING_RESCHEDULED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "BOOKING_RESCHEDULED"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "659d16b3-0dd3-41f8-8948-ab8329261b4b",
+                    "leftValue": "={{ $('Cal.com Trigger').item.json.triggerEvent }}",
+                    "rightValue": "MEETING_ENDED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "MEETING_ENDED"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -480,
+        -288
+      ],
+      "id": "3ddd3487-11d1-413a-b3b3-a364fb6e4a90",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1atIlmeZnPiLt72y7AXn4RrAaWNiR8TBO87dwM5akYiA",
+          "mode": "list",
+          "cachedResultName": "Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1atIlmeZnPiLt72y7AXn4RrAaWNiR8TBO87dwM5akYiA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1250721158,
+          "mode": "list",
+          "cachedResultName": "Meetings Calender",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1atIlmeZnPiLt72y7AXn4RrAaWNiR8TBO87dwM5akYiA/edit#gid=1250721158"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client Name": "={{ $json['Client Name'] }}",
+            "Client Email": "={{ $json['Client Email'] }}",
+            "Website": "={{ $json.Website }}",
+            "Date": "={{ new Date($now).toLocaleString(\"en-IN\", { timeZone: \"Asia/Kolkata\" }) }}",
+            "LI/IG/FB": "={{ $json.Url }}",
+            "Time": "={{ $json.startTime }}",
+            "Notes": "={{ $json.Notes }}",
+            "Meeting URL": "={{ $json.metadata.videoCallUrl }}"
+          },
+          "matchingColumns": [
+            "Client Email"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Client Email",
+              "displayName": "Client Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Website",
+              "displayName": "Website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LI/IG/FB",
+              "displayName": "LI/IG/FB",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Time",
+              "displayName": "Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Meeting URL",
+              "displayName": "Meeting URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Meeting Update",
+              "displayName": "Meeting Update",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        32,
+        -480
+      ],
+      "id": "e7facd62-beb4-4f4f-980e-1f4792892d04",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1atIlmeZnPiLt72y7AXn4RrAaWNiR8TBO87dwM5akYiA",
+          "mode": "list",
+          "cachedResultName": "Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1atIlmeZnPiLt72y7AXn4RrAaWNiR8TBO87dwM5akYiA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1250721158,
+          "mode": "list",
+          "cachedResultName": "Meetings Calender",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1atIlmeZnPiLt72y7AXn4RrAaWNiR8TBO87dwM5akYiA/edit#gid=1250721158"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client Email": "={{ $json['Client Email'] }}",
+            "Notes": "Meeting Cancelled"
+          },
+          "matchingColumns": [
+            "Client Email"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Client Email",
+              "displayName": "Client Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Website",
+              "displayName": "Website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "LI/IG/FB",
+              "displayName": "LI/IG/FB",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Time",
+              "displayName": "Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Meeting URL",
+              "displayName": "Meeting URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Meeting Update",
+              "displayName": "Meeting Update",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        16,
+        -272
+      ],
+      "id": "b9662562-8fd3-4100-983f-b360765a1adf",
+      "name": "Append or update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1atIlmeZnPiLt72y7AXn4RrAaWNiR8TBO87dwM5akYiA",
+          "mode": "list",
+          "cachedResultName": "Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1atIlmeZnPiLt72y7AXn4RrAaWNiR8TBO87dwM5akYiA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1250721158,
+          "mode": "list",
+          "cachedResultName": "Meetings Calender",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1atIlmeZnPiLt72y7AXn4RrAaWNiR8TBO87dwM5akYiA/edit#gid=1250721158"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client Name": "={{ $json['Client Name'] }}",
+            "Client Email": "={{ $json['Client Email'] }}",
+            "Website": "={{ $json.Website }}",
+            "Date": "={{ new Date($now).toLocaleString(\"en-IN\", { timeZone: \"Asia/Kolkata\" }) }}",
+            "LI/IG/FB": "={{ $json.Url }}",
+            "Time": "={{ $json.startTime }}",
+            "Notes": "={{ $json.Notes }}",
+            "Meeting URL": "={{ $json.metadata.videoCallUrl }}"
+          },
+          "matchingColumns": [
+            "Client Email"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Client Email",
+              "displayName": "Client Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Website",
+              "displayName": "Website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LI/IG/FB",
+              "displayName": "LI/IG/FB",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Time",
+              "displayName": "Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Meeting URL",
+              "displayName": "Meeting URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Meeting Update",
+              "displayName": "Meeting Update",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        48,
+        -48
+      ],
+      "id": "5c965859-6657-4184-9e27-e5cbc30f5f3f",
+      "name": "Append or update row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "8417171830",
+        "text": "Meeting is done ",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        48,
+        144
+      ],
+      "id": "810af411-f815-40e9-bf39-b8f1f08aabcf",
+      "name": "Send a text message",
+      "webhookId": "d0637979-9e49-4435-8507-5df5853aa22e",
+      "credentials": {
+        "telegramApi": {
+          "id": "Eb5m8Ou5otuazRt3",
+          "name": "Summary"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "events": [
+          "BOOKING_CREATED",
+          "BOOKING_CANCELLED",
+          "BOOKING_RESCHEDULED",
+          "MEETING_ENDED"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.calTrigger",
+      "typeVersion": 2,
+      "position": [
+        -848,
+        672
+      ],
+      "id": "42247cbd-b1b8-47b9-a496-8c5d8b879f4c",
+      "name": "Cal.com Trigger1",
+      "webhookId": "fc67fb11-f949-40ff-98d7-40930815bf99",
+      "credentials": {
+        "calApi": {
+          "id": "EUv3ewUXAb0GzLlV",
+          "name": "Vamsi Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "79f66929-3483-41f2-accf-f14f991d5807",
+              "name": "Client Name",
+              "value": "={{ $json.attendees[0].name }}",
+              "type": "string"
+            },
+            {
+              "id": "319f561a-db86-4d4d-aed3-ee06eca6bfde",
+              "name": "Client Email",
+              "value": "={{ $json.attendees[0].email }}",
+              "type": "string"
+            },
+            {
+              "id": "353926b3-9490-43b1-b63d-6197d32db4cf",
+              "name": "Website",
+              "value": "={{ $json.responses.Website_name.value }}",
+              "type": "string"
+            },
+            {
+              "id": "d862683c-be74-4c7c-9790-5cdb58ba6220",
+              "name": "Url",
+              "value": "={{ $json.responses.URL.value }}",
+              "type": "string"
+            },
+            {
+              "id": "df7749a7-d034-4813-b44a-18b06d749935",
+              "name": "Notes",
+              "value": "={{ $json.responses.notes.value }}",
+              "type": "string"
+            },
+            {
+              "id": "24e1393c-aa1b-4ed4-9d80-0b6c324e074d",
+              "name": "startTime",
+              "value": "={{ new Date($json.startTime).toLocaleString(\"en-IN\", { timeZone: \"Asia/Kolkata\" }) }}",
+              "type": "string"
+            },
+            {
+              "id": "b3c3df5d-8bc8-4c6b-92eb-0bee8a5ecc0d",
+              "name": "metadata.videoCallUrl",
+              "value": "={{ $json.metadata.videoCallUrl }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -640,
+        672
+      ],
+      "id": "894c1163-5460-4a82-9767-f1e669eca45d",
+      "name": "Required Fields1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Cal.com Trigger1').item.json.triggerEvent }}",
+                    "rightValue": "BOOKING_CREATED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "8d9c1f1c-fef0-4a3a-b031-be8319db02ef"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "BOOKING_CREATED"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b8d8ebde-6da3-49e8-b746-130f7fd4c0f2",
+                    "leftValue": "={{ $('Cal.com Trigger1').item.json.triggerEvent }}",
+                    "rightValue": "BOOKING_CANCELLED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "BOOKING_CANCELLED"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "7a853818-326a-477e-87bd-7f5e8c928b4f",
+                    "leftValue": "={{ $('Cal.com Trigger1').item.json.triggerEvent }}",
+                    "rightValue": "BOOKING_RESCHEDULED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "BOOKING_RESCHEDULED"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "659d16b3-0dd3-41f8-8948-ab8329261b4b",
+                    "leftValue": "={{ $('Cal.com Trigger1').item.json.triggerEvent }}",
+                    "rightValue": "MEETING_ENDED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "MEETING_ENDED"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -432,
+        640
+      ],
+      "id": "62c1b705-e82c-4483-9825-c1bbd08e163f",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1atIlmeZnPiLt72y7AXn4RrAaWNiR8TBO87dwM5akYiA",
+          "mode": "list",
+          "cachedResultName": "Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1atIlmeZnPiLt72y7AXn4RrAaWNiR8TBO87dwM5akYiA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1250721158,
+          "mode": "list",
+          "cachedResultName": "Meetings Calender",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1atIlmeZnPiLt72y7AXn4RrAaWNiR8TBO87dwM5akYiA/edit#gid=1250721158"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client Name": "={{ $json['Client Name'] }}",
+            "Client Email": "={{ $json['Client Email'] }}",
+            "Website": "={{ $json.Website }}",
+            "Date": "={{ new Date($now).toLocaleString(\"en-IN\", { timeZone: \"Asia/Kolkata\" }) }}",
+            "LI/IG/FB": "={{ $json.Url }}",
+            "Time": "={{ $json.startTime }}",
+            "Notes": "={{ $('Cal.com Trigger1').item.json.responses.title.value }}",
+            "Meeting URL": "={{ $json.metadata.videoCallUrl }}"
+          },
+          "matchingColumns": [
+            "Client Email"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Client Email",
+              "displayName": "Client Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Website",
+              "displayName": "Website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LI/IG/FB",
+              "displayName": "LI/IG/FB",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Time",
+              "displayName": "Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Meeting URL",
+              "displayName": "Meeting URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Meeting Update",
+              "displayName": "Meeting Update",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        128,
+        448
+      ],
+      "id": "5fbc7549-e753-43cb-b730-b377dcfcd45c",
+      "name": "Append or update row in sheet3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1atIlmeZnPiLt72y7AXn4RrAaWNiR8TBO87dwM5akYiA",
+          "mode": "list",
+          "cachedResultName": "Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1atIlmeZnPiLt72y7AXn4RrAaWNiR8TBO87dwM5akYiA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1250721158,
+          "mode": "list",
+          "cachedResultName": "Meetings Calender",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1atIlmeZnPiLt72y7AXn4RrAaWNiR8TBO87dwM5akYiA/edit#gid=1250721158"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client Email": "={{ $json['Client Email'] }}",
+            "Notes": "Meeting Cancelled"
+          },
+          "matchingColumns": [
+            "Client Email"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Client Email",
+              "displayName": "Client Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Website",
+              "displayName": "Website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "LI/IG/FB",
+              "displayName": "LI/IG/FB",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Time",
+              "displayName": "Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Meeting URL",
+              "displayName": "Meeting URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Meeting Update",
+              "displayName": "Meeting Update",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        160,
+        656
+      ],
+      "id": "4c29e6c9-3e01-41bf-89fc-684e630a70a2",
+      "name": "Append or update row in sheet4",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1atIlmeZnPiLt72y7AXn4RrAaWNiR8TBO87dwM5akYiA",
+          "mode": "list",
+          "cachedResultName": "Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1atIlmeZnPiLt72y7AXn4RrAaWNiR8TBO87dwM5akYiA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1250721158,
+          "mode": "list",
+          "cachedResultName": "Meetings Calender",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1atIlmeZnPiLt72y7AXn4RrAaWNiR8TBO87dwM5akYiA/edit#gid=1250721158"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client Name": "={{ $json['Client Name'] }}",
+            "Client Email": "={{ $json['Client Email'] }}",
+            "Website": "={{ $json.Website }}",
+            "Date": "={{ new Date($now).toLocaleString(\"en-IN\", { timeZone: \"Asia/Kolkata\" }) }}",
+            "LI/IG/FB": "={{ $json.Url }}",
+            "Time": "={{ $json.startTime }}",
+            "Notes": "={{ $('Cal.com Trigger1').item.json.responses.title.value }}",
+            "Meeting URL": "={{ $json.metadata.videoCallUrl }}"
+          },
+          "matchingColumns": [
+            "Client Email"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Client Email",
+              "displayName": "Client Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Website",
+              "displayName": "Website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LI/IG/FB",
+              "displayName": "LI/IG/FB",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Time",
+              "displayName": "Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Meeting URL",
+              "displayName": "Meeting URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Meeting Update",
+              "displayName": "Meeting Update",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        144,
+        880
+      ],
+      "id": "ec00eae9-59b0-4fcc-9dc1-42eea7864a2f",
+      "name": "Append or update row in sheet5",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "8417171830",
+        "text": "Meeting is done ",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        1184
+      ],
+      "id": "236dafc3-a9eb-47a7-a4d1-d70ced38f17a",
+      "name": "Send a text message1",
+      "webhookId": "d0637979-9e49-4435-8507-5df5853aa22e",
+      "credentials": {
+        "telegramApi": {
+          "id": "Eb5m8Ou5otuazRt3",
+          "name": "Summary"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Lumoscale Meetings Tracker\n",
+        "height": 448,
+        "width": 576
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1136,
+        -432
+      ],
+      "typeVersion": 1,
+      "id": "3d8adb20-7d8a-45b3-9f0e-3029b9958244",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# Vamsi Meetings Tracker\n",
+        "height": 448,
+        "width": 576
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1184,
+        416
+      ],
+      "typeVersion": 1,
+      "id": "69cd199e-bc29-4194-b248-ae3626047ab0",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09NN1U4YSE",
+          "mode": "list",
+          "cachedResultName": "meeting-alerts"
+        },
+        "text": "=*📅 New Meeting Alert Buddy*\n\n*👤 Name:* {{ $('Cal.com Trigger1').item.json.attendees[0].name }}\n*📧 Email:* {{ $('Cal.com Trigger1').item.json.attendees[0].email }}\n*Time:* {{ $json.Time }}\n*📝 Notes:* {{ $('Required Fields1').item.json.Notes }}\n*🔗 Meeting Link:* {{ $('Cal.com Trigger1').item.json.metadata.videoCallUrl }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false,
+          "unfurl_links": false,
+          "unfurl_media": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        336,
+        448
+      ],
+      "id": "f7d8021b-a99a-4e5d-9399-42a9bfb4ed7d",
+      "name": "Send a message1",
+      "webhookId": "a2282cd9-6c75-4095-9dd2-d9f56f92d1dc",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "Rb7HyhAgq0iIU3TT",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09NN1U4YSE",
+          "mode": "list",
+          "cachedResultName": "meeting-alerts"
+        },
+        "text": "=*📅 New Meeting Alert Buddy*\n\n*👤 Name:* {{ $('Cal.com Trigger1').item.json.attendees[0].name }}\n*📧 Email:* {{ $('Cal.com Trigger1').item.json.attendees[0].email }}\n*📝 Notes:* {{ $('Required Fields1').item.json.Notes }}\n*🔗 Meeting Link:* {{ $('Cal.com Trigger1').item.json.metadata.videoCallUrl }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false,
+          "unfurl_links": false,
+          "unfurl_media": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        240,
+        -480
+      ],
+      "id": "c5572860-19f6-4135-9edc-9149c3c77086",
+      "name": "Send a message",
+      "webhookId": "a2282cd9-6c75-4095-9dd2-d9f56f92d1dc",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "Rb7HyhAgq0iIU3TT",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://mail.zoho.in/api/accounts/7932394000000002002/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"fromAddress\": \"contact@lumoscale.com\",\n  \"toAddress\": \"vamsivk555@gmail.com\",\n  \"subject\": \"✨ Ready to Automate Your Business?\",\n  \"content\": \"<html><body style='font-family:Arial,sans-serif;background-color:#f9fafb;padding:30px;color:#333;'><table style='max-width:600px;margin:auto;background:#ffffff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.1);padding:30px;'><tr><td><h2 style='color:#2b2d42;'>✨ Ready to Automate Your Business?</h2><p style='font-size:16px;line-height:1.6;'>Hey Muskaan,<br><br>I’d love to show you how we can streamline your client onboarding, follow-ups, and payment tracking — all using smart automations built for your business.</p><div style='margin:30px 0;text-align:center;'><a href='https://cal.com/lumoscale' style='background-color:#0078D4;color:#ffffff;padding:14px 24px;text-decoration:none;border-radius:8px;font-size:16px;display:inline-block;'>📅 Book a Free Strategy Call</a></div><p style='font-size:14px;color:#555;'>Let’s walk through your workflow and explore what can be automated this week. <br><br>Best,<br><strong>Vamsi</strong><br>Founder, Lumoscale</p></td></tr></table></body></html>\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        560,
+        448
+      ],
+      "id": "386cf9cb-1c7e-45d2-8a0d-4ed1a537c9eb",
+      "name": "HTTP Request",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "2G2wV9IgLA2994n8",
+          "name": "Zoho-Lumoscale"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://mail.zoho.in/api/accounts/7932394000000002002/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"fromAddress\": \"contact@lumoscale.com\",\n  \"toAddress\": \"vamsivk1465@gmail.com\",\n  \"subject\": \"✨ Ready to Automate Your Business?\",\n  \"content\": \"<html><body style='font-family:Arial,sans-serif;background-color:#f9fafb;padding:30px;color:#333;'><table style='max-width:600px;margin:auto;background:#ffffff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.1);padding:30px;'><tr><td><h2 style='color:#2b2d42;'>✨ Ready to Automate Your Business?</h2><p style='font-size:16px;line-height:1.6;'>Hey Muskaan,<br><br>I’d love to show you how we can streamline your client onboarding, follow-ups, and payment tracking — all using smart automations built for your business.</p><div style='margin:30px 0;text-align:center;'><a href='https://cal.com/lumoscale' style='background-color:#0078D4;color:#ffffff;padding:14px 24px;text-decoration:none;border-radius:8px;font-size:16px;display:inline-block;'>📅 Book a Free Strategy Call</a></div><p style='font-size:14px;color:#555;'>Let’s walk through your workflow and explore what can be automated this week. <br><br>Best,<br><strong>Vamsi</strong><br>Founder, Lumoscale</p></td></tr></table></body></html>\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        448,
+        -480
+      ],
+      "id": "2b9045e5-fb21-49bc-b741-b5912d59d035",
+      "name": "HTTP Request2",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "2G2wV9IgLA2994n8",
+          "name": "Zoho-Lumoscale"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cal.com Trigger": {
+      "main": [
+        [
+          {
+            "node": "Required Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Required Fields": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append or update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append or update row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cal.com Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Required Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Required Fields1": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append or update row in sheet4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append or update row in sheet5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet3": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        []
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Cal.com Trigger": {
+      "webhookId": "12a649a1-42b0-4187-8707-c11acf646991"
+    },
+    "node:Cal.com Trigger1": {
+      "webhookId": "169e6a6c-72f3-4959-80aa-db0548d36dfc"
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Cal.com Trigger1": [
+      {
+        "json": {
+          "triggerEvent": "BOOKING_CREATED",
+          "createdAt": "2026-02-28T15:54:49.810Z",
+          "bookerUrl": "https://cal.com",
+          "title": "30 Min Meeting between Lumoscale and Atama Eromosele",
+          "startTime": "2026-03-03T11:00:00Z",
+          "endTime": "2026-03-03T11:30:00Z",
+          "additionalNotes": "",
+          "type": "30min",
+          "description": "let’s chat and explore ideas",
+          "eventTypeId": 3086845,
+          "hideCalendarNotes": false,
+          "hideCalendarEventDetails": false,
+          "hideOrganizerEmail": false,
+          "schedulingType": null,
+          "seatsPerTimeSlot": null,
+          "seatsShowAttendees": true,
+          "seatsShowAvailabilityCount": true,
+          "customReplyToEmail": null,
+          "disableRescheduling": false,
+          "disableCancelling": false,
+          "organizer": {
+            "id": 1696057,
+            "name": "Lumoscale",
+            "email": "vamsivk1465@gmail.com",
+            "username": "vamsivk",
+            "timeZone": "Asia/Calcutta",
+            "language": {
+              "locale": "en"
+            },
+            "timeFormat": "HH:mm",
+            "utcOffset": 330
+          },
+          "attendees": [
+            {
+              "email": "atamaeromosele@gmail.com",
+              "name": "Atama Eromosele",
+              "firstName": "",
+              "lastName": "",
+              "timeZone": "Africa/Lagos",
+              "language": {
+                "locale": "en"
+              },
+              "utcOffset": 60
+            }
+          ],
+          "customInputs": {},
+          "responses": {
+            "name": {
+              "label": "your_name",
+              "value": "Atama Eromosele",
+              "isHidden": false
+            },
+            "email": {
+              "label": "email_address",
+              "value": "atamaeromosele@gmail.com",
+              "isHidden": false
+            },
+            "attendeePhoneNumber": {
+              "label": "phone_number",
+              "isHidden": true
+            },
+            "location": {
+              "label": "location",
+              "value": {
+                "value": "integrations:google:meet",
+                "optionValue": ""
+              },
+              "isHidden": false
+            },
+            "Company-name": {
+              "label": "Company name",
+              "isHidden": false
+            },
+            "Linkedin-website-instagram": {
+              "label": "Linkedin or website or Instagram",
+              "isHidden": false
+            },
+            "title": {
+              "label": "what_is_this_meeting_about",
+              "value": "Collaboration ",
+              "isHidden": false
+            },
+            "notes": {
+              "label": "additional_notes",
+              "isHidden": true
+            },
+            "guests": {
+              "label": "additional_guests",
+              "value": [],
+              "isHidden": false
+            },
+            "rescheduleReason": {
+              "label": "reason_for_reschedule",
+              "isHidden": false
+            }
+          },
+          "userFieldsResponses": {
+            "Company-name": {
+              "label": "Company name",
+              "isHidden": false
+            },
+            "Linkedin-website-instagram": {
+              "label": "Linkedin or website or Instagram",
+              "isHidden": false
+            }
+          },
+          "location": "https://meet.google.com/oej-idng-pvc",
+          "destinationCalendar": [
+            {
+              "id": 759961,
+              "integration": "google_calendar",
+              "externalId": "vamsivk1465@gmail.com",
+              "primaryEmail": "vamsivk1465@gmail.com",
+              "userId": 1696057,
+              "eventTypeId": null,
+              "credentialId": 1245761,
+              "createdAt": "2025-08-17T16:26:13.617Z",
+              "updatedAt": "2026-01-20T20:02:20.631Z",
+              "delegationCredentialId": null,
+              "domainWideDelegationCredentialId": null,
+              "customCalendarReminder": null
+            }
+          ],
+          "iCalUID": "7yqcXvG9mPDbDZ4TCEpCn6@Cal.com",
+          "iCalSequence": 0,
+          "requiresConfirmation": false,
+          "oneTimePassword": null,
+          "hashedLink": null,
+          "hideBranding": false,
+          "uid": "7yqcXvG9mPDbDZ4TCEpCn6",
+          "conferenceData": {
+            "createRequest": {
+              "requestId": "8a0ce172-f69a-51b5-8481-93feb73d58e2"
+            }
+          },
+          "appsStatus": [
+            {
+              "appName": "Google Calendar",
+              "type": "google_calendar",
+              "success": 1,
+              "failures": 0,
+              "errors": [],
+              "warnings": []
+            },
+            {
+              "appName": "Google Meet",
+              "type": "conferencing",
+              "success": 1,
+              "failures": 0,
+              "errors": []
+            }
+          ],
+          "eventTitle": "30 Min Meeting",
+          "eventDescription": "let’s chat and explore ideas",
+          "price": 0,
+          "currency": "usd",
+          "length": 30,
+          "bookingId": 16478705,
+          "metadata": {
+            "videoCallUrl": "https://meet.google.com/oej-idng-pvc"
+          },
+          "status": "ACCEPTED"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "31126d0f-1537-4604-afc4-70e34e8c6de9",
+  "activeVersionId": null,
+  "triggerCount": 2,
+  "shared": [
+    {
+      "updatedAt": "2025-10-26T16:42:01.708Z",
+      "createdAt": "2025-10-26T16:42:01.708Z",
+      "role": "workflow:owner",
+      "workflowId": "TbSZSUI9mq7bXTOL",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
