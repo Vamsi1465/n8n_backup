@@ -1,0 +1,123 @@
+{
+  "updatedAt": "2025-11-02T11:19:29.000Z",
+  "createdAt": "2025-10-29T20:39:35.504Z",
+  "id": "1Q4Uf5ONosEK0xnB",
+  "name": "Fb leads",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "metaleads",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -384,
+        -112
+      ],
+      "id": "299535dd-3433-4e02-8c2a-876e0901ae7d",
+      "name": "Webhook",
+      "webhookId": "853a238d-7839-443d-a706-0de9b6ce72a8"
+    },
+    {
+      "parameters": {
+        "jsCode": "const entries = $json.entry || [];\nconst leadgenId = entries[0]?.changes?.[0]?.value?.leadgen_id;\nreturn [{ json: { leadgen_id: leadgenId } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -176,
+        -112
+      ],
+      "id": "f79ab50b-7cea-45ae-970f-c0c2dabfb33b",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v20.0/{{$json.leadgen_id}}?access_token=YOUR_LONG_LIVED_ACCESS_TOKEN",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        32,
+        -112
+      ],
+      "id": "208e4be5-e664-46fe-b29f-d302f674dca0",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = {};\nconst fields = $json.field_data || [];\nfor (const f of fields) {\n  data[f.name] = f.values[0];\n}\nreturn [{ json: data }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        -112
+      ],
+      "id": "bc9b29cd-8628-487a-9f5b-3b907f36495b",
+      "name": "Code in JavaScript1"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "2dea2690-c3e2-4d0e-9f65-596dc37aee02",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-29T20:39:35.509Z",
+      "createdAt": "2025-10-29T20:39:35.509Z",
+      "role": "workflow:owner",
+      "workflowId": "1Q4Uf5ONosEK0xnB",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
