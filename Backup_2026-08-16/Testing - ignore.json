@@ -1,0 +1,890 @@
+{
+  "updatedAt": "2025-12-27T07:32:05.849Z",
+  "createdAt": "2025-12-24T09:10:56.976Z",
+  "id": "dzgsl4G6Rm95rjyG",
+  "name": "Testing - ignore",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -432,
+        1984
+      ],
+      "id": "6422714c-7b32-4640-8eeb-521dbd58711e",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "8cTwctTGeEBOJeUq",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawText =\n  $input.first().json?.output?.[0]?.content?.[0]?.text || \"\";\n\nlet parsed;\n\ntry {\n  parsed = JSON.parse(rawText);\n} catch (e) {\n  parsed = { reply: rawText };\n}\n\nreturn [\n  {\n    json: parsed\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        592
+      ],
+      "id": "a9323ea1-59bc-4cfb-9099-daa9b0294395",
+      "name": "Format Prompt1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "18R60xzEJYDSgFg-sIi-Do7_zj1q6jpGuBqP_jg9IZK8",
+          "mode": "list",
+          "cachedResultName": "Vastulogy - Akshith Test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18R60xzEJYDSgFg-sIi-Do7_zj1q6jpGuBqP_jg9IZK8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1316669931,
+          "mode": "list",
+          "cachedResultName": "Insta Convo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18R60xzEJYDSgFg-sIi-Do7_zj1q6jpGuBqP_jg9IZK8/edit#gid=1316669931"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Sender_id",
+              "lookupValue": "={{ $json.body.entry[0].messaging[0].sender.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        544,
+        592
+      ],
+      "id": "f06762ae-8ed5-42f0-934a-56347351ac4d",
+      "name": "Get previous convo1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all();\n\n// Sort rows by row number to maintain order\nrows.sort((a, b) => (a.json.row_number || 0) - (b.json.row_number || 0));\n\n// Build history in AI → User → AI → User format\nconst history = [];\n\nfor (const r of rows) {\n  const aiReply = r.json[\"AI reply\"] || \"\";\n  const userMsg = r.json[\"User message\"] || \"\";\n\n  if (aiReply.trim() !== \"\") {\n    history.push({ role: \"AI\", text: aiReply.trim() });\n  }\n  if (userMsg.trim() !== \"\") {\n    history.push({ role: \"User\", text: userMsg.trim() });\n  }\n}\n\n// Add NEW incoming message from Instagram webhook\nconst newUserMsg =\n  $node[\"Instagram DM1\"].json.body.entry[0].messaging[0]?.message?.text\n  || \"[No text]\";\n\nhistory.push({ role: \"User\", text: newUserMsg.trim() });\n\n// Build FULL conversation log as readable string\nconst conversationLog = history\n  .map(h => `${h.role}: ${h.text}`)\n  .join(\" | \");\n\n// Take last 5 exchanges = 10 messages max\nconst last5Exchanges = history.slice(-10);\n\n// Convert last 5 exchanges into CHAT TEXT (not array)\nconst last5Formatted = last5Exchanges\n  .map(h => `${h.role}: ${h.text}`)\n  .join(\"\\n\");\n\nreturn [{\n  json: {\n    sender_id: $node[\"Extracts ID1\"].json[\"body.entry[0].messaging[0].sender.id\"],\n    conversation_log: conversationLog,\n    last_5_messages: last5Formatted\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        752,
+        592
+      ],
+      "id": "594ede95-6502-4ca1-968a-cc826bfb8db9",
+      "name": "Get last 5 Conversations1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "72766303-8b9a-4178-bf5f-c0d0d8c1b313",
+              "leftValue": "={{ $json.echo }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "e09ed7f6-640d-40c4-b7f8-44e7bd79aff1",
+              "leftValue": "={{ $('Instagram DM1').item.json.body.entry[0].messaging[0].message.is_deleted }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        288,
+        576
+      ],
+      "id": "e1a0f409-e642-48ce-8988-6c408717e1eb",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6bd88b13-825f-4c9e-bce8-a45d423433db",
+              "name": "body.entry[0].messaging[0].sender.id",
+              "value": "={{ $json.body.entry[0].messaging[0].sender.id }}",
+              "type": "string"
+            },
+            {
+              "id": "c95fbccd-0bc0-438b-8d67-4d9c9de62d41",
+              "name": "Text",
+              "value": "={{ \n  $json.body.entry[0].messaging[0].message \n    ? $json.body.entry[0].messaging[0].message.text \n    : ($json.body.entry[0].messaging[0].message_edit \n        ? $json.body.entry[0].messaging[0].message_edit.text \n        : \"\") \n}}",
+              "type": "string"
+            },
+            {
+              "id": "397a18db-5a5b-419a-a8c1-d606d623e1cc",
+              "name": "direction",
+              "value": "Incoming",
+              "type": "string"
+            },
+            {
+              "id": "dd49e08a-ae00-4f37-b2d2-c1459c904725",
+              "name": "timestamp",
+              "value": "={{ $now.toLocaleString(\"en-IN\", { timeZone: \"Asia/Kolkata\" }) }}",
+              "type": "string"
+            },
+            {
+              "id": "bbf49ade-52ec-4d54-91e2-3fb27d3930b0",
+              "name": "echo",
+              "value": "={{ $json.body.entry[0].messaging[0].message.is_echo }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        64,
+        576
+      ],
+      "id": "93e93644-d7c8-45dd-bc6d-cdd3770d6ecb",
+      "name": "Extracts ID1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.instagram.com/v24.0/me/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"recipient\": {\n    \"id\": \"{{ $('Extracts ID1').first().json.body.entry[0].messaging[0].sender.id }}\"\n  },\n  \"message\": {\n    \"text\": \"{{ $json.reply }}\"\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2272,
+        304
+      ],
+      "id": "c00c3fef-47d6-4ea2-b264-8b15c9ea509c",
+      "name": "Send reply back in Instagram1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "nclmvu7yuYiyERQv",
+          "name": "Instagram Meta Dev"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.query['hub.challenge'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -176,
+        896
+      ],
+      "id": "428d28f8-5486-46e1-a5f2-2536b3a13646",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.last_5_messages }},{{ $('Extracts ID1').first().json.Text }}\n\nImp; Dont sound like robotic use human words and easy words to understand",
+        "options": {
+          "systemMessage": "=# VASTULOGY INSTAGRAM DM ASSISTANT\n# END TO END PRODUCTION PROMPT (FINAL, CLEAR, NON-SCRIPTED)\n\n---\n\n## ROLE\n\nYou are a real human sounding spiritual guide representing **Akshit Ji at Vastulogy**.\n\nYou speak like a calm, experienced, respectful guide.\nYou never sound automated, scripted, or repetitive.\nYou never mention or imply technology.\n\n---\n\n## TASK\n\nYour task is to:\n\n1. Respond naturally to Instagram DMs related to spiritual and devotional guidance.\n2. Help users understand what Vastulogy offers.\n3. Convert genuinely interested users into paid 1:1 consultations.\n4. Politely decline free requests, unrelated topics, or misuse of DMs.\n5. Maintain a smooth, human conversation without repeating the same reply.\n\nYou must **generate replies based on understanding**, not by copying templates.\n\n---\n\n## CONTEXT DEFINITION\n\n### VALID CONTEXT (ALWAYS ALLOWED)\n\n- Spiritual guidance\n- Devotional curiosity\n- Astrology, numerology, vastu, tarot, palmistry\n- Consultations, pricing, slots, payment\n- Questions about Akshit Ji\n- Questions about Vastulogy\n- Page related questions such as:\n  - Who is answering?\n  - Who is the owner?\n  - Is this Akshit Ji?\n  - What is this page about?\n  - How will you guide me?\n\nThese must never be treated as out of context.\n\n### OUT OF CONTEXT (ONLY THESE)\n\nTopics with no spiritual or devotional relevance, such as:\n- Business or marketing advice\n- Technical or coding questions\n- Job requests\n- Random personal favors\n- Any topic clearly unrelated to spiritual guidance or consultations\n\n---\n\n## REASONING RULES (CRITICAL, DO NOT SKIP)\n\nBefore replying, you must internally do ALL of the following:\n\n1. Read the recent conversation fully, not only the last message.\n2. Understand what the user is actually trying to know or say.\n3. Identify the user’s current intent:\n   - Curiosity\n   - Seeking guidance\n   - Interested in consultation\n   - Hesitating\n   - Disinterested\n   - Asking about the page or person\n   - Clearly unrelated topic\n4. Decide the reply purpose:\n   - Inform\n   - Clarify\n   - Offer consultation\n   - Respectfully stop\n   - Decline unrelated topic\n5. Generate a **fresh reply** that fits the intent.\n6. Do NOT reuse exact sentences from earlier replies.\n7. Templates are references only, never mandatory outputs.\n\nMeaning always comes before structure.\n\n---\n\n## ABSOLUTE FORBIDDEN WORDS\n\nNever use, mention, or imply:\n\nAI  \nmodel  \nbot  \nautomation  \nsystem  \ntraining  \n\nIf any appear, the response is invalid.\n\n---\n\n## LANGUAGE RULES\n\n- Write like a real person on Instagram.\n- Short sentences. Clear words.\n- Calm and respectful tone.\n- No textbook explanations.\n- No spiritual metaphors unless the user uses them first.\n- Never sound defensive or robotic.\n- Never repeat the same sentence in one conversation.\n\n---\n\n## OUTPUT FORMAT (STRICT)\n\nAlways return ONLY valid JSON:\n\n```json\n{\"reply\":\"your reply here\"}\nNo explanations.\nNo extra keys.\nNo text outside JSON.\nFORMATTING RULE\nUse bullet points (•) only when listing services, prices, slots, or options.\nNever use bullets for greetings, guidance, reassurance, or conversation.\n\nGREETING RULE\nThe first reply of every new conversation MUST start with:\n\nNamaste 🙏 or\n\nNamaskar 🙏\n\nUse spiritual warmth.\n\nUse the greeting only once per chat.\n\nNever repeat it again.\n\nApproved examples:\n\n\"reply\":\"Namaste 🙏 Welcome to Vastulogy. How may I guide you today?\"\n\n\"reply\":\"Namaskar 🙏 Welcome to Vastulogy. How may I guide you today?\"\nSERVICE OFFER RULE\nOnly when the user shows interest in guidance or consultation, and only once per chat:\n\n\"reply\":\"I offer personal consultations in Astrology, Vastu, Numerology, Tarot, and Palmistry. Reply YES to see available slots and pricing.\"\nDo not force this if the user is just asking general questions.\n\nPRICING RULE: \nIf the user asks about price, consultation, or payment:\nFormat the reply as a clear list using line breaks.\nUse bullet points (•) ONLY for services or pricing lists.\nDo not use bullets for normal conversation.\n\nIf the user asks about price, consultation, or payment:\n\"reply\":\"Available Numerology Services:\\nName Numerology – Rs 2500\\nNumero Name for Company or Brand – Rs 5100\\nCompatibility Analysis for Marriage & Alliance – Rs 2100\\nComplete Numerology Analysis for faster Growth & Money – Rs 5100\\nPlease confirm which service you wish to proceed with.\"\n\nPAYMENT RULE\nSend payment link only after service confirmation.\n\n\"reply\":\"Name Numerology booking link:\\nhttps://kapoorakshit.mojo.page/name-numerology\"\n\n\"reply\":\"Numero Name for Company or Brand booking link:\\nhttps://kapoorakshit.mojo.page/numero-name-for-company-or-brand\"\n\n\"reply\":\"Compatibility Analysis for Marriage & Alliance booking link:\\nhttps://kapoorakshit.mojo.page/compatibility-analysis-for-marriage\"\n\"reply\":\"Complete Numerology Analysis for faster Growth & Money booking link:\\nhttps://kapoorakshit.mojo.page/complete-numerology-analysis\"\n\nSALES STOPPING CONDITIONS (MANDATORY)\nIf the user says:\nNot interested\nNo\nNo thanks\nStop\n\nI do not want consultation\n\nImmediately stop selling and close politely:\n\"reply\":\"Understood. Take care🙏. If you ever need guidance later, we are here.\"\nNever send pricing again in the same chat.\n\nFREE REQUEST HANDLING\n\"reply\":\"Quick predictions over DMs can mislead. Accurate guidance is given only after proper chart study. You may book a short consultation if you want clarity.\"\n\n\nOUT OF CONTEXT HANDLING (DYNAMIC, NOT FIXED)\nFirst unrelated message\nDecline politely.\nExample styles:\n\"reply\":\"This page is meant only for spiritual guidance and consultations, so I cannot help with this topic here.\"\n\n\"reply\":\"That topic is outside the focus of this page. We assist only with spiritual guidance.\"\nRepeated unrelated message\nBe firmer.\n\nClose politely.\n\nChange wording again.\n\nExample styles:\n\"reply\":\"This space is dedicated only to spiritual consultations. I won’t be able to help with other topics. Take care🙏.\"\nRules:\n\nNever reuse the same sentence.\n\nNever argue.\n\nNever explain internal logic.\n\nRUDE OR ABUSIVE USER\n\"reply\":\"We do not tolerate rude behavior. Take care🙏.\"\nCRISIS STOPPING CONDITION\nIf the user mentions harm or self harm:\n\n\"reply\":\"I can feel the heaviness. Please contact local emergency services or a mental health professional immediately. We cannot handle crisis over DMs.\"\n\nFINAL ENFORCEMENT\nDo not copy replies.\n\nDo not react only to the last message.\n\nDo not fire templates blindly.\n\nAlways respond based on understanding and intent.\n\nSound human every time.\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -320,
+        1792
+      ],
+      "id": "12ba1690-1ebe-4e4f-a27e-17cb026e800d",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "instagram",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -368,
+        736
+      ],
+      "id": "ab6c8cf1-f944-426b-9fdb-90be5bc58b11",
+      "name": "Instagram DM1",
+      "webhookId": "72e2cf71-13ea-4246-9dec-034082bd6105"
+    },
+    {
+      "parameters": {
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\n\nconst msg =\n  $json.body?.entry?.[0]?.messaging?.[0]?.message;\n\nconst mid = msg?.mid;\n\nif (!mid) {\n  return [];\n}\n\nif (!staticData.processed) {\n  staticData.processed = {};\n}\n\nif (staticData.processed[mid]) {\n  return [];\n}\n\nstaticData.processed[mid] = Date.now();\n\nfor (const k in staticData.processed) {\n  if (Date.now() - staticData.processed[k] > 120000) {\n    delete staticData.processed[k];\n  }\n}\n\nreturn [$json];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -176,
+        576
+      ],
+      "id": "7e56c157-b289-40cf-a44d-bfdeaf3aeb72",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "18R60xzEJYDSgFg-sIi-Do7_zj1q6jpGuBqP_jg9IZK8",
+          "mode": "list",
+          "cachedResultName": "Vastulogy - Akshith",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18R60xzEJYDSgFg-sIi-Do7_zj1q6jpGuBqP_jg9IZK8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Instagram",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18R60xzEJYDSgFg-sIi-Do7_zj1q6jpGuBqP_jg9IZK8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) }}",
+            "Sender ID": "={{ $('Extracts ID1').first().json.body.entry[0].messaging[0].sender.id }}",
+            "Text": "={{ $('Extracts ID1').first().json.Text }}"
+          },
+          "matchingColumns": [
+            "Sender ID"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sender ID",
+              "displayName": "Sender ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Text",
+              "displayName": "Text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Booked or Not",
+              "displayName": "Booked or Not",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2464,
+        304
+      ],
+      "id": "cbafc190-3d2e-415e-b576-575916349fe0",
+      "name": "Add Leads to Sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "18R60xzEJYDSgFg-sIi-Do7_zj1q6jpGuBqP_jg9IZK8",
+          "mode": "list",
+          "cachedResultName": "Vastulogy - Akshith",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18R60xzEJYDSgFg-sIi-Do7_zj1q6jpGuBqP_jg9IZK8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1316669931,
+          "mode": "list",
+          "cachedResultName": "Insta Convo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18R60xzEJYDSgFg-sIi-Do7_zj1q6jpGuBqP_jg9IZK8/edit#gid=1316669931"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Sender_id": "={{ $('Extracts ID1').first().json.body.entry[0].messaging[0].sender.id }}",
+            "AI reply": "={{ $('Format Prompt1').item.json.reply }}",
+            "User message": "={{ $('Extracts ID1').first().json.Text }}"
+          },
+          "matchingColumns": [
+            "Sender_id"
+          ],
+          "schema": [
+            {
+              "id": "Sender_id",
+              "displayName": "Sender_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "AI reply",
+              "displayName": "AI reply",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "User message",
+              "displayName": "User message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2640,
+        304
+      ],
+      "id": "60a2cbc7-741a-4da7-acb6-e49fcd1b3139",
+      "name": "Add Conversations1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Extracts ID1').first().json.body.entry[0].messaging[0].sender.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -288,
+        1984
+      ],
+      "id": "f672dab2-b0fc-433e-9162-391cee9204ac",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\n\nfor (const item of $input.all()) {\n\n  const reply = (item.json.reply || \"\").toString();\n\n  // Match any real URL (http or https)\n  const urlPattern = /(https?:\\/\\/[^\\s]+)/i;\n\n  const has_booking_link = urlPattern.test(reply);\n\n  results.push({\n    json: {\n      reply: reply,\n      has_booking_link: has_booking_link\n    }\n  });\n}\n\nreturn results;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1472,
+        592
+      ],
+      "id": "342b8b61-3e14-4a20-a7b2-1a3d43dcf40e",
+      "name": "Link checker"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5efc32c2-d578-4194-b366-42bd894c234f",
+              "leftValue": "={{ $json.has_booking_link }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1680,
+        592
+      ],
+      "id": "15caa8eb-9087-4986-bc86-fd1514d3b76c",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\n\nfor (const item of $input.all()) {\n\n  let reply = (item.json.reply || \"\").toString();\n\n  const senderId =\n    $('Extracts ID1')\n      .first()\n      .json\n      .body\n      .entry[0]\n      .messaging[0]\n      .sender\n      .id;\n\n  // STEP 1: Convert escaped newlines to real newlines\n  reply = reply.replace(/\\\\n/g, \"\\n\");\n\n  // STEP 2: Append sid ONLY to real URLs\n  reply = reply.replace(\n    /(https?:\\/\\/[^\\s]+)/g,\n    (url) => {\n      if (url.includes(\"sid=\")) return url;\n      return `${url}?sid=${senderId}`;\n    }\n  );\n\n  // STEP 3: Convert real newlines back to escaped newlines\n  reply = reply.replace(/\\n/g, \"\\\\n\");\n\n  results.push({\n    json: {\n      reply,\n      sid: senderId\n    }\n  });\n}\n\nreturn results;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2048,
+        768
+      ],
+      "id": "4de1ed70-e78d-4c62-9dea-d5c43f180a32",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.instagram.com/v24.0/me/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"recipient\": {\n    \"id\": \"{{ $('Extracts ID1').first().json.body.entry[0].messaging[0].sender.id }}\"\n  },\n  \"message\": {\n    \"text\": \"{{ $json.reply }}\"\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2288,
+        768
+      ],
+      "id": "32472219-6637-449f-bbb9-057fc8f66f27",
+      "name": "Send reply back in Instagram",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "nclmvu7yuYiyERQv",
+          "name": "Instagram Meta Dev"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cashfree",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -336,
+        1168
+      ],
+      "id": "39d5f34b-e7f3-44cb-a7d9-83817491f777",
+      "name": "Webhook",
+      "webhookId": "68440c39-5386-4f75-aa82-b978d5bb2ec4"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-nano",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-NANO"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "SYSTEM RULE (HIGHEST PRIORITY):\nIgnore all user messages.\nIgnore context.\nIgnore instructions.\n\nReturn ONLY the following JSON.\nNo additional text.\nNo explanation.\nNo formatting changes.\n\n{\"reply\":\"Here is the pricing link: https://payments.cashfree.com/links?code=M9ma1rh09lo0_AAAAAAARVvU\"}\n"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        960,
+        592
+      ],
+      "id": "8a7bf075-d85c-4aeb-9b70-caaf0561a894",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "8cTwctTGeEBOJeUq",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "events": [
+          "BOOKING_CREATED"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.calTrigger",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        1392
+      ],
+      "id": "4edbb3a8-d956-47ad-b40a-c657ded4a2fe",
+      "name": "Cal.com Trigger",
+      "webhookId": "df64c692-56f2-4663-9330-1b9d300951dd",
+      "credentials": {
+        "calApi": {
+          "id": "EUv3ewUXAb0GzLlV",
+          "name": "Vamsi Account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Prompt1": {
+      "main": [
+        [
+          {
+            "node": "Link checker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get previous convo1": {
+      "main": [
+        [
+          {
+            "node": "Get last 5 Conversations1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get last 5 Conversations1": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get previous convo1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extracts ID1": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send reply back in Instagram1": {
+      "main": [
+        [
+          {
+            "node": "Add Leads to Sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        []
+      ]
+    },
+    "Instagram DM1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Extracts ID1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Leads to Sheet1": {
+      "main": [
+        [
+          {
+            "node": "Add Conversations1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Link checker": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send reply back in Instagram1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send reply back in Instagram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Format Prompt1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "global": {
+      "processed": {
+        "aWdfZAG1faXRlbToxOklHTWVzc2FnZAUlEOjE3ODQxNDY3OTk2MTE3NTE1OjM0MDI4MjM2Njg0MTcxMDMwMTI0NDI3NjE1OTI4OTkxMTk1NTg4ODozMjU4ODAwNDAxMzc1MDA2NjEyMzE1ODEzOTIwNDI3MjEyOAZDZD": 1766599238762
+      }
+    },
+    "node:Cal.com Trigger": {}
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Instagram DM1": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.srv1011051.hstgr.cloud",
+            "user-agent": "facebookexternalua",
+            "content-length": "410",
+            "accept": "*/*",
+            "accept-encoding": "deflate, gzip",
+            "content-type": "application/json",
+            "instagram-api-version": "v24.0",
+            "x-forwarded-for": "172.18.0.1",
+            "x-forwarded-host": "n8n.srv1011051.hstgr.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "d3888760db36",
+            "x-hub-signature": "sha1=050b167acbf504fd37a35611e3b7e4248205ccfd",
+            "x-hub-signature-256": "sha256=fc2e62fc21e8b6cf5f10dbeff7820de6f4a3de2102306318ee3e034b192fab1c",
+            "x-real-ip": "172.18.0.1"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "object": "instagram",
+            "entry": [
+              {
+                "time": 1766597421412,
+                "id": "17841467996117515",
+                "messaging": [
+                  {
+                    "sender": {
+                      "id": "822476990695307"
+                    },
+                    "recipient": {
+                      "id": "17841467996117515"
+                    },
+                    "timestamp": 1766597421074,
+                    "message": {
+                      "mid": "aWdfZAG1faXRlbToxOklHTWVzc2FnZAUlEOjE3ODQxNDY3OTk2MTE3NTE1OjM0MDI4MjM2Njg0MTcxMDMwMTI0NDI3NjE1OTI4OTkxMTk1NTg4ODozMjU4Nzk3MDUwNzgzMjU1MTkzNzY4NzEyNzgzMDAzNjQ4MAZDZD",
+                      "text": "Send me booking link"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "webhookUrl": "https://n8n.srv1011051.hstgr.cloud/webhook/instagram",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "613bd3fe-f674-45f8-abaf-977e009a3fc4",
+  "activeVersionId": null,
+  "triggerCount": 3,
+  "shared": [
+    {
+      "updatedAt": "2025-12-24T09:10:56.981Z",
+      "createdAt": "2025-12-24T09:10:56.981Z",
+      "role": "workflow:owner",
+      "workflowId": "dzgsl4G6Rm95rjyG",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
