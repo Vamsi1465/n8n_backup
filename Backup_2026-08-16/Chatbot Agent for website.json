@@ -1,0 +1,646 @@
+{
+  "updatedAt": "2025-12-27T10:37:46.857Z",
+  "createdAt": "2025-10-05T10:18:50.376Z",
+  "id": "QRslAsQOl8NgHjb1",
+  "name": "Chatbot Agent for website",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eefcd4db-b442-48a8-94b6-96226dc3d63e",
+              "name": "text",
+              "value": "={{ $json.body.message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        16
+      ],
+      "id": "300e5fed-f7c9-4364-93a8-29c079d3eb42",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        560,
+        16
+      ],
+      "id": "8fb10a60-6b41-4141-9d57-cc2d443049fc",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d2943398-69c0-472d-908e-09c2473b9692",
+              "leftValue": "={{ $json.body.message }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -272,
+        32
+      ],
+      "id": "faf32db4-8cbd-4e03-9dc3-643ee27d9c6a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n\"output\": \"Our agent is facing some issue, please try to contact in whatsapp or book a call.\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -208,
+        288
+      ],
+      "id": "8de58352-3bb6-49b7-a784-4c683280f78d",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "content": "\n🔹 Trigger\n\nWhen chat message received (chatTrigger)\n→ Starts workflow when a user sends a chat message.\n→ Outputs: chatInput, sessionId\n\n🔹 Condition Handling\n\nIf (check chatInput exists)\n\n✅ Yes → go to Edit Fields\n\n❌ No → go to Respond to Webhook1 (\"Please type your name and email address first\")\n\n🔹 Input Processing\n\nEdit Fields (Set Node)\n\nSaves chatInput → text\n\nPrepares clean input for AI Agent\n\n",
+        "height": 528,
+        "width": 528,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1056,
+        -784
+      ],
+      "typeVersion": 1,
+      "id": "106ba693-d277-4674-bf8a-ae36c0cecbd3",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "🔹 AI Agent (LangChain Agent)\n\nAI Agent\n\nUses Google Gemini Chat Model\n\nMemory: Simple Memory (Buffer Window, 20 turns)\n\nTools:\n\nStore_memory (Supabase insert)\n\nGet_memory (Supabase query)\n\nproduct info (Google Sheets FAQ lookup)\n\nSystem Prompt:\n\nActs as AI Automation Agency assistant\n\nUses Supabase for memory (Store / Get)\n\nSuggests automations, AI agents, workflows\n\n🔹 Memory\n\nSimple Memory (memoryBufferWindow)\n\nSession Key = sessionId from trigger\n\nMaintains last 20 messages for context\n\n🔹 AI Model\n\nGoogle Gemini Chat Model\n\nModel = gemini-2.5-flash-lite\n\nConnected to AI Agent\n\n",
+        "height": 1232,
+        "width": 1504
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -512,
+        -784
+      ],
+      "typeVersion": 1,
+      "id": "26da77b5-76d4-41e0-811d-016585dd5d84",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "🔹 Tools\n\nStore_memory (Supabase Tool)\n\nTable: n8n agent\n\nFields stored:\n\nid = {{ $json[\"id\"] || $now }}\n\nmemory = AI generated summary\n\nname = extracted from input\n\nemail = extracted from input\n\nsessionID = from webhook trigger\n\nGet_memory (Supabase Tool)\n\nFetches past rows for personalization\n\nproduct info (Google Sheets)\n\nLooks up product/FAQ info\n\nSource: Google Sheet\n\n🔹 Response\n\nRespond to Webhook\n\nReturns AI Agent’s answer to user\n\nRespond to Webhook1 (only if no input)",
+        "height": 704,
+        "width": 448,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        480,
+        -768
+      ],
+      "typeVersion": 1,
+      "id": "2c01a46d-24d3-4639-921c-ef15692407a3",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ab2f2d12-0797-443d-be2a-12686cffc085",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -448,
+        32
+      ],
+      "id": "98e7724c-f050-41bd-8ea8-27fa1631089c",
+      "name": "Webhook",
+      "webhookId": "ab2f2d12-0797-443d-be2a-12686cffc085"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        224
+      ],
+      "id": "315c667c-f274-4673-99b9-f72b6fa44d59",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "8cTwctTGeEBOJeUq",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "=LUMOSCALE AI – PREMIUM SALES, SUPPORT, AND QUALIFICATION PROMPT\nWHO YOU ARE\n\nYou are Sarah from Lumoscale AI.\nYou are a sharp, confident senior sales consultant and first line customer support.\n\nYou understand business problems deeply and offer clear, practical solutions.\nYou speak like a premium closer, calm, direct, confident, and human.\nNever pushy. Never desperate. Never robotic.\n\nABOUT LUMOSCALE AI\n\nLumoscale is a premium AI automation agency.\n\nWe build and manage AI powered inbound systems that:\n\nInstantly reply to Instagram DMs, WhatsApp, website chat, email, and ads\n\nHandle FAQs and basic customer support automatically\n\nQualify leads through natural conversation\n\nRoute high value or complex cases to humans\n\nBook qualified leads directly to calls\n\nReduce manual sales and support workload\n\nMost clients use Lumoscale to stop missing leads, reply instantly, and convert more inbound demand without hiring more people.\n\nCORE RULES\n\n1. MESSAGE LENGTH: 2 TO 4 LINES MAX\nEvery response must be short and punchy.\nNo bullet points unless they explicitly ask for a breakdown.\n\n2. LISTEN FIRST, SOLVE SECOND\nUnderstand their real pain before pitching anything.\nAsk ONE smart question at a time.\n\n3. SPEAK LIKE A PREMIUM CONSULTANT\nYou are not a chatbot.\nYou have seen this problem many times.\nShare insight, not sales scripts.\n\n4. CALL ONLY WHEN EARNED\nNever force a booking link.\nOnly offer a call when interest is clear.\n\n5. REMEMBER CONTEXT\nNever ask the same question twice.\nAlways build on what they already shared.\n\nHOW YOU OPERATE\n\nYou dynamically switch roles based on intent.\n\nCUSTOMER SUPPORT MODE\n\nWhen they ask about:\n\nWhat Lumoscale does\n\nHow it works\n\nSetup time\n\nPricing range\n\nCustomization or integrations\n\nReliability\n\nAnswer clearly, briefly, and confidently.\n\nCONSULTATIVE SALES MODE\n\nWhen they mention:\n\nMissed leads\n\nSlow replies\n\nToo many DMs\n\nManual follow ups\n\nLost revenue\n\nAcknowledge briefly, then ask ONE question that reveals impact or urgency.\n\nHUMAN ESCALATION\n\nWhen:\n\nThe question is complex\n\nThe lead is high value\n\nThey want to speak to a human\n\nOffer options naturally:\n\nBook a call\n\nTap the call button\n\nContinue on WhatsApp\n\nNever force any option.\n\nINTENT SIGNALS TO DETECT\n\nPain Signals\nSlow replies, inbox overload, missed opportunities, manual work, revenue leakage.\n\nUrgency Signals\nFrustration, pressure, loss, time sensitivity.\n\nBuying Signals\nQuestions about pricing, setup, integrations, ROI, customization.\n\nLow Intent Signals\nJust exploring, maybe later, vague replies, no follow up questions.\n\nDECISION LOGIC\n\nIf pain is unclear, ask one clarifying question\n\nIf pain is clear but urgency is low, test seriousness\n\nIf pain and urgency are clear, confirm ownership\n\nIf buying signals appear, answer briefly and offer a call\n\nIf low intent appears twice, disengage politely and stop\n\nBOOKING RULE\n\nOnly offer a call when interest is earned.\n\nSet it up naturally, then share the link.\n\nCalendar: [INSERT YOUR CALENDLY LINK HERE]\n\nEXIT RULE\n\nIf they disengage, go silent, or show low intent:\nEnd politely.\nDo not chase.\nDo not re pitch.\n\nTONE GUIDELINES\n\nConfident. Calm. Direct. Premium. Human.\n\nIf a senior consultant would not say it, you do not say it.\n\nFINAL MINDSET\n\nYou are not here to convince everyone.\nYou are here to qualify, support, and move the right people forward.\n\nWhen someone is ready, they will book.\nYour job is to make the value clear and the next step easy."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        208,
+        16
+      ],
+      "id": "375187f5-45d9-4ee5-a7f7-e84ee4deb952",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook').item.json.body.message }}",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        304,
+        224
+      ],
+      "id": "03b85da8-b99c-4415-ba11-33836a587823",
+      "name": "Simple Memory"
+    }
+  ],
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.srv1011051.hstgr.cloud",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+            "content-length": "27",
+            "accept": "*/*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "en-US,en;q=0.9",
+            "content-type": "application/json",
+            "dnt": "1",
+            "origin": "http://localhost:8080",
+            "priority": "u=1, i",
+            "referer": "http://localhost:8080/",
+            "sec-ch-ua": "\"Google Chrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "x-forwarded-for": "27.7.144.201",
+            "x-forwarded-host": "n8n.srv1011051.hstgr.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "d3888760db36",
+            "x-real-ip": "27.7.144.201"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "message": "Why repeatinh"
+          },
+          "webhookUrl": "https://n8n.srv1011051.hstgr.cloud/webhook/ab2f2d12-0797-443d-be2a-12686cffc085",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "2a40a986-43f5-4cf4-a4fc-7127e4aa84d6",
+  "activeVersionId": "7a7cfe46-fed8-47b5-b235-1b3a92b537bb",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-10-05T10:18:50.380Z",
+      "createdAt": "2025-10-05T10:18:50.380Z",
+      "role": "workflow:owner",
+      "workflowId": "QRslAsQOl8NgHjb1",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2025-12-21T20:13:15.000Z",
+    "createdAt": "2025-12-21T20:13:14.043Z",
+    "versionId": "7a7cfe46-fed8-47b5-b235-1b3a92b537bb",
+    "workflowId": "QRslAsQOl8NgHjb1",
+    "nodes": [
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "eefcd4db-b442-48a8-94b6-96226dc3d63e",
+                "name": "text",
+                "value": "={{ $json.body.message }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          272,
+          48
+        ],
+        "id": "300e5fed-f7c9-4364-93a8-29c079d3eb42",
+        "name": "Edit Fields"
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          832,
+          48
+        ],
+        "id": "8fb10a60-6b41-4141-9d57-cc2d443049fc",
+        "name": "Respond to Webhook"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "d2943398-69c0-472d-908e-09c2473b9692",
+                "leftValue": "={{ $json.body.message }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "exists",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          0,
+          64
+        ],
+        "id": "faf32db4-8cbd-4e03-9dc3-643ee27d9c6a",
+        "name": "If"
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "{\n\"output\": \"Our agent is facing some issue, please try to contact in whatsapp or book a call.\"\n}\n",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          64,
+          320
+        ],
+        "id": "8de58352-3bb6-49b7-a784-4c683280f78d",
+        "name": "Respond to Webhook1"
+      },
+      {
+        "parameters": {
+          "content": "\n🔹 Trigger\n\nWhen chat message received (chatTrigger)\n→ Starts workflow when a user sends a chat message.\n→ Outputs: chatInput, sessionId\n\n🔹 Condition Handling\n\nIf (check chatInput exists)\n\n✅ Yes → go to Edit Fields\n\n❌ No → go to Respond to Webhook1 (\"Please type your name and email address first\")\n\n🔹 Input Processing\n\nEdit Fields (Set Node)\n\nSaves chatInput → text\n\nPrepares clean input for AI Agent\n\n",
+          "height": 528,
+          "width": 528,
+          "color": 3
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -1056,
+          -784
+        ],
+        "typeVersion": 1,
+        "id": "106ba693-d277-4674-bf8a-ae36c0cecbd3",
+        "name": "Sticky Note"
+      },
+      {
+        "parameters": {
+          "content": "🔹 AI Agent (LangChain Agent)\n\nAI Agent\n\nUses Google Gemini Chat Model\n\nMemory: Simple Memory (Buffer Window, 20 turns)\n\nTools:\n\nStore_memory (Supabase insert)\n\nGet_memory (Supabase query)\n\nproduct info (Google Sheets FAQ lookup)\n\nSystem Prompt:\n\nActs as AI Automation Agency assistant\n\nUses Supabase for memory (Store / Get)\n\nSuggests automations, AI agents, workflows\n\n🔹 Memory\n\nSimple Memory (memoryBufferWindow)\n\nSession Key = sessionId from trigger\n\nMaintains last 20 messages for context\n\n🔹 AI Model\n\nGoogle Gemini Chat Model\n\nModel = gemini-2.5-flash-lite\n\nConnected to AI Agent\n\n",
+          "height": 1232,
+          "width": 1504
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -512,
+          -784
+        ],
+        "typeVersion": 1,
+        "id": "26da77b5-76d4-41e0-811d-016585dd5d84",
+        "name": "Sticky Note1"
+      },
+      {
+        "parameters": {
+          "content": "🔹 Tools\n\nStore_memory (Supabase Tool)\n\nTable: n8n agent\n\nFields stored:\n\nid = {{ $json[\"id\"] || $now }}\n\nmemory = AI generated summary\n\nname = extracted from input\n\nemail = extracted from input\n\nsessionID = from webhook trigger\n\nGet_memory (Supabase Tool)\n\nFetches past rows for personalization\n\nproduct info (Google Sheets)\n\nLooks up product/FAQ info\n\nSource: Google Sheet\n\n🔹 Response\n\nRespond to Webhook\n\nReturns AI Agent’s answer to user\n\nRespond to Webhook1 (only if no input)",
+          "height": 704,
+          "width": 448,
+          "color": 3
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          480,
+          -768
+        ],
+        "typeVersion": 1,
+        "id": "2c01a46d-24d3-4639-921c-ef15692407a3",
+        "name": "Sticky Note2"
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "ab2f2d12-0797-443d-be2a-12686cffc085",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -176,
+          64
+        ],
+        "id": "98e7724c-f050-41bd-8ea8-27fa1631089c",
+        "name": "Webhook",
+        "webhookId": "ab2f2d12-0797-443d-be2a-12686cffc085"
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4.1-mini"
+          },
+          "builtInTools": {},
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          464,
+          256
+        ],
+        "id": "315c667c-f274-4673-99b9-f72b6fa44d59",
+        "name": "OpenAI Chat Model",
+        "credentials": {
+          "openAiApi": {
+            "id": "8cTwctTGeEBOJeUq",
+            "name": "OpenAi account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "={{ $json.text }}",
+          "options": {
+            "systemMessage": "=LUMOSCALE AI – PREMIUM SALES, SUPPORT, AND QUALIFICATION PROMPT\nWHO YOU ARE\n\nYou are Sarah from Lumoscale AI.\nYou are a sharp, confident senior sales consultant and first line customer support.\n\nYou understand business problems deeply and offer clear, practical solutions.\nYou speak like a premium closer, calm, direct, confident, and human.\nNever pushy. Never desperate. Never robotic.\n\nABOUT LUMOSCALE AI\n\nLumoscale is a premium AI automation agency.\n\nWe build and manage AI powered inbound systems that:\n\nInstantly reply to Instagram DMs, WhatsApp, website chat, email, and ads\n\nHandle FAQs and basic customer support automatically\n\nQualify leads through natural conversation\n\nRoute high value or complex cases to humans\n\nBook qualified leads directly to calls\n\nReduce manual sales and support workload\n\nMost clients use Lumoscale to stop missing leads, reply instantly, and convert more inbound demand without hiring more people.\n\nCORE RULES\n\n1. MESSAGE LENGTH: 2 TO 4 LINES MAX\nEvery response must be short and punchy.\nNo bullet points unless they explicitly ask for a breakdown.\n\n2. LISTEN FIRST, SOLVE SECOND\nUnderstand their real pain before pitching anything.\nAsk ONE smart question at a time.\n\n3. SPEAK LIKE A PREMIUM CONSULTANT\nYou are not a chatbot.\nYou have seen this problem many times.\nShare insight, not sales scripts.\n\n4. CALL ONLY WHEN EARNED\nNever force a booking link.\nOnly offer a call when interest is clear.\n\n5. REMEMBER CONTEXT\nNever ask the same question twice.\nAlways build on what they already shared.\n\nHOW YOU OPERATE\n\nYou dynamically switch roles based on intent.\n\nCUSTOMER SUPPORT MODE\n\nWhen they ask about:\n\nWhat Lumoscale does\n\nHow it works\n\nSetup time\n\nPricing range\n\nCustomization or integrations\n\nReliability\n\nAnswer clearly, briefly, and confidently.\n\nCONSULTATIVE SALES MODE\n\nWhen they mention:\n\nMissed leads\n\nSlow replies\n\nToo many DMs\n\nManual follow ups\n\nLost revenue\n\nAcknowledge briefly, then ask ONE question that reveals impact or urgency.\n\nHUMAN ESCALATION\n\nWhen:\n\nThe question is complex\n\nThe lead is high value\n\nThey want to speak to a human\n\nOffer options naturally:\n\nBook a call\n\nTap the call button\n\nContinue on WhatsApp\n\nNever force any option.\n\nINTENT SIGNALS TO DETECT\n\nPain Signals\nSlow replies, inbox overload, missed opportunities, manual work, revenue leakage.\n\nUrgency Signals\nFrustration, pressure, loss, time sensitivity.\n\nBuying Signals\nQuestions about pricing, setup, integrations, ROI, customization.\n\nLow Intent Signals\nJust exploring, maybe later, vague replies, no follow up questions.\n\nDECISION LOGIC\n\nIf pain is unclear, ask one clarifying question\n\nIf pain is clear but urgency is low, test seriousness\n\nIf pain and urgency are clear, confirm ownership\n\nIf buying signals appear, answer briefly and offer a call\n\nIf low intent appears twice, disengage politely and stop\n\nBOOKING RULE\n\nOnly offer a call when interest is earned.\n\nSet it up naturally, then share the link.\n\nCalendar: [INSERT YOUR CALENDLY LINK HERE]\n\nEXIT RULE\n\nIf they disengage, go silent, or show low intent:\nEnd politely.\nDo not chase.\nDo not re pitch.\n\nTONE GUIDELINES\n\nConfident. Calm. Direct. Premium. Human.\n\nIf a senior consultant would not say it, you do not say it.\n\nFINAL MINDSET\n\nYou are not here to convince everyone.\nYou are here to qualify, support, and move the right people forward.\n\nWhen someone is ready, they will book.\nYour job is to make the value clear and the next step easy."
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3,
+        "position": [
+          480,
+          48
+        ],
+        "id": "375187f5-45d9-4ee5-a7f7-e84ee4deb952",
+        "name": "AI Agent"
+      },
+      {
+        "parameters": {
+          "sessionIdType": "customKey",
+          "sessionKey": "={{ $('Webhook').item.json.body.message }}",
+          "contextWindowLength": 20
+        },
+        "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+        "typeVersion": 1.3,
+        "position": [
+          576,
+          256
+        ],
+        "id": "03b85da8-b99c-4415-ba11-33836a587823",
+        "name": "Simple Memory"
+      }
+    ],
+    "connections": {
+      "Edit Fields": {
+        "main": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If": {
+        "main": [
+          [
+            {
+              "node": "Edit Fields",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Respond to Webhook1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "If",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenAI Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AI Agent": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Simple Memory": {
+        "ai_memory": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_memory",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Vamsi V",
+    "name": "Version 7a7cfe46",
+    "description": ""
+  },
+  "tags": []
+}
