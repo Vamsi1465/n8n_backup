@@ -1,0 +1,2226 @@
+{
+  "updatedAt": "2026-02-18T20:06:47.224Z",
+  "createdAt": "2026-02-18T06:42:11.294Z",
+  "id": "HW0O5fRkQJSWNobg",
+  "name": "LinkedIn System with Comment Triggers",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "commenttom",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -768,
+        -128
+      ],
+      "id": "c19bb4c7-8536-431f-b89d-1cf23746348e",
+      "name": "Webhook",
+      "webhookId": "3d6f68b3-b5dc-4c50-a5d4-1c251c115dd7"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.query['hub.challenge'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -512,
+        -304
+      ],
+      "id": "4a346e1a-3d8b-4e8f-9723-49ad1c8b331c",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ba45f470-2056-4b3c-bc3e-df62b6b7e9cb",
+              "name": "body.entry[0].changes[0].value.text",
+              "value": "={{ $json.body.entry[0].changes[0].value.text }}",
+              "type": "string"
+            },
+            {
+              "id": "34c4aa72-e941-4d4f-bf59-c0654ad9d358",
+              "name": "body.entry[0].changes[0].value.from.username",
+              "value": "={{ $json.body.entry[0].changes[0].value.from.username }}",
+              "type": "string"
+            },
+            {
+              "id": "93a58b4e-63bb-4251-87a3-d65cc7a1fd98",
+              "name": "body.entry[0].changes[0].value.from.id",
+              "value": "={{ $json.body.entry[0].changes[0].value.from.id }}",
+              "type": "string"
+            },
+            {
+              "id": "df885a39-2c99-496b-a0b3-e04c36d7c0ea",
+              "name": "body.entry[0].changes[0].value.media.id",
+              "value": "={{ $json.body.entry[0].changes[0].value.media.id }}",
+              "type": "string"
+            },
+            {
+              "id": "73c227d6-ebb3-4398-9846-de11ba05a468",
+              "name": "body.entry[0].changes[0].value.id",
+              "value": "={{ $json.body.entry[0].changes[0].value.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -560,
+        -48
+      ],
+      "id": "b85a7c2f-34ba-4566-88de-060454ff2676",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/{{ $('Webhook').item.json.body.entry[0].id }}/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"recipient\": {\n    \"id\": \"{{ $('Webhook').item.json.body.entry[0].changes[0].value.from.id }}\"\n  },\n  \"message\": {\n    \"text\": \"Hey 👋 I’ll share the file once you follow the page. Tap below after you follow.\",\n    \"quick_replies\": [\n      {\n        \"content_type\": \"text\",\n        \"title\": \"I followed\",\n        \"payload\": \"FOLLOW_DONE\"\n      }\n    ]\n  }\n}\n ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -144,
+        -48
+      ],
+      "id": "3194ab06-3923-4f49-8582-85e78b1ceba4",
+      "name": "userID",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "nclmvu7yuYiyERQv",
+          "name": "Instagram Meta Dev - ibotn8n"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/{{ $json.body.entry[0].changes[0].value.id }}/replies",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"message\": \"Sent you a DM 📩\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -368,
+        -48
+      ],
+      "id": "36bd9530-9f70-461c-9f86-834470dd647f",
+      "name": "Sent comment",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "nclmvu7yuYiyERQv",
+          "name": "Instagram Meta Dev - ibotn8n"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Quick Setup \n1. Grab your Unipile API key.\n2. Create a Google Sheet with the right columns.\n3. Import my JSON workflow into n8n.\n4. Plug in your LinkedIn post ID, trigger word, and lead magnet link.\n5. Run it once to test, then let the schedule take over.",
+        "height": 256,
+        "width": 416
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -3712,
+        -960
+      ],
+      "id": "4ee767c9-28fb-4cea-ae95-58f0b3786aa2",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA",
+          "mode": "list",
+          "cachedResultName": "LinkedIn Posts - n8n Lead Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 187775433,
+          "mode": "list",
+          "cachedResultName": "System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA/edit#gid=187775433"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "linkedin_id": "={{ $('Loop Over Items').item.json.author_details.id }}",
+            "name": "={{ $('Loop Over Items').item.json.author }}",
+            "headline": "={{ $('Loop Over Items').item.json.author_details.headline }}",
+            "date": "={{$('Loop Over Items').item.json.date?.toDateTime().format('yyyy-MM-dd') }}",
+            "posts_id": "={{ $('Loop Over Items').item.json.post_id }}",
+            "url": "={{ $('Loop Over Items').item.json.author_details.profile_url }}",
+            "dm_status": "sent",
+            "connection_status": "={{ $('Loop Over Items').item.json.author_details.network_distance }}",
+            "followup_status": "not_sent"
+          },
+          "matchingColumns": [
+            "linkedin_id"
+          ],
+          "schema": [
+            {
+              "id": "linkedin_id",
+              "displayName": "linkedin_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "headline",
+              "displayName": "headline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "posts_id",
+              "displayName": "posts_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "connection_status",
+              "displayName": "connection_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "dm_status",
+              "displayName": "dm_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "followup_status",
+              "displayName": "followup_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -448,
+        -1024
+      ],
+      "id": "3e5ccd79-a530-4b2c-8da2-6679cf7684e2",
+      "name": "Create Row1",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA",
+          "mode": "list",
+          "cachedResultName": "LinkedIn Posts - n8n Lead Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 187775433,
+          "mode": "list",
+          "cachedResultName": "System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA/edit#gid=187775433"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -736,
+        -640
+      ],
+      "id": "8ebcc8e7-3d8e-4fab-8ca5-01262b0baa67",
+      "name": "Get row(s) in sheet2"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA",
+          "mode": "list",
+          "cachedResultName": "LinkedIn Posts - n8n Lead Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 187775433,
+          "mode": "list",
+          "cachedResultName": "System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA/edit#gid=187775433"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "followup_status": "sent",
+            "row_number": 0,
+            "linkedin_id": "={{ $json.linkedin_id }}",
+            "last_followup_at": "={{$now.toFormat(\"yyyy-LL-dd\")}}"
+          },
+          "matchingColumns": [
+            "linkedin_id"
+          ],
+          "schema": [
+            {
+              "id": "linkedin_id",
+              "displayName": "linkedin_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "headline",
+              "displayName": "headline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "posts_id",
+              "displayName": "posts_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "connection_status",
+              "displayName": "connection_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "dm_status",
+              "displayName": "dm_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "followup_status",
+              "displayName": "followup_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_followup_at",
+              "displayName": "last_followup_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -528,
+        -640
+      ],
+      "id": "732b544b-4721-4db8-8813-0cffb5039ea3",
+      "name": "Update row in sheet"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api21.unipile.com/api/v1/chats",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY"
+            },
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "account_id",
+              "value": "={{ \"ozhB03HpQFm7YZk8KWOqrQ\" }}"
+            },
+            {
+              "name": "attendees_ids",
+              "value": "={{ $json.author_details.id }}"
+            },
+            {
+              "name": "text",
+              "value": "=Hey {{ $json.author.split(\" \")[0] }}!\n\nJust checking in - did you have a chance to explore the automation I sent last week?\n\nLet me know if you ran into any issues or have questions - happy to help 🙌\n\nBest,\nAlex Sammers"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": "={{ Math.floor(Math.random() * 4000) + 8000 }}"
+            }
+          }
+        }
+      },
+      "id": "ac1a37f8-7d7b-42f5-ab7f-1a8d1d3d4ab3",
+      "name": "Follow-up Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -928,
+        -640
+      ],
+      "retryOnFail": true,
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "=https://api21.unipile.com/api/v1/posts/urn%3Ali%3Aactivity%3A{{ $('Set Config1').item.json.post_id }}/comments",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "account_id",
+              "value": "={{ \"ozhB03HpQFm7YZk8KWOqrQ\" }}"
+            },
+            {
+              "name": "={{$json.cursor? \"cursor\": \"\"}}",
+              "value": "={{ $json.cursor }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY"
+            },
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cfa1b96e-79a4-43f4-ba72-e67a849515c6",
+      "name": "Get Comments from Posts1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -2976,
+        112
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "items",
+        "options": {}
+      },
+      "id": "53d8606a-11cd-4a55-bbaf-2c080f58b27d",
+      "name": "Split Out3",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        -2752,
+        112
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c66c00d6-cf3a-4ca7-ac99-d68953fdc942",
+              "operator": {
+                "name": "filter.operator.equals",
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.author_details.network_distance }}",
+              "rightValue": "DISTANCE_1"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a2ef2808-88d6-46c9-8e25-69cb69245ab6",
+      "name": "Check if we are connected1",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -2256,
+        112
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "780979f7-0acd-4c4a-a39f-9f9b34de1579",
+              "leftValue": "={{\n  (() => {\n    const raw = $('Set Config1').item.json.trigger_word || '';\n    const text = String($json.text || '');\n\n    // escape any regex chars in the trigger word\n    const esc = s => s.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n\n    // support multiple comma-separated trigger words\n    const triggers = raw.toString()\n      .split(',')\n      .map(w => w.trim())\n      .filter(Boolean);\n\n    // check whole-word match: \\bWORD\\b (case-insensitive)\n    return triggers.some(w => new RegExp(`\\\\b${esc(w)}\\\\b`, 'i').test(text));\n  })()\n}}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f2f0923e-503f-4e63-a9cf-bcb50acd13f9",
+      "name": "Filter Comments with trigger1",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        -2528,
+        112
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api21.unipile.com/api/v1/chats",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY"
+            },
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "account_id",
+              "value": "={{ \"ozhB03HpQFm7YZk8KWOqrQ\" }}"
+            },
+            {
+              "name": "attendees_ids",
+              "value": "={{ $json.author_details.id }}"
+            },
+            {
+              "name": "text",
+              "value": "=Hey {{ $json.author.split(\" \")[0] }}!\n\nYou’re all set 🚀\n\nHere’s the full workflow as promised:\n👉 {{ $('Set Config1').first().json.lead_magnet_link }}\n\nLet me know how it works for you or if you have any questions!\n\nBest,\nAlex Sammers"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": "={{ Math.floor(Math.random() * 4000) + 8000 }}"
+            }
+          }
+        }
+      },
+      "id": "e295349a-5045-4ccc-bd05-a3b974ea3644",
+      "name": "Send DM with Lead Magnet1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -1024,
+        -1024
+      ],
+      "retryOnFail": true,
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api21.unipile.com/api/v1/posts/{{ encodeURIComponent('urn:li:activity:' + $('Loop Over Items').item.json.post_id) }}/comments",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY"
+            },
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "account_id",
+              "value": "={{ \"ozhB03HpQFm7YZk8KWOqrQ\" }}"
+            },
+            {
+              "name": "comment_id",
+              "value": "={{ $('Loop Over Items').item.json.id }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.reply_message }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c35908f0-92d3-4ea8-a11d-4bd8101cd8ba",
+      "name": "Answer to comment1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -608,
+        -1024
+      ],
+      "executeOnce": true,
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const messages = [\n  \"DM sent! 📨\",\"Check your DM! 💬\",\"Message sent privately! ✨\",\n  \"Workflow on its way! 🚀\",\"Sending now... 📤\",\"Resource incoming! ⚡\",\n  \"Done! 👍\",\"Sent! ✅\",\"Check your messages! 📩\"\n];\n\nreturn items.map(item => {\n  const idx = Math.floor(Math.random() * messages.length);\n  return {\n    json: {\n      ...item.json,\n      reply_message: messages[idx],\n      message_index: idx,\n      timestamp: new Date().toISOString(),\n    }\n  };\n});"
+      },
+      "id": "130c68fc-3ca4-43b9-b28d-c633e7a4f51d",
+      "name": "Create Message Rotation1",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -816,
+        -1024
+      ],
+      "typeVersion": 2,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api21.unipile.com/api/v1/posts/{{ encodeURIComponent('urn:li:activity:' + $json.post_id) }}/comments",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY"
+            },
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "account_id",
+              "value": "={{ \"ozhB03HpQFm7YZk8KWOqrQ\" }}"
+            },
+            {
+              "name": "comment_id",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "name": "text",
+              "value": "=Please send me a connection request first so I can DM you the workflow!"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 3000
+            }
+          }
+        }
+      },
+      "id": "bad65dae-d002-4d45-97cf-3aa147484132",
+      "name": "Ask For connection1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -1088,
+        160
+      ],
+      "retryOnFail": true,
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "id": "92e601bc-3e1a-4003-9065-6ff76dfd6e40",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        -1792,
+        -656
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.floor(Math.random() * 4) + 8 }}"
+      },
+      "id": "58541273-74e0-4ed1-a8df-f2c7ea4a5feb",
+      "name": "Wait2",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        -1264,
+        -1024
+      ],
+      "webhookId": "8027ff5d-44ea-45c0-8edb-600199d99527",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "filtered",
+        "options": {}
+      },
+      "id": "b2171c8f-c379-4a96-abd0-a3905b37f90c",
+      "name": "Split Out4",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        -2032,
+        -656
+      ],
+      "typeVersion": 1,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "let cursor =\"\"\ntry {\n\n cursor = $('Get Comments from Posts1').first().json.cursor\n\n} catch (e) {\n  \n cursor = \"\";\n\n}\nreturn { cursor};"
+      },
+      "id": "38cbcae3-59ae-48a7-8c68-9b15ee35d20a",
+      "name": "cursor1",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -3200,
+        112
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "id": "8d2eb5a8-4b2e-44fe-b1f7-cf14bd73ecdb",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        -1072,
+        -192
+      ],
+      "typeVersion": 3.2,
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "57115dce-3f94-405d-b657-11b14e67e770",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              },
+              "leftValue": "={{ $('Get Comments from Posts1').first().json.cursor }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2532d554-4798-4450-a2c0-15aafbe4247a",
+      "name": "Filter",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        -864,
+        -192
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "06df5494-c414-4d37-990d-23bde419ade0",
+              "operator": {
+                "type": "array",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.filtered }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9dd672d2-7faf-47cc-b8eb-bafcaa757523",
+      "name": "If2",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -1616,
+        128
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "filtered",
+        "options": {}
+      },
+      "id": "122aefb8-c8da-4338-a68e-47467075d397",
+      "name": "Split Out5",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        -1280,
+        160
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "0cd4f32e-0bbc-47bd-ac34-375674c2645d",
+              "operator": {
+                "type": "array",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.filtered }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "920f0f47-ade8-44f6-b69b-99978656f93f",
+      "name": "If3",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -1616,
+        -160
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "content": "## Configure Settings \n- Post ID - from LinkedIn\n- Trigger Word - what people comment on the post\n- Lead Magnet URL - what we're giving away",
+        "height": 656,
+        "width": 432,
+        "color": 3
+      },
+      "id": "f5c4fb80-a24c-4d87-8917-8dda1302b4b0",
+      "name": "Sticky Note11",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3712,
+        -304
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Get all the comments from the post \n- Get all comments\n- Filter the ones that contains the trigger word",
+        "height": 656,
+        "width": 736,
+        "color": 4
+      },
+      "id": "71890aab-e21b-41d7-b6fa-82c396ac9c0e",
+      "name": "Sticky Note12",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3072,
+        -304
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Check if we are connected\n- check the connection level\n- if it's 1 we can send the DM directly\n- if not we first ask them to connect",
+        "height": 656
+      },
+      "id": "1bcc8bbd-fb16-451e-ba8d-20135bc8ed98",
+      "name": "Sticky Note13",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2320,
+        -304
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Filter the ones where already have sent messages\nIn both cases, check Nocodb to see if we already have sent a DM or a connection request to avoid double-sends. ",
+        "height": 656,
+        "width": 624,
+        "color": 5
+      },
+      "id": "caa94e96-bce4-4ff8-8edf-67f6191924d6",
+      "name": "Sticky Note14",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2064,
+        -304
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Ask them to connect\n- Answer to their comment by asking them to connect. ",
+        "height": 256,
+        "width": 416
+      },
+      "id": "f3d6dc34-55de-49b6-859a-4bdb3bfee992",
+      "name": "Sticky Note15",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1136,
+        64
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Merge both branches and filter if there is more pages\n",
+        "height": 320,
+        "width": 432,
+        "color": 4
+      },
+      "id": "02f933ee-56e2-413a-ae20-3c3137b7d930",
+      "name": "Sticky Note16",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1136,
+        -320
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Initialize the cursor to avoid errors",
+        "height": 656,
+        "width": 176
+      },
+      "id": "b29354b2-767b-456d-bc2b-3a11159d0f47",
+      "name": "Sticky Note17",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3264,
+        -304
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Send the DMs\n- Create a loop so we can log and send them one by one. \n- Add a wait time of a few minutes to avoid problems with linkedin ates and make it random to make it seems more natural. \n- Send the DM including the first name and the link to the lead magnet. \n- Comment a comment with a variable message to make it seem more natural. \n- Log everything into Nocodb. ",
+        "height": 432,
+        "width": 1088,
+        "color": 3
+      },
+      "id": "017828f5-a9ae-4c9e-b2f2-44bddb0716d8",
+      "name": "Sticky Note18",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1328,
+        -1232
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "const messageSent = $('Get all the rows where the dm is already sent1').all().map(item => item.json.linkedin_id)\nconst attendees = $(\"Check if we are connected1\").all().map(item =>item.json)\n\nconsole.log(\"messageSent\", messageSent, \"attendees\", attendees)\n\nconst filtered = attendees.filter(item => !messageSent?.includes(item.author_details.id))\n\nreturn {filtered}"
+      },
+      "id": "584d5e3f-2a0e-47f4-a858-22823bb99fa6",
+      "name": "Filter people where we have not sent the DM yet1",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -1824,
+        -176
+      ],
+      "executeOnce": true,
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "const messageSent =  $(\"Get all the rows where the connection is already asked1\").all().map(item => item.json.linkedin_id)\nconst attendees = $(\"Check if we are connected1\").all().map(item =>item.json)\n\nconsole.log(\"messageSent\", messageSent, \"attendees\", attendees)\n\nconst filtered = attendees.filter(item => !messageSent?.includes(item.author_details.id) && item.reply_counter===0)\n\nreturn {filtered}"
+      },
+      "id": "69199ecb-6d08-4909-8523-4e0579833f5f",
+      "name": "Filter people where we have not asked connexion yet1",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -1792,
+        128
+      ],
+      "executeOnce": true,
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 60
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -3648,
+        112
+      ],
+      "id": "75adbcb6-4125-4348-b3ec-47ab8af2b25e",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b0a23ead-8194-4ef8-a50e-f44a2840fe37",
+              "name": "post_id",
+              "value": "POST ID",
+              "type": "string"
+            },
+            {
+              "id": "5b1557ce-3bce-42a7-a8fc-54a60068d970",
+              "name": "trigger_word",
+              "value": "System",
+              "type": "string"
+            },
+            {
+              "id": "34fe5181-b731-42ab-912b-17e42557c306",
+              "name": "lead_magnet_link",
+              "value": "URL",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3456,
+        112
+      ],
+      "id": "1ddaac81-7f84-4a8b-8d2f-5f2b2e54a8cf",
+      "name": "Set Config1"
+    },
+    {
+      "parameters": {
+        "amount": "={{ 7 }}",
+        "unit": "days"
+      },
+      "id": "9fb20c50-7d7a-414e-a025-51eb7faad69f",
+      "name": "Wait3",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        -1152,
+        -640
+      ],
+      "webhookId": "8027ff5d-44ea-45c0-8edb-600199d99527",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "content": "## Follow Up After 1 Week\n- Used to follow up with people on LinkedIn a week after we sent them the Lead Magnet - delay can be customized",
+        "height": 288,
+        "width": 896,
+        "color": 3
+      },
+      "id": "5688431e-f63c-4aa9-985b-e0d8f2f5d225",
+      "name": "Sticky Note19",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1232,
+        -736
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA",
+          "mode": "list",
+          "cachedResultName": "LinkedIn Posts - n8n Lead Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 187775433,
+          "mode": "list",
+          "cachedResultName": "System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA/edit#gid=187775433"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "linkedin_id": "={{ $('Split Out5').item.json.author_details.id }}",
+            "name": "={{ $('Split Out5').item.json.author }}",
+            "headline": "={{ $('Split Out5').item.json.author_details.headline }}",
+            "date": "={{$('Split Out5').item.json.date?.toDateTime().format('yyyy-MM-dd') }}",
+            "posts_id": "={{ $('Split Out5').item.json.post_id }}",
+            "url": "={{ $('Split Out5').item.json.author_details.profile_url }}",
+            "dm_status": "connection request",
+            "connection_status": "={{ $('Split Out5').item.json.author_details.network_distance }}",
+            "followup_status": "not_sent"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "linkedin_id",
+              "displayName": "linkedin_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "headline",
+              "displayName": "headline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "posts_id",
+              "displayName": "posts_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "connection_status",
+              "displayName": "connection_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "dm_status",
+              "displayName": "dm_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "followup_status",
+              "displayName": "followup_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -896,
+        160
+      ],
+      "id": "67b79459-f024-4846-8493-83a5ca452d9b",
+      "name": "Create Row2",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA",
+          "mode": "list",
+          "cachedResultName": "LinkedIn Posts - n8n Lead Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 187775433,
+          "mode": "list",
+          "cachedResultName": "System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA/edit#gid=187775433"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "dm_status",
+              "lookupValue": "sent"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2016,
+        -176
+      ],
+      "id": "800b38e0-c763-4bd5-9e0b-ca7b495dc2a4",
+      "name": "Get all the rows where the dm is already sent1",
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA",
+          "mode": "list",
+          "cachedResultName": "LinkedIn Posts - n8n Lead Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 187775433,
+          "mode": "list",
+          "cachedResultName": "System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA/edit#gid=187775433"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "dm_status",
+              "lookupValue": "connection request"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2016,
+        128
+      ],
+      "id": "37e7c707-940a-435a-b810-323e6bb55444",
+      "name": "Get all the rows where the connection is already asked1",
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Dates in ISO (yyyy-LL-dd)\nconst today        = DateTime.now().toFormat('yyyy-LL-dd');\nconst sevenDaysAgo = DateTime.now().minus({ days: 7 }).toFormat('yyyy-LL-dd');\n\n// helpers\nconst norm = v => String(v ?? '').trim().toLowerCase();\nconst toISO = v => {\n  if (!v) return null;\n  const d = DateTime.fromISO(String(v));\n  return d.isValid ? d.toFormat('yyyy-LL-dd') : null;\n};\n\nconst out = [];\nfor (const item of items) {\n  const r = item.json || {};\n\n  // must already be connected (DM sent)\n  const isDmSent      = norm(r.dm_status) === 'sent';\n\n  // follow-up not yet sent\n  const needsFollowup = norm(r.followup_status) === 'not_sent';\n\n  // date logic: due if next_followup_at <= today,\n  // else if dm_sent_at <= sevenDaysAgo,\n  // else (no dates) treat as due\n  const nextISO = toISO(r.next_followup_at);\n  const dmISO   = toISO(r.dm_sent_at);\n  const dueByNext   = nextISO && nextISO <= today;\n  const dueByDmDate = dmISO && dmISO <= sevenDaysAgo;\n  const due = (dueByNext || dueByDmDate || (!nextISO && !dmISO)); // if no dates, include\n\n  if (isDmSent && needsFollowup && due) {\n    out.push(item);\n  }\n}\n\nreturn out;"
+      },
+      "id": "4c728f8f-6e30-49e9-a618-3ad3b888f1d9",
+      "name": "Filter Due for Follow-up1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3344,
+        -560
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "batchSize": "=1",
+        "options": {}
+      },
+      "id": "f40767d3-afca-4aae-8b47-f7fe41833a23",
+      "name": "Split In Batches1",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        -3184,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA",
+          "mode": "list",
+          "cachedResultName": "LinkedIn Posts - n8n Lead Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 187775433,
+          "mode": "list",
+          "cachedResultName": "System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA/edit#gid=187775433"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -3504,
+        -560
+      ],
+      "id": "e483964f-933a-40da-b692-1cc3cbc4fa35",
+      "name": "Get All Rows1"
+    },
+    {
+      "parameters": {
+        "content": "## FollowUp Manual Backfill\n- Used to follow up with people on LinkedIn, in case the automation was turned off\n- It uses the date the contact was added to Google Sheets and then updates the records",
+        "height": 304,
+        "width": 1264,
+        "color": 3
+      },
+      "id": "38b92931-f83b-4284-b7ff-0bc426657f5f",
+      "name": "Sticky Note20",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3712,
+        -672
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api21.unipile.com/api/v1/chats",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY"
+            },
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "account_id",
+              "value": "={{ \"ozhB03HpQFm7YZk8KWOqrQ\" }}"
+            },
+            {
+              "name": "attendees_ids",
+              "value": "={{ $json.linkedin_id }}"
+            },
+            {
+              "name": "text",
+              "value": "=Hey {{ $json.name }}!\n\nJust checking in - did you have a chance to explore the automation I sent recently?\n\nLet me know if you ran into any issues or have questions - happy to help 🙌\n\nBest,\nAlex"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "12066f3a-ca07-4b68-b6b7-29b892073a9a",
+      "name": "Send Follow Up Email2",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -3024,
+        -560
+      ],
+      "retryOnFail": true,
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA",
+          "mode": "list",
+          "cachedResultName": "LinkedIn Posts - n8n Lead Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 187775433,
+          "mode": "list",
+          "cachedResultName": "System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA/edit#gid=187775433"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "followup_status": "sent",
+            "row_number": 0,
+            "linkedin_id": "={{ $json.linkedin_id }}",
+            "last_followup_at": "={{$now.toFormat(\"yyyy-LL-dd\")}}"
+          },
+          "matchingColumns": [
+            "linkedin_id"
+          ],
+          "schema": [
+            {
+              "id": "linkedin_id",
+              "displayName": "linkedin_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "headline",
+              "displayName": "headline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "posts_id",
+              "displayName": "posts_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "connection_status",
+              "displayName": "connection_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "dm_status",
+              "displayName": "dm_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "followup_status",
+              "displayName": "followup_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_followup_at",
+              "displayName": "last_followup_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2672,
+        -560
+      ],
+      "id": "28319a4d-9380-4599-8724-ab836eda3bc9",
+      "name": "Update Row After Follow Up2"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA",
+          "mode": "list",
+          "cachedResultName": "LinkedIn Posts - n8n Lead Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 187775433,
+          "mode": "list",
+          "cachedResultName": "System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dhkKEVjYmQk5MVWDnvxdO8iybRvTRxCtWntSf7tb_rA/edit#gid=187775433"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "linkedin_id",
+              "lookupValue": "={{ $json.linkedin_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2848,
+        -560
+      ],
+      "id": "561e04f4-a1e7-4718-8884-4a1978462674",
+      "name": "Get Existing Rows2"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Sent comment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sent comment": {
+      "main": [
+        [
+          {
+            "node": "userID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Row1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet2": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Follow-up Email": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Comments from Posts1": {
+      "main": [
+        [
+          {
+            "node": "Split Out3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out3": {
+      "main": [
+        [
+          {
+            "node": "Filter Comments with trigger1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if we are connected1": {
+      "main": [
+        [
+          {
+            "node": "Get all the rows where the dm is already sent1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get all the rows where the connection is already asked1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Comments with trigger1": {
+      "main": [
+        [
+          {
+            "node": "Check if we are connected1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send DM with Lead Magnet1": {
+      "main": [
+        [
+          {
+            "node": "Create Message Rotation1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer to comment1": {
+      "main": [
+        [
+          {
+            "node": "Create Row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Message Rotation1": {
+      "main": [
+        [
+          {
+            "node": "Answer to comment1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask For connection1": {
+      "main": [
+        [
+          {
+            "node": "Create Row2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wait3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "Send DM with Lead Magnet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out4": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cursor1": {
+      "main": [
+        [
+          {
+            "node": "Get Comments from Posts1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "cursor1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Split Out5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Split Out5": {
+      "main": [
+        [
+          {
+            "node": "Ask For connection1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Split Out4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter people where we have not sent the DM yet1": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter people where we have not asked connexion yet1": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Set Config1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Config1": {
+      "main": [
+        [
+          {
+            "node": "cursor1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait3": {
+      "main": [
+        [
+          {
+            "node": "Follow-up Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Row2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get all the rows where the dm is already sent1": {
+      "main": [
+        [
+          {
+            "node": "Filter people where we have not sent the DM yet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get all the rows where the connection is already asked1": {
+      "main": [
+        [
+          {
+            "node": "Filter people where we have not asked connexion yet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Due for Follow-up1": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split In Batches1": {
+      "main": [
+        [
+          {
+            "node": "Send Follow Up Email2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Rows1": {
+      "main": [
+        [
+          {
+            "node": "Filter Due for Follow-up1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Follow Up Email2": {
+      "main": [
+        [
+          {
+            "node": "Get Existing Rows2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Existing Rows2": {
+      "main": [
+        [
+          {
+            "node": "Update Row After Follow Up2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "9d951880-9d7e-47dc-88e1-aaede8ad8198",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-02-18T06:42:11.320Z",
+      "createdAt": "2026-02-18T06:42:11.320Z",
+      "role": "workflow:owner",
+      "workflowId": "HW0O5fRkQJSWNobg",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
