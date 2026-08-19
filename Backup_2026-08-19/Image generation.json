@@ -1,0 +1,30 @@
+{
+  "updatedAt": "2026-04-14T12:21:41.469Z",
+  "createdAt": "2026-04-14T12:21:41.469Z",
+  "id": "oVm18gJ5MbBZkLSh",
+  "name": "Image generation",
+  "active": false,
+  "isArchived": false,
+  "nodes": [],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "51edf859-8b6f-47c5-8f84-e6307a79ec11",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-04-14T12:21:41.473Z",
+      "createdAt": "2026-04-14T12:21:41.473Z",
+      "role": "workflow:owner",
+      "workflowId": "oVm18gJ5MbBZkLSh",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
