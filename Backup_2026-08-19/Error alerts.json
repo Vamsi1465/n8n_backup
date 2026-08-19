@@ -1,0 +1,156 @@
+{
+  "updatedAt": "2025-12-25T07:17:53.003Z",
+  "createdAt": "2025-12-25T07:15:48.760Z",
+  "id": "KmlcHelTqqeDZX1Y",
+  "name": "Error alerts",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        -16
+      ],
+      "id": "2357edc9-4920-43a9-a86b-ac75425a8058",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09PV3DSRJQ",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "text": "==============\n\n🚨 *N8N ERROR ALERT* 🚨\n\nWorkflow Name: {{ $json.workflow.name }}\n🧩 *Workflow:* {{ $json.execution.url }}\n💥 *Error Description:* {{ $json.execution.error.description }}\n🛠️ *Failing Node:* {{ $json.execution.error.node.name }}\n🗯️ *Message:* {{ $json.execution.error.message }}\n⏱️ *Timestamp:* {{ new Date($now).toLocaleString(\"en-IN\", { timeZone: \"Asia/Kolkata\" }) }}\n\n=============",
+        "otherOptions": {
+          "includeLinkToWorkflow": false,
+          "unfurl_links": false,
+          "unfurl_media": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        16,
+        -16
+      ],
+      "id": "ecc82ed9-d12a-42d6-abe4-829eeaf6d7a9",
+      "name": "Send a message",
+      "webhookId": "d2bf2dbd-0fdc-4489-9d6b-a26e9064dbf6",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "Rb7HyhAgq0iIU3TT",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "d7ac8970-331d-4c86-bf03-74f34eca5c62",
+  "activeVersionId": "d7ac8970-331d-4c86-bf03-74f34eca5c62",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-25T07:15:48.766Z",
+      "createdAt": "2025-12-25T07:15:48.766Z",
+      "role": "workflow:owner",
+      "workflowId": "KmlcHelTqqeDZX1Y",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2025-12-25T07:17:45.000Z",
+    "createdAt": "2025-12-25T07:17:44.163Z",
+    "versionId": "d7ac8970-331d-4c86-bf03-74f34eca5c62",
+    "workflowId": "KmlcHelTqqeDZX1Y",
+    "nodes": [
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.errorTrigger",
+        "typeVersion": 1,
+        "position": [
+          -192,
+          -16
+        ],
+        "id": "2357edc9-4920-43a9-a86b-ac75425a8058",
+        "name": "Error Trigger"
+      },
+      {
+        "parameters": {
+          "authentication": "oAuth2",
+          "select": "channel",
+          "channelId": {
+            "__rl": true,
+            "value": "C09PV3DSRJQ",
+            "mode": "list",
+            "cachedResultName": "n8n"
+          },
+          "text": "==============\n\n🚨 *N8N ERROR ALERT* 🚨\n\nWorkflow Name: {{ $json.workflow.name }}\n🧩 *Workflow:* {{ $json.execution.url }}\n💥 *Error Description:* {{ $json.execution.error.description }}\n🛠️ *Failing Node:* {{ $json.execution.error.node.name }}\n🗯️ *Message:* {{ $json.execution.error.message }}\n⏱️ *Timestamp:* {{ new Date($now).toLocaleString(\"en-IN\", { timeZone: \"Asia/Kolkata\" }) }}\n\n=============",
+          "otherOptions": {
+            "includeLinkToWorkflow": false,
+            "unfurl_links": false,
+            "unfurl_media": false
+          }
+        },
+        "type": "n8n-nodes-base.slack",
+        "typeVersion": 2.3,
+        "position": [
+          16,
+          -16
+        ],
+        "id": "ecc82ed9-d12a-42d6-abe4-829eeaf6d7a9",
+        "name": "Send a message",
+        "webhookId": "d2bf2dbd-0fdc-4489-9d6b-a26e9064dbf6",
+        "credentials": {
+          "slackOAuth2Api": {
+            "id": "Rb7HyhAgq0iIU3TT",
+            "name": "Slack account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Error Trigger": {
+        "main": [
+          [
+            {
+              "node": "Send a message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Vamsi V",
+    "name": "Version d7ac8970",
+    "description": ""
+  },
+  "tags": []
+}
