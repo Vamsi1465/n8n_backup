@@ -1,0 +1,967 @@
+{
+  "updatedAt": "2025-11-20T20:20:14.000Z",
+  "createdAt": "2025-09-16T20:05:51.515Z",
+  "id": "1OAApRYd9rdYJ7dH",
+  "name": "Linkedin Scrapping",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 👤 Profile Information Extraction\n**Actor Used:** [LinkedIn Profile Scraper](https://console.apify.com/actors/2SyF0bVxmgGr8IVCZ/runs) (Apify)\n\n### 📊 Data Extracted:\n- Basic Info: Name, headline, location, connections\n- Professional: Current job, company details, experience\n- Contact: Email, mobile (when available)\n- Social: Profile picture, LinkedIn URL, about section\n- Detailed: Skills, education, certifications, recommendations\n\n### ⚠️ Requirements:\n- Valid Apify API key\n- LinkedIn profile URLs in \"ready\" status\n- Proper rate limiting to avoid blocks",
+        "height": 580,
+        "width": 1604,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        -1008
+      ],
+      "id": "9616520c-9227-4db7-8cc5-85468d55493e",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e5d58c79-b9ae-4f41-ad8b-6d20e9a38833",
+              "name": "profile_ids",
+              "value": "={{ JSON.stringify({\n  profileUrls: $items(\" Fetch Ready Profiles from Google Sheets \")\n    .map(i => i.json[\"URLs\"])\n    .filter(url => !!url)\n}[\"profileUrls\"]) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -288,
+        -640
+      ],
+      "id": "81fc97f1-938d-47b7-8d43-2bffc2bde055",
+      "name": "Configure Apify API Settings"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cc27b2d9-8de7-43ca-a741-2d150084f78e",
+              "name": "currentStartIndex",
+              "value": 1,
+              "type": "number"
+            },
+            {
+              "id": "fc552c57-4510-4f04-aa09-2294306d0d9f",
+              "name": "maxPages",
+              "value": 1,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -368,
+        -1248
+      ],
+      "id": "13c7d23b-c258-4d21-a5ce-7a76e938f84e",
+      "name": "Set Fields"
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/customsearch/v1",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "key"
+            },
+            {
+              "name": "cx",
+              "value": "32f7b7e04ce0a4c96"
+            },
+            {
+              "name": "q",
+              "value": "coaches USA site:linkedin.com/in"
+            },
+            {
+              "name": "start",
+              "value": "={{ $runIndex == 0 ? $node[\"Set Fields\"].json.currentStartIndex : $node[\"Pagination Check\"].json.startIndex }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -192,
+        -1248
+      ],
+      "id": "bfa379b1-6eca-4aba-9093-3aac659b7380",
+      "name": "Search Google"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the response data\nconst response = $input.first().json;\nconst items = response.items || [];\n\n// Track pagination info\nlet nextStartIndex = 1;\nif (response.queries && response.queries.nextPage && response.queries.nextPage[0]) {\n  nextStartIndex = response.queries.nextPage[0].startIndex;\n}\n\n// Calculate if we should continue (Google only allows up to 100 results)\nconst hasMoreResults = nextStartIndex <= 100;\n\n// Process the items and include pagination info in each item\nconst results = items.map(item => {\n  const titleParts = item.title.split(\" - \");\n  return {\n    name: titleParts[0] || null,\n    title: titleParts.slice(1).join(\" - \") || null,\n    link: item.link || null,\n    snippet: item.snippet || null,\n    image: item.pagemap?.cse_thumbnail?.[0]?.src || null,\n    // Add pagination info to each item\n    startIndex: nextStartIndex,\n    hasMoreResults: hasMoreResults\n  };\n});\n\n// If there are no results, return at least one item with pagination info\nif (results.length === 0) {\n  return [{ \n    json: {\n      name: null,\n      title: null,\n      link: null,\n      snippet: null,\n      image: null,\n      startIndex: nextStartIndex,\n      hasMoreResults: false\n    }\n  }];\n}\n\n// Return the processed results\nreturn results.map(r => ({ json: r }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        -1248
+      ],
+      "id": "8af5f932-f48c-48e2-abcb-48825d9730b5",
+      "name": "Extract Results"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1O-2NBC6Cv5op55rkNAXcI01xo4n7ySeStDOBxAjMfzM",
+          "mode": "list",
+          "cachedResultName": "Linkedin Scrap",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1O-2NBC6Cv5op55rkNAXcI01xo4n7ySeStDOBxAjMfzM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1O-2NBC6Cv5op55rkNAXcI01xo4n7ySeStDOBxAjMfzM/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.name }}",
+            "title": "={{ $json.title }}",
+            "Linkedin Url": "={{ $json.link }}",
+            "snippet": "={{ $json.snippet }}",
+            "image": "={{ $json.image }}",
+            "index": "={{ $json.startIndex }}",
+            "results": "={{ $json.hasMoreResults }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Linkedin Url",
+              "displayName": "Linkedin Url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "snippet",
+              "displayName": "snippet",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "image",
+              "displayName": "image",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "index",
+              "displayName": "index",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "results",
+              "displayName": "results",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        416,
+        -1632
+      ],
+      "id": "51dd926c-28ca-4432-8947-cf1f27e06299",
+      "name": "Add to Google",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all input items\nconst inputItems = $input.all();\nconsole.log(\"Input items count:\", inputItems.length);\n\n// Extract pagination values with fallbacks\nlet nextStartIndex = 1;\nlet hasMoreResults = false;\n\n// Try different approaches to find the pagination info\nif (inputItems && inputItems.length > 0) {\n  const firstItem = inputItems[0];\n  \n  // Check direct properties\n  if (firstItem.json) {\n    console.log(\"First item JSON:\", JSON.stringify(firstItem.json));\n    \n    // Check for \"index\" property (instead of startIndex)\n    if (firstItem.json.index !== undefined) {\n      nextStartIndex = firstItem.json.index;\n      console.log(\"Found index:\", nextStartIndex);\n    }\n    \n    // Check for \"results\" property (instead of hasMoreResults)\n    if (firstItem.json.results !== undefined) {\n      hasMoreResults = firstItem.json.results;\n      console.log(\"Found results:\", hasMoreResults);\n    }\n  }\n}\n\n// Return pagination control info\nreturn {\n  json: {\n    continueLoop: hasMoreResults,\n    startIndex: nextStartIndex\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        -1344
+      ],
+      "id": "677da155-2bc0-49df-8d8e-aeedd2f526b0",
+      "name": "Pagination"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "faef2862-80a4-465b-9e0b-be5b9753dcbd",
+              "leftValue": "={{ $json.continueLoop }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        -1216
+      ],
+      "id": "fe6895b4-c0d3-4e76-bd71-8dc85ef29c63",
+      "name": "Pagination Check"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        160,
+        -1248
+      ],
+      "id": "be867abc-5f62-4c13-ae8f-a498dff36943",
+      "name": "Wait",
+      "webhookId": "d3bbbd53-2135-45e5-a847-aad35b1c518e"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1O-2NBC6Cv5op55rkNAXcI01xo4n7ySeStDOBxAjMfzM",
+          "mode": "list",
+          "cachedResultName": "Linkedin Scrap",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1O-2NBC6Cv5op55rkNAXcI01xo4n7ySeStDOBxAjMfzM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 858123210,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1O-2NBC6Cv5op55rkNAXcI01xo4n7ySeStDOBxAjMfzM/edit#gid=858123210"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Sent",
+            "URLs": "={{ $json['Linkedin Url'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "URLs",
+              "displayName": "URLs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        416,
+        -1488
+      ],
+      "id": "4402ad64-de9c-468e-90f2-abc0ee2daff3",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -544,
+        -1248
+      ],
+      "id": "f72699f6-a69a-4e38-a3ce-63a56da997c6",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Function node\n// Input: array of enriched profile JSONs\n// Output: only firstName, lastName, fullName, companyName, email\n\nreturn items.map(item => {\n  const d = item.json;\n  return {\n    json: {\n      firstName: d.firstName || \"\",\n      lastName: d.lastName || \"\",\n      fullName: d.fullName || \"\",\n      companyName: d.companyName || \"\",\n      email: d.email || \"\"\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        -864
+      ],
+      "id": "84714f2b-8f0e-4dfd-a649-a90073cb78c7",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "content": "## Google API Instructions\n\n1. Go to [Google Cloud Console](https://console.cloud.google.com/)\n   - Create a new project  \n   - Enable **Custom Search API**  \n   - Go to **Credentials** and copy your **API Key**\n\n2. Go to [Programmable Search Engine](https://programmablesearchengine.google.com/controlpanel/create)\n   - Create a name  \n   - Select **Search entire web**  \n   - Copy the **cx** value\n\n## Usage Limits (Free Tier)\n\n- The free tier of the Google Custom Search API allows **100 requests per day**\n- Each request returns **up to 10 search results**\n- This means you can get **up to 1,000 search results per day** at no cost\n",
+        "height": 608,
+        "width": 400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -992,
+        -1680
+      ],
+      "typeVersion": 1,
+      "id": "62be651c-f811-42df-9038-5b4b27d5fd3c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1O-2NBC6Cv5op55rkNAXcI01xo4n7ySeStDOBxAjMfzM",
+          "mode": "list",
+          "cachedResultName": "Linkedin Scrap",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1O-2NBC6Cv5op55rkNAXcI01xo4n7ySeStDOBxAjMfzM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 858123210,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1O-2NBC6Cv5op55rkNAXcI01xo4n7ySeStDOBxAjMfzM/edit#gid=858123210"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "Sent"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -496,
+        -640
+      ],
+      "id": "954b6698-92ad-4d9a-8b07-10d22b0705be",
+      "name": " Fetch Ready Profiles from Google Sheets ",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        -640
+      ],
+      "id": "183346a0-ce80-410f-8d77-edcdab79ccaf",
+      "name": " Manual Trigger"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.apify.com/v2/acts/dev_fusion~linkedin-profile-scraper/runs",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"profileUrls\":{{ $json.profile_ids }}\n    \n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        16,
+        -640
+      ],
+      "id": "eb9f89c4-fac1-49a1-a64a-1e9c186c1f3c",
+      "name": "Launch LinkedIn Profile Scraper Actor",
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "HRaS1hI25rXa967C",
+          "name": "Apify"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.apify.com/v2/acts/{{ $json.data.actId }}/runs/last",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        352,
+        -704
+      ],
+      "id": "fbe18e52-1113-4c70-afd9-2085580105f3",
+      "name": "Check Profile Scraper Status",
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "HRaS1hI25rXa967C",
+          "name": "Apify"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f4022ce0-3ed0-4c5b-92e9-9f54dbf8ac9c",
+              "leftValue": "={{ $json.data.status }}",
+              "rightValue": "SUCCEEDED",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        -848
+      ],
+      "id": "cee624ca-df38-47fe-ac07-f647e0c8030c",
+      "name": "Is Profile Scraping Complete?"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.apify.com/v2/acts/{{ $json.data.actId }}/runs/last/dataset/items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        800,
+        -864
+      ],
+      "id": "5c839939-b966-4b02-bdcf-c7283fec6317",
+      "name": " Retrieve Profile Data ",
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "HRaS1hI25rXa967C",
+          "name": "Apify"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        784,
+        -656
+      ],
+      "id": "754d6fb0-5a37-46e8-939f-6fa8cd4e83e6",
+      "name": "Wait for Profile Processing ",
+      "webhookId": "4ba9e8c1-7bc9-4355-b14c-c18fd30b669e"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1O-2NBC6Cv5op55rkNAXcI01xo4n7ySeStDOBxAjMfzM",
+          "mode": "list",
+          "cachedResultName": "Linkedin Scrap",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1O-2NBC6Cv5op55rkNAXcI01xo4n7ySeStDOBxAjMfzM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 858123210,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1O-2NBC6Cv5op55rkNAXcI01xo4n7ySeStDOBxAjMfzM/edit#gid=858123210"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "First name": "={{ $('Code in JavaScript').item.json.firstName }}",
+            "Last name": "={{ $('Code in JavaScript').item.json.lastName }}",
+            "Email": "={{ $json.email }}",
+            "title": "={{ $(' Retrieve Profile Data ').item.json.experiences[0].title }}",
+            "Headline": "={{ $(' Retrieve Profile Data ').item.json.headline }}",
+            "connections": "={{ $(' Retrieve Profile Data ').item.json.connections }}",
+            "About": "={{ $(' Retrieve Profile Data ').item.json.about }}",
+            "Company Name": "={{ $(' Retrieve Profile Data ').item.json.companyName }}",
+            "URLs": "={{ $(' Retrieve Profile Data ').item.json.linkedinUrl }}"
+          },
+          "matchingColumns": [
+            "URLs"
+          ],
+          "schema": [
+            {
+              "id": "URLs",
+              "displayName": "URLs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "First name",
+              "displayName": "First name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last name",
+              "displayName": "Last name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Headline",
+              "displayName": "Headline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "connections",
+              "displayName": "connections",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "About",
+              "displayName": "About",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1264,
+        -864
+      ],
+      "id": "85b6ab1b-41be-4f0c-9571-ef2f57be10d8",
+      "name": "Update Profile Information in Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Configure Apify API Settings": {
+      "main": [
+        [
+          {
+            "node": "Launch LinkedIn Profile Scraper Actor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Fields": {
+      "main": [
+        [
+          {
+            "node": "Search Google",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Google": {
+      "main": [
+        [
+          {
+            "node": "Extract Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Results": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to Google": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pagination": {
+      "main": [
+        [
+          {
+            "node": "Pagination Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pagination Check": {
+      "main": [
+        [
+          {
+            "node": "Search Google",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Add to Google",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Pagination",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Update Profile Information in Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    " Fetch Ready Profiles from Google Sheets ": {
+      "main": [
+        [
+          {
+            "node": "Configure Apify API Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    " Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": " Fetch Ready Profiles from Google Sheets ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Launch LinkedIn Profile Scraper Actor": {
+      "main": [
+        [
+          {
+            "node": "Check Profile Scraper Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Profile Scraper Status": {
+      "main": [
+        [
+          {
+            "node": "Is Profile Scraping Complete?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Profile Scraping Complete?": {
+      "main": [
+        [
+          {
+            "node": " Retrieve Profile Data ",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait for Profile Processing ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    " Retrieve Profile Data ": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for Profile Processing ": {
+      "main": [
+        [
+          {
+            "node": "Check Profile Scraper Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "372c2d4f-8029-4f3e-8f9c-82e595fcd4a7",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-16T20:05:51.517Z",
+      "createdAt": "2025-09-16T20:05:51.517Z",
+      "role": "workflow:owner",
+      "workflowId": "1OAApRYd9rdYJ7dH",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
