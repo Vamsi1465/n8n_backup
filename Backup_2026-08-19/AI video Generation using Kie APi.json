@@ -1,0 +1,909 @@
+{
+  "updatedAt": "2025-11-18T21:05:53.000Z",
+  "createdAt": "2025-11-16T17:46:51.326Z",
+  "id": "RDcBL6HetNBzu3dj",
+  "name": "AI video Generation using Kie APi",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "UGC",
+        "formDescription": "High quality",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Upload product",
+              "fieldType": "file",
+              "acceptFileTypes": ".jpg, .png, .jpeg",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Target Audience",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Women 18 to 25"
+                  },
+                  {
+                    "option": "Women 25 to 40"
+                  },
+                  {
+                    "option": "Men 18 to 30"
+                  },
+                  {
+                    "option": "Men 30 to 45"
+                  },
+                  {
+                    "option": "Skincare users"
+                  },
+                  {
+                    "option": "Fitness users"
+                  },
+                  {
+                    "option": "Fashion buyers"
+                  },
+                  {
+                    "option": "People with dry skin"
+                  },
+                  {
+                    "option": "People wanting to lose weight"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Tone of video",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Friendly and nature"
+                  },
+                  {
+                    "option": "Aesthetic and calm"
+                  },
+                  {
+                    "option": "High energy"
+                  },
+                  {
+                    "option": "Storytelling vibe"
+                  },
+                  {
+                    "option": "Review style"
+                  },
+                  {
+                    "option": "Problem solving"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Focus point",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Hydration"
+                  },
+                  {
+                    "option": "Lightweight"
+                  },
+                  {
+                    "option": "Comfort"
+                  },
+                  {
+                    "option": "Glow"
+                  },
+                  {
+                    "option": "Fast results"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Description about script"
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -1312,
+        1696
+      ],
+      "id": "33643141-5d50-4a15-88ae-75695ab6ad0e",
+      "name": "On form submission",
+      "webhookId": "ddad5b04-b2e7-493d-84fd-97c4a05f8678"
+    },
+    {
+      "parameters": {
+        "operation": "resize",
+        "dataPropertyName": "Upload_product",
+        "width": 720,
+        "height": 1280,
+        "resizeOption": "ignoreAspectRatio",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        -1120,
+        1696
+      ],
+      "id": "97129ded-fa09-42cc-97e5-8bb8bfd27514",
+      "name": "Edit Image"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        240,
+        1936
+      ],
+      "id": "14ea4b7d-e526-4255-966d-f21311d6c056",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Gq3qNdXZmlzVb7Jg",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/veo/generate",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"prompt\": {{ JSON.stringify($json.output) }},\n  \"imageUrls\": [\n    \"https://drive.google.com/uc?export=view&id={{ $('Upload Image').item.json.id }}\"\n  ],\n  \"model\": \"veo3_fast\",\n  \"watermark\": \"Lumoscale\",\n  \"aspectRatio\": \"16:9\",\n  \"seeds\": 12345,\n  \"enableFallback\": false,\n  \"enableTranslation\": true,\n  \"generationType\": \"REFERENCE_2_VIDEO\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1776,
+        -368
+      ],
+      "id": "edcac9e1-a9e2-4f2f-9726-f61c86626915",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Sd8hPGkflaFZs144",
+          "name": "Kie API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/veo/record-info",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "taskId",
+              "value": "={{ $json.data.taskId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1136,
+        -368
+      ],
+      "id": "d96b71f0-060c-415c-b841-57b3ed1389df",
+      "name": "HTTP Request6",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Sd8hPGkflaFZs144",
+          "name": "Kie API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.data.response.resultUrls[0] }}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          },
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "sora_video.mp4"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -704,
+        -384
+      ],
+      "id": "d342835e-bdb5-4662-ac60-e317ce5ee31f",
+      "name": "HTTP Request7"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5ccd71e5-f89a-4c79-9dd0-84b62c98a3f5",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -928,
+        -368
+      ],
+      "id": "f71adde7-5f71-42c2-a8c1-4cdbfc4d29d1",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "amount": 3,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1360,
+        -368
+      ],
+      "id": "aee63c14-2d0e-4d0d-bf67-8516bb5dd2d2",
+      "name": "Wait",
+      "webhookId": "9affabd3-4a0d-4c95-be3d-0b25d26bbc37"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "Upload_product",
+        "name": "UGC Product",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "15aDGAPg8X9wZr3RvFHygQs2bRSY00uUD",
+          "mode": "list",
+          "cachedResultName": "UGC",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/15aDGAPg8X9wZr3RvFHygQs2bRSY00uUD"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -944,
+        1696
+      ],
+      "id": "92d36252-25ad-4805-bfec-f2b4f948947a",
+      "name": "Upload Image",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "pqwDBXzX6aAkWb7p",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "writer",
+            "type": "anyone",
+            "allowFileDiscovery": true
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -752,
+        1696
+      ],
+      "id": "129f8267-057e-4a54-8002-a393c4384029",
+      "name": "Share permissions",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "pqwDBXzX6aAkWb7p",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Upload Image').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -576,
+        1696
+      ],
+      "id": "779caa5f-efb8-4604-a7f2-636b51e6be84",
+      "name": "Download File",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "pqwDBXzX6aAkWb7p",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash-preview-05-20",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash-preview-05-20"
+        },
+        "text": "=Describe the product shown in the image. Include its category, color, texture, materials, size, shape, how it is used, who usually uses it, and the type of setting it fits in. Keep it concise but detailed enough for generating a realistic UGC scene.",
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        1696
+      ],
+      "id": "4bb86cfa-55f1-4543-a57b-b425773a2ba0",
+      "name": "Analyze image",
+      "retryOnFail": false,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Gq3qNdXZmlzVb7Jg",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Product description: {{ $json.content.parts[0].text }}\nTarget audience: {{ $('On form submission').item.json['Target Audience'] }}\nTone of video: {{ $('On form submission').item.json['Tone of video'] }}\nFocus point: {{ $('On form submission').item.json['Focus point'] }}\nDecription about script: {{ $('On form submission').item.json['Description about script'] }}\nAdditonal notes: {{ $json['Additional Notes'] }}\nCreate the final scene using all inputs above.",
+        "options": {
+          "systemMessage": "=## 🤖 SYSTEM: UGC_Story_Architect\n\nYour role is the UGC_Story_Architect. Your task is to generate one complete and concise script for a 12 second User Generated Content advertisement such as TikTok, Reels, or Shorts. The script must feel natural and authentic, and it can be a solo monologue or a short dialogue based on the inputs provided.\n\nYou must use only the information in the inputs. Never restate or summarize the inputs in the final script.\n\n## 🥅 GOAL\n\nProduce one script that:\n1. Strictly matches the number of actors and scenario described in the Description about script input.\n2. Follows the five part structure exactly in the correct order.\n3. Clearly aligns with the Target audience and Tone of video.\n4. Is short enough to fit a 12 second delivery.\n5. Integrates the product naturally and highlights the Focus point.\n6. Uses the Additional notes input if provided. If it is not provided, ignore it completely.\n\n## 📜 RULES\n\n1. Actor count is final. Follow it with no exceptions.\n2. The script must contain exactly five parts with no added elements.\n3. Lines must be short, simple, and natural such as real social content.\n4. No corporate language, no long sentences, no filler, no technical details.\n5. Do not add visuals, camera notes, scene descriptions, or explanations. Only write dialogue or monologue.\n6. Do not repeat or reference the inputs directly. Use them only to shape the story.\n7. Keep the entire script authentic, human, and easy to speak in under 12 seconds.\n\n## 🛠️ MANDATORY FIVE PART STRUCTURE\n\n1. Quick Setup, one or two short lines.\n2. Problem or Question, one short line.\n3. Natural Reply or Action, one short line.\n4. Product Moment, one or two short lines that introduce the solution naturally.\n5. Final Reaction or Conclusion, one short line.\n\n## 📥 INPUTS\n\nProduct description: {{ $json.content.parts[0].text }}\nTarget audience: {{ $('On form submission').item.json['Target Audience'] }}\nTone of video: {{ $('On form submission').item.json['Tone of video'] }}\nFocus point: {{ $('On form submission').item.json['Focus point'] }}\nDecription about script: {{ $('On form submission').item.json['Description about script'] }}\nAdditonal notes: {{ $json['Additional Notes'] }} (Optional. These are improvement notes from previous review. If provided, apply them fully. If missing, ignore.)\n\n## 📤 OUTPUT FORMAT\n\nOnly output the final script. Use dialogue or monologue based on the actor count. Do not add any explanations or labels.\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -48,
+        1696
+      ],
+      "id": "114009dc-7b45-4735-91d3-5ef524d84838",
+      "name": "Story Writer"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "options": {
+          "systemMessage": "=## 🤖 SYSTEM: Visual Scene Architect for Video Generation\n\nYour role is the **Visual Scene Architect**. Your job is to translate a short UGC dialogue script (provided as the input 'Story') into one single, continuous, highly detailed, and cinematic visual description suitable for a text-to-video model (like Sora). The output must serve as a complete blueprint for a seamless 12-second video scene.\n\n## 🥅 GOAL\n\nGenerate a single, dense, continuous visual description that covers the entire 12-second scene, ensuring all plot points, emotional beats, and product interactions from the input 'Story' are visually realized through character actions and environmental detail.\n\n## 📜 RULES (Mandatory Constraints)\n\n1.  **Actor Count is Law:** You **must strictly adhere to the number of people** present in the input 'Story' (1, 2, or a group). Do not add, remove, or change the scenario.\n2.  **No Dialogue/Text:** The final output **must not contain any spoken words, dialogue, text, or on-screen text.** Convert all verbal exchanges into physical actions and emotional reactions.\n3.  **No Camera Terminology:** Do not use technical camera language (e.g., 'shot,' 'angle,' 'close-up,' 'pan,' 'zoom'). Describe the action as a continuous, flowing visual narrative.\n4.  **Comprehensive Detail:** The description must be rich in visual elements, explicitly detailing all the following required components throughout the narrative flow:\n    * **Setting:** The exact room, location, and time of day.\n    * **Lighting:** The style and quality of light (e.g., golden hour glow, bright kitchen daylight, soft ambient indoor light).\n    * **Background Detail:** Specific objects that anchor the scene in reality (e.g., a pile of books, a half-eaten snack, keys on a hook).\n    * **Character Actions:** Precise movements of all actors throughout the scene.\n    * **Facial/Body Reactions:** Clear emotional shifts (e.g., a sudden frown, a look of relief, subtle head nodding).\n    * **Product Interaction:** How the product is held, opened, demonstrated, or shown to another person.\n    * **Hand Movements:** Small, natural gestures (e.g., fidgeting fingers, gentle taps, quick hand gestures).\n\n## 📥 INPUT\n\n* **Story:** (The complete, short dialogue script generated in the previous step.)\n\n## 📝 EXAMPLE\n\n*Story:*\nCreator: My to-do list used to run the day. It was chaos.\nCreator: How can anyone focus when every task looks the same?\nCreator: I realized I needed a system to see what matters instantly.\nCreator: Now I use this planner. The color-coding is a lifesaver for priority.\nCreator: Instantly calmer. This is essential for growth.\n\n*Scene Conversion Output:*\nSoft, warm desk lamp light illuminates a cozy home office setting. A solo creator sits at a wooden desk with a large, messy pile of papers beside their laptop. They run a hand through their hair, sighing visibly while looking at the chaotic pile. Their fingers tap impatiently on the desk surface as they shake their head slightly in frustration. The creator then purposefully pushes the messy papers aside and picks up a clean, open planner (the product) from the corner. They gently trace the color-coded sections with a finger, their face visibly relaxing. A small, self-satisfied smile appears as they slowly close the planner and nod once, leaning back with a look of calm relief.\nAudio Suggestion: Gentle, motivational piano music transitions into a soft acoustic guitar track.\n\n## 📤 OUTPUT FORMAT\n\nGenerate the single, continuous Visual Description paragraph, followed by the separate Audio Suggestion line."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        384,
+        1696
+      ],
+      "id": "d6efaeca-8686-443e-a032-215fbf00f9c1",
+      "name": "Prompt Generator"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/jobs/createTask",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"sora-2-image-to-video\",\n  \"input\": {\n    \"prompt\": {{ JSON.stringify($json.output) }},\n    \"image_urls\": [\n      \"https://drive.google.com/uc?export=view&id={{ $('Upload Image').item.json.id }}\"\n    ],\n    \"aspect_ratio\": \"portrait\",\n    \"quality\": \"hd\"\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        848,
+        976
+      ],
+      "id": "d91d05b4-7fc8-4e50-b1dd-415a550224f5",
+      "name": "Create video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Sd8hPGkflaFZs144",
+          "name": "Kie API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 3,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        864,
+        1200
+      ],
+      "id": "6ac96c1b-a5d7-4ecc-8cf5-af9469e458e7",
+      "name": "Wait for 3min",
+      "webhookId": "9affabd3-4a0d-4c95-be3d-0b25d26bbc37"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "taskId",
+              "value": "={{ $json.data.taskId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        864,
+        1376
+      ],
+      "id": "9768dcd5-3874-4089-a6b7-558e68470415",
+      "name": "Check status of video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Sd8hPGkflaFZs144",
+          "name": "Kie API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c0dc46c1-0ff6-4b73-900c-3d63bd3573ca",
+              "leftValue": "={{ $json.data.state }}",
+              "rightValue": "generating",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        864,
+        1584
+      ],
+      "id": "0ad37060-7e0c-4aa3-84d6-2d0e67af5bf0",
+      "name": "Completed or Pending"
+    },
+    {
+      "parameters": {
+        "jsCode": "const resultJsonRaw = $json.data.resultJson;\n\n// Parse string to object\nconst parsed = JSON.parse(resultJsonRaw);\n\n// Extract first URL\nconst url = parsed.resultUrls[0];\n\nreturn [\n  {\n    json: {\n      video_url: url\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        1824
+      ],
+      "id": "d5c9596c-5515-4de9-a9d7-510d579bcf54",
+      "name": "Get Url"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.video_url }}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          },
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "sora_video.mp4"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        2000
+      ],
+      "id": "9721ba23-6a31-429b-a67b-66d106f57078",
+      "name": "Download video"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "sora_video.mp4",
+        "name": "New",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1248,
+        2192
+      ],
+      "id": "9fe8c70c-b04f-432f-85d8-3c27d6acd55d",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "pqwDBXzX6aAkWb7p",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendVideo",
+        "chatId": "8417171830",
+        "binaryData": true,
+        "binaryPropertyName": "sora_video.mp4",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1248,
+        1840
+      ],
+      "id": "271ea9df-84d1-4d85-abd3-af31f8653ed0",
+      "name": "Send a video",
+      "webhookId": "d640d20a-17ca-401c-ab50-4e27c9c452f9",
+      "credentials": {
+        "telegramApi": {
+          "id": "Eb5m8Ou5otuazRt3",
+          "name": "Summary"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Edit Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Image": {
+      "main": [
+        [
+          {
+            "node": "Upload Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Story Writer",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Prompt Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request6": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request7",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Image": {
+      "main": [
+        [
+          {
+            "node": "Share permissions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Share permissions": {
+      "main": [
+        [
+          {
+            "node": "Download File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download File": {
+      "main": [
+        [
+          {
+            "node": "Analyze image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image": {
+      "main": [
+        [
+          {
+            "node": "Story Writer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Story Writer": {
+      "main": [
+        [
+          {
+            "node": "Prompt Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt Generator": {
+      "main": [
+        [
+          {
+            "node": "Create video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create video": {
+      "main": [
+        [
+          {
+            "node": "Wait for 3min",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for 3min": {
+      "main": [
+        [
+          {
+            "node": "Check status of video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check status of video": {
+      "main": [
+        [
+          {
+            "node": "Completed or Pending",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Completed or Pending": {
+      "main": [
+        [
+          {
+            "node": "Check status of video",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Url",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Url": {
+      "main": [
+        [
+          {
+            "node": "Download video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download video": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "40f8606e-acfb-4d61-b752-f1f6360bb51f",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-11-16T17:46:51.330Z",
+      "createdAt": "2025-11-16T17:46:51.330Z",
+      "role": "workflow:owner",
+      "workflowId": "RDcBL6HetNBzu3dj",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
