@@ -1,0 +1,198 @@
+{
+  "updatedAt": "2026-03-28T21:37:28.843Z",
+  "createdAt": "2026-03-28T13:12:55.171Z",
+  "id": "BXHopyKEDqFQK62N",
+  "name": "Cold Calling",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://5a02-27-4-49-165.ngrok-free.app/api/client-webhook/b1f16d1b-f135-4768-a63f-cea8baaa5e99",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "ngrok-skip-browser-warning",
+              "value": "true"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "mobile",
+              "value": "=+91{{ $json['Phone Number'] }}"
+            },
+            {
+              "name": "name",
+              "value": "={{ $json.Name }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        48,
+        -160
+      ],
+      "id": "38098b3c-2761-4a33-a2af-ae1301313e5d",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        -176
+      ],
+      "id": "9432c56b-282e-47ad-8c64-52c797d059da",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1_B7x5nkMLJ6BW9WuUeyw1rYcG5p-5HSv8Otajw5RxIc",
+          "mode": "list",
+          "cachedResultName": "Cold Calling",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_B7x5nkMLJ6BW9WuUeyw1rYcG5p-5HSv8Otajw5RxIc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_B7x5nkMLJ6BW9WuUeyw1rYcG5p-5HSv8Otajw5RxIc/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -384,
+        -176
+      ],
+      "id": "ba9a15b8-540f-45e7-80e6-43675cf7ff84",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -176,
+        -176
+      ],
+      "id": "84605424-0774-4da6-85d2-d71693f39e65",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        256,
+        -160
+      ],
+      "id": "b836f48a-2e3c-4d74-83dd-456a6cc8316f",
+      "name": "Wait",
+      "webhookId": "983103ea-eac3-451a-bc0f-a4e47ceb6f98"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "0c5cb468-4357-489b-9082-cf541be64756",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-03-28T13:12:55.175Z",
+      "createdAt": "2026-03-28T13:12:55.175Z",
+      "role": "workflow:owner",
+      "workflowId": "BXHopyKEDqFQK62N",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
