@@ -1,0 +1,158 @@
+{
+  "updatedAt": "2025-09-16T16:12:00.000Z",
+  "createdAt": "2025-09-16T15:34:50.181Z",
+  "id": "vJ7AiuDbCfDQ6K7G",
+  "name": "Lead Scrapper",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        -128
+      ],
+      "id": "5e1c18e8-5579-4331-9f18-2d01a63a3b63",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "00213f32-2be2-43ab-b7bc-4f5a69b9195c",
+              "name": "query",
+              "value": "lawyer USA email OR contact OR @gmail.com OR @yahoo.com",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -160,
+        -128
+      ],
+      "id": "b2dee7de-9573-499a-a94c-58eb927ca0d8",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        48,
+        -128
+      ],
+      "id": "a7b1f3bd-2159-4a0e-b10f-f79a2bc37eb8",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://google.serper.dev/search",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"X-API-KEY\": \"e99be85074c4d283dc2aebc710e714a73b60a439\",\n  \"Content-Type\": \"application/json\"\n}\n",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"q\": \"{{ $json.query }}\",\n  \"num\": 10\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        272,
+        -112
+      ],
+      "id": "f5185874-fbc3-48dd-bdcd-25d2e8d87f08",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const itemsOut = [];\n\nitems.forEach(item => {\n  const organic = item.json.organic || [];\n\n  organic.forEach(result => {\n    const snippet = result.snippet || \"\";\n    const link = result.link || \"\";\n    \n    // Extract emails from snippet\n    const emailMatches = snippet.match(/\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b/gi) || [];\n    \n    // Extract phones from snippet\n    const phoneMatches = snippet.match(/\\b\\d{2,4}[\\s-]?\\d{3,4}[\\s-]?\\d{3,4}\\b/g) || [];\n    \n    // Create one item per email\n    emailMatches.forEach((email, index) => {\n      itemsOut.push({\n        json: {\n          email: email,\n          phone: phoneMatches[index] || \"\", // match phone if exists\n          url: link\n        }\n      });\n    });\n  });\n});\n\nreturn itemsOut;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        -112
+      ],
+      "id": "dac3b62f-0f9c-4d34-89f6-a23c5342ddcc",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "3fa654dc-8ffc-460e-9902-58ef4486d77e",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-16T15:34:50.184Z",
+      "createdAt": "2025-09-16T15:34:50.184Z",
+      "role": "workflow:owner",
+      "workflowId": "vJ7AiuDbCfDQ6K7G",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
