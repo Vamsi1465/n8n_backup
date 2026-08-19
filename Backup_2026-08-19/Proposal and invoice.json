@@ -1,0 +1,1201 @@
+{
+  "updatedAt": "2025-11-11T19:16:32.000Z",
+  "createdAt": "2025-11-09T10:10:24.764Z",
+  "id": "0dWRDN8wXie8HL9e",
+  "name": "Proposal and invoice",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Client Details",
+        "formDescription": "Lets create step by step onboarding",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Client Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Client Email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Service ",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Amount",
+              "fieldType": "number"
+            },
+            {
+              "fieldLabel": "Currency"
+            },
+            {
+              "fieldLabel": "Notes"
+            },
+            {
+              "fieldLabel": "Contract date",
+              "fieldType": "date"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -272,
+        -624
+      ],
+      "id": "e61c1627-04a3-48c8-801f-be976f078725",
+      "name": "On form submission",
+      "webhookId": "cf64edd1-4505-4733-b456-754b5bdd5045"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $json;\nreturn [{\n  client_name: String(b.client_name || b[\"Client Name\"] || '').trim(),\n  client_email: String(b.client_email || b[\"Client Email\"] || '').trim(),\n  project_name: String(b.project_name || b.Service || 'AI Automation Setup').trim(),\n  amount: Number(b.amount || b.Amount || 0),\n  currency: String(b.currency || b.Currency || 'INR').trim(),\n  notes: String(b.notes || b.Notes || '').trim(),\n  contract_date: b.contract_date || new Date().toISOString()\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        -624
+      ],
+      "id": "0ad9ddca-072c-4cd7-91be-11401c20fcc9",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1PJXAzX7Vl7CDKayh7m1sLFcOtRegilcD",
+          "mode": "list",
+          "cachedResultName": "BTS Client Agreement.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1PJXAzX7Vl7CDKayh7m1sLFcOtRegilcD/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        128,
+        -624
+      ],
+      "id": "d5a914ae-b7f5-4100-86fa-1943c581c4ee",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "pqwDBXzX6aAkWb7p",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        336,
+        -624
+      ],
+      "id": "63fde09e-cbe3-454e-93cb-ba95b5a7a753",
+      "name": "Extract from File1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "=Prompt Title: Client Agreement Auto-Updater Agent\n\nPrompt (User Message):\n\nYou are a document updater agent.\nYour task is to read the extracted contract text below and replace old client information with new details, keeping the legal and structural format of the agreement intact.\n\nHere is the extracted text from the file:\n\n{{ $json.text }}\n\n\nYour job:\nFind and replace all previous client information with the new data below. Keep the rest of the agreement exactly the same. Do not remove or modify section numbers, formatting, or legal terms.\n\nNew client details:\n\nClient Name: Vamsi V\n\nClient Email: Vamsivk555@gmail.com\n\nService: Lead Qualification\n\nAmount: 5000 INR\n\nNotes: No\n\nContract Date: 2025-11-09\n\nReplacement Rules:\n\nReplace old client name (“Sai Rupak” or any other name under “Client”) with Vamsi V.\n\nUpdate any mention of services, amount, or payment terms to reflect Lead Qualification and 5000 INR.\n\nUpdate Agreement date and Term start date to 2025-11-09 (in the same format as original).\n\nDo not modify agency name “Lumoscale” or legal clauses.\n\nKeep consistent formatting for paragraphs and numbering.\n\nReturn the final updated agreement text only, without any explanation.\n\nExpected Output Format:\n\nCLIENT AGREEMENT\nThis Agreement is entered into on 09-11-2025 by and between:\nLumoscale, a company organized under the laws of India (hereinafter referred to as the \"Agency\"),\nAND\nVamsi V, an individual (hereinafter referred to as the \"Client\").\n[Full updated agreement continues...]"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        544,
+        -624
+      ],
+      "id": "ca52d7a3-cba0-475a-bbab-970c9ec5fac4",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        -432
+      ],
+      "id": "21c168da-590a-4ad8-8971-cf03032795cf",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "8cTwctTGeEBOJeUq",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "html": "{{ $json.html }}"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        1024,
+        -624
+      ],
+      "id": "dcc25209-db36-474e-832a-92084b81838b",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the contract text from the previous node\nconst text = $json.output || \"\";\n\n// Helper function: converts numbered clauses, sections, and bullet-like lines to HTML\nfunction formatTextToHtml(rawText) {\n  // Split into lines\n  const lines = rawText.split(/\\n+/);\n\n  let html = \"\";\n  for (let line of lines) {\n    line = line.trim();\n\n    // Skip empty lines\n    if (!line) continue;\n\n    // Top title\n    if (/^client agreement/i.test(line)) {\n      html += `<h1>${line}</h1>`;\n    }\n    // Section numbers like \"1. Services Provided\"\n    else if (/^\\d+\\.\\s+/.test(line)) {\n      const parts = line.split(/\\s+/);\n      html += `<h2>${line}</h2>`;\n    }\n    // Subsections like \"3.1 One-Time Project Fee\"\n    else if (/^\\d+\\.\\d+/.test(line)) {\n      html += `<h3>${line}</h3>`;\n    }\n    // Bullet points (lines starting with \"-\" or \"•\")\n    else if (/^[-•]/.test(line)) {\n      html += `<ul><li>${line.replace(/^[-•]\\s*/, \"\")}</li></ul>`;\n    }\n    // Capitalized phrases like \"Note:\" or \"Important:\"\n    else if (/^(Note|Important|Reminder|Tip):/i.test(line)) {\n      html += `<p><strong>${line}</strong></p>`;\n    }\n    // Regular sentences\n    else {\n      html += `<p>${line}</p>`;\n    }\n  }\n\n  // Wrap everything in a full HTML layout\n  return `\n  <!DOCTYPE html>\n  <html lang=\"en\">\n  <head>\n  <meta charset=\"utf-8\" />\n  <title>Client Agreement</title>\n  <style>\n    body { font-family: Arial, Helvetica, sans-serif; line-height: 1.6; padding: 40px; color: #111; background: #fff; }\n    h1 { text-align: center; font-size: 22px; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; }\n    h2 { font-size: 18px; color: #222; margin-top: 24px; }\n    h3 { font-size: 15px; color: #333; margin-top: 16px; }\n    p { margin: 8px 0; }\n    ul { margin: 6px 0 6px 24px; }\n    li { margin-bottom: 4px; }\n    strong { font-weight: 700; }\n    hr { border: 0; border-top: 1px solid #ccc; margin: 20px 0; }\n    footer { text-align: center; margin-top: 40px; font-size: 12px; color: #666; }\n  </style>\n  </head>\n  <body>\n    ${html}\n    <hr>\n    <footer>Generated automatically by Lumoscale Contract System</footer>\n  </body>\n  </html>\n  `;\n}\n\n// Generate HTML from the AI output text\nconst html = formatTextToHtml(text);\n\nreturn [{ html }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        848,
+        -624
+      ],
+      "id": "e122702b-b01b-4c66-9c02-c46d5ff65a52",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get HTML from previous node\nconst html = $json.html;\n\n// Convert to base64\nconst base64Html = Buffer.from(html, 'utf-8').toString('base64');\n\nreturn [{\n  html_base64: base64Html,\n  original_html: html\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        -624
+      ],
+      "id": "480a3666-cdcb-4273-a264-8ac79c955b3e",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.html2pdf.app/v1/generate",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "html",
+              "value": "={{ $json.original_html }}"
+            },
+            {
+              "name": "apiKey",
+              "value": "xRjumNJJPnFOkD6Dm0Kqi6pLzEEw7GQidzHjeKoG69nVTZaR1XPIDqdtgHaputPU"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "client_agreement.pdf"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1456,
+        -624
+      ],
+      "id": "b436c3da-6eac-43d8-9196-e920a8b914fb",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "client_agreement.pdf",
+        "name": "New 1",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1ohnjGBopSI1YYu7u3qDFzni3TmQ4m4YO",
+          "mode": "list",
+          "cachedResultName": "Demo Videos",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1ohnjGBopSI1YYu7u3qDFzni3TmQ4m4YO"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1648,
+        -624
+      ],
+      "id": "633d7d1a-a7ee-44ac-9818-0c9662fab72c",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "pqwDBXzX6aAkWb7p",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sign.zoho.in/api/v1/requests",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "data",
+              "value": "=return {\n  data: JSON.stringify({\n    requests: {\n      request_name: \"NDA\",\n      description: \"Client agreement document\",\n      request_type_id: \"\",  // optional\n      folder_id: \"\",        // optional\n      is_sequential: true,\n      expiration_days: 10,\n      email_reminders: true,\n      reminder_period: 2,\n      notes: \"Please review and sign this agreement.\",\n      actions: [\n        {\n          action_type: \"SIGN\",\n          recipient_name: \"Alex James\",\n          recipient_email: \"abc@example.com\",\n          signing_order: 0,\n          verify_recipient: true,\n          verification_type: \"EMAIL\",\n          private_notes: \"Client to sign.\"\n        },\n        {\n          action_type: \"SIGN\",\n          recipient_name: \"Lumoscale\",\n          recipient_email: \"your_email@yourdomain.com\",\n          signing_order: 1,\n          verify_recipient: false,\n          private_notes: \"Agency signature.\"\n        }\n      ]\n    }\n  })\n}\n"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2176,
+        -624
+      ],
+      "id": "bfb7aae0-d3e8-4e65-b3fb-8e1d426402b0",
+      "name": "HTTP Request3",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "2G2wV9IgLA2994n8",
+          "name": "Bigin-Lumoscale"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1856,
+        -624
+      ],
+      "id": "576932a0-2d7e-418c-b644-a79db4586541",
+      "name": "Download file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "pqwDBXzX6aAkWb7p",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Testing",
+        "formDescription": "New Form",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "client_name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "company"
+            },
+            {
+              "fieldLabel": "signer_name"
+            },
+            {
+              "fieldLabel": "signer_email",
+              "fieldType": "email"
+            },
+            {
+              "fieldLabel": "address"
+            },
+            {
+              "fieldLabel": "scope"
+            },
+            {
+              "fieldLabel": "deliverables"
+            },
+            {
+              "fieldLabel": "price",
+              "fieldType": "number"
+            },
+            {
+              "fieldLabel": "Currency"
+            },
+            {
+              "fieldLabel": "payment_terms"
+            },
+            {
+              "fieldLabel": "kickoff_date",
+              "fieldType": "date"
+            },
+            {
+              "fieldLabel": "contact_email",
+              "fieldType": "email"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "253da6ed-13dd-475c-be09-47c2c2b1b390",
+      "name": "On form submission1",
+      "webhookId": "01346d0d-be7c-417a-879a-e494eacf6723"
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $json.client_name }} folder1",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "7ebdea21-7f1c-4f77-b629-ce69f258d367",
+      "name": "Create folder",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "pqwDBXzX6aAkWb7p",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "https://docs.google.com/document/d/1sHK4MjcOD_jNOigfvPmmMbktQUIq6YACPv0LSlXzosg/edit?tab=t.0"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        656,
+        0
+      ],
+      "id": "437ab941-b0e8-45d0-aabf-96eb32b71f85",
+      "name": "Get a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "kBUbGEX7FP2FSpmx",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.result }} , {{ $('Get a document').item.json.content }}",
+        "options": {
+          "systemMessage": "=You are an AI document automation agent that personalizes contract or agreement templates using dynamic form submission data.\n\n🧩 System Prompt\nYou are a document automation AI agent responsible for customizing an agreement template using data received from a client form submission.\n\nYour goal is to take a base agreement (legal document) and replace or fill in the relevant placeholders with accurate, formatted details from the data provided.\n\nFollow these rules carefully:\n\n1. Use only the fields provided in the form data to fill the document.\n2. Preserve the legal structure and formatting of the agreement.\n3. Maintain professional indentation, bullet points, and spacing suitable for a Google Docs document.\n4. Replace all placeholders like - \n{{ $('Edit Fields').item.json.client_name }}\n   - {{ $('Edit Fields').item.json.company }}\n   - {{ $('Edit Fields').item.json.price }}\n   - {{ $('Edit Fields').item.json.Currency }}\n   - {{ $('Edit Fields').item.json.scope }}\n   - {{ $('Edit Fields').item.json.deliverables }}\n   - {{ $('Edit Fields').item.json.payment_terms }}\n   - {{ $('Edit Fields').item.json.kickoff_date }}\n   - {{ $('Edit Fields').item.json.signer_name }}\n   - {{ $('Edit Fields').item.json.signer_email }}\n   - {{ $('Edit Fields').item.json.address }} with real data values.\n5. If a value is missing, keep the placeholder as it is.\n6. Do not rewrite or simplify legal clauses, only replace the variables.\n7. At the end, include a signature section formatted neatly.\n\nReturn the entire document text, fully formatted and ready for Google Docs.\n\nExample Input:\n{\n  \"client_name\": \"John\",\n  \"company\": \"Lumoguy\",\n  \"signer_name\": \"Vamsi\",\n  \"signer_email\": \"vamsikrishna2536@gmail.com\",\n  \"address\": \"India\",\n  \"scope\": \"Building websites\",\n  \"deliverables\": \"Website, domain, SSL, Monitoring\",\n  \"price\": \"2000\",\n  \"Currency\": \"INR\",\n  \"payment_terms\": \"50% upfront and 50% after delivery\",\n  \"kickoff_date\": \"2025-11-28\",\n}\n\nExample Output:\nA clean, legally formatted agreement document with the placeholders replaced by these values, ready to be uploaded to Google Docs.\n\nAlways ensure the output is a plain text document, not JSON or code.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1104,
+        0
+      ],
+      "id": "5170e340-3c28-4a14-8da7-3778c7292104",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// This Code Node will take all values from the \"On form submission1\" node\n// and return them as a single comma-separated string\n\n// Get data from the node named \"On form submission1\"\nconst formData = $items(\"Edit Fields\")[0].json;\n\n// Collect all field values\nconst allValues = Object.values(formData);\n\n// Join them into a single comma-separated string\nconst commaSeparated = allValues.join(', ');\n\n// Return result\nreturn [\n  {\n    json: {\n      result: commaSeparated\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        0
+      ],
+      "id": "bcd457dc-598c-4da3-9e11-aeb0dc7d6b3e",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7ec55508-0c49-4749-8731-0c037a8ec5fc",
+              "name": "client_name",
+              "value": "={{ $json.client_name }}",
+              "type": "string"
+            },
+            {
+              "id": "bd2d3e51-ca30-455a-8a12-aba544b87220",
+              "name": "company",
+              "value": "={{ $json.company }}",
+              "type": "string"
+            },
+            {
+              "id": "980affa6-cc48-4fa2-8d1c-1c30f6b1df7d",
+              "name": "signer_name",
+              "value": "={{ $json.signer_name }}",
+              "type": "string"
+            },
+            {
+              "id": "79a93a43-e377-4c41-9ef8-9e137c00fa69",
+              "name": "signer_email",
+              "value": "={{ $json.signer_email }}",
+              "type": "string"
+            },
+            {
+              "id": "fa86a582-d788-4bcd-afb4-d9180c13292a",
+              "name": "address",
+              "value": "={{ $json.address }}",
+              "type": "string"
+            },
+            {
+              "id": "cfdd1141-7277-4ad3-9993-2077701bf354",
+              "name": "scope",
+              "value": "={{ $json.scope }}",
+              "type": "string"
+            },
+            {
+              "id": "15dd8063-f81a-439f-bff3-1eae429e7e03",
+              "name": "deliverables",
+              "value": "={{ $json.deliverables }}",
+              "type": "string"
+            },
+            {
+              "id": "675bbbbc-563e-4cdb-a499-3054b8a08b4c",
+              "name": "price",
+              "value": "={{ $json.price }}",
+              "type": "number"
+            },
+            {
+              "id": "47c204b6-0b3c-44a9-ab2b-1969001bc0ec",
+              "name": "Currency",
+              "value": "={{ $json.Currency }}",
+              "type": "string"
+            },
+            {
+              "id": "162fbde1-7024-41bf-9105-076b81823452",
+              "name": "payment_terms",
+              "value": "={{ $json.payment_terms }}",
+              "type": "string"
+            },
+            {
+              "id": "ce3708da-86fb-49e2-94ca-2cd68a6d28e6",
+              "name": "kickoff_date",
+              "value": "={{ $json.kickoff_date }}",
+              "type": "string"
+            },
+            {
+              "id": "4fd755bb-7062-4bf7-9be5-cae7d7d4fe45",
+              "name": "contact_email",
+              "value": "={{ $json.contact_email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "81c935ce-151a-4be7-b74c-243cdf0c600e",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1024,
+        208
+      ],
+      "id": "ff1a013c-6a80-4f27-9b69-10a1369e4ece",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "8cTwctTGeEBOJeUq",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the contract text from the previous node\nconst text = $json.output || \"\";\n\n// Helper function: converts numbered clauses, sections, and bullet-like lines to HTML\nfunction formatTextToHtml(rawText) {\n  // Split into lines\n  const lines = rawText.split(/\\n+/);\n\n  let html = \"\";\n  for (let line of lines) {\n    line = line.trim();\n\n    // Skip empty lines\n    if (!line) continue;\n\n    // Top title\n    if (/^client agreement/i.test(line)) {\n      html += `<h1>${line}</h1>`;\n    }\n    // Section numbers like \"1. Services Provided\"\n    else if (/^\\d+\\.\\s+/.test(line)) {\n      const parts = line.split(/\\s+/);\n      html += `<h2>${line}</h2>`;\n    }\n    // Subsections like \"3.1 One-Time Project Fee\"\n    else if (/^\\d+\\.\\d+/.test(line)) {\n      html += `<h3>${line}</h3>`;\n    }\n    // Bullet points (lines starting with \"-\" or \"•\")\n    else if (/^[-•]/.test(line)) {\n      html += `<ul><li>${line.replace(/^[-•]\\s*/, \"\")}</li></ul>`;\n    }\n    // Capitalized phrases like \"Note:\" or \"Important:\"\n    else if (/^(Note|Important|Reminder|Tip):/i.test(line)) {\n      html += `<p><strong>${line}</strong></p>`;\n    }\n    // Regular sentences\n    else {\n      html += `<p>${line}</p>`;\n    }\n  }\n\n  // Wrap everything in a full HTML layout\n  return `\n  <!DOCTYPE html>\n  <html lang=\"en\">\n  <head>\n  <meta charset=\"utf-8\" />\n  <title>Client Agreement</title>\n  <style>\n    body { font-family: Arial, Helvetica, sans-serif; line-height: 1.6; padding: 40px; color: #111; background: #fff; }\n    h1 { text-align: center; font-size: 22px; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; }\n    h2 { font-size: 18px; color: #222; margin-top: 24px; }\n    h3 { font-size: 15px; color: #333; margin-top: 16px; }\n    p { margin: 8px 0; }\n    ul { margin: 6px 0 6px 24px; }\n    li { margin-bottom: 4px; }\n    strong { font-weight: 700; }\n    hr { border: 0; border-top: 1px solid #ccc; margin: 20px 0; }\n    footer { text-align: center; margin-top: 40px; font-size: 12px; color: #666; }\n  </style>\n  </head>\n  <body>\n    ${html}\n    <hr>\n    <footer>Generated automatically by Lumoscale Contract System</footer>\n  </body>\n  </html>\n  `;\n}\n\n// Generate HTML from the AI output text\nconst html = formatTextToHtml(text);\n\nreturn [{ html }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1472,
+        0
+      ],
+      "id": "a6eab387-8b05-45a2-9441-bfa48589d878",
+      "name": "Code in JavaScript4"
+    },
+    {
+      "parameters": {
+        "html": "{{ $json.html }}"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        1680,
+        0
+      ],
+      "id": "2f5fb474-0ed0-43bc-b181-37453e8a088f",
+      "name": "HTML1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get HTML from previous node\nconst html = $json.html;\n\n// Convert to base64\nconst base64Html = Buffer.from(html, 'utf-8').toString('base64');\n\nreturn [{\n  html_base64: base64Html,\n  original_html: html\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1888,
+        0
+      ],
+      "id": "5890236b-657f-470e-8d00-126f69ac7686",
+      "name": "Code in JavaScript5"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.html2pdf.app/v1/generate",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "html",
+              "value": "={{ $json.original_html }}"
+            },
+            {
+              "name": "apiKey",
+              "value": "xRjumNJJPnFOkD6Dm0Kqi6pLzEEw7GQidzHjeKoG69nVTZaR1XPIDqdtgHaputPU"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "client_agreement.pdf"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2096,
+        0
+      ],
+      "id": "0febb50b-0dbd-438b-982e-0f57ec53e263",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "client_agreement.pdf",
+        "name": "New 1",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Create folder').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2288,
+        0
+      ],
+      "id": "bfa38808-71b5-44f7-90cf-a39c2dd1d38a",
+      "name": "Upload file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "pqwDBXzX6aAkWb7p",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2496,
+        0
+      ],
+      "id": "5c4338dd-1b2b-411e-9db0-25b5620e6c15",
+      "name": "Download file2",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "pqwDBXzX6aAkWb7p",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.signnow.com/v2/documents/url",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer a3e92eba9c4cdc3155cd8a1e116effde387764bad32e94c01138e0fa6fabb3ae"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $json.webContentLink }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        48,
+        720
+      ],
+      "id": "de1ab574-e061-449f-9d90-5da9b6398c4e",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.signnow.com/document/{{ $json.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer a3e92eba9c4cdc3155cd8a1e116effde387764bad32e94c01138e0fa6fabb3ae"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"fields\": [\n    {\n      \"type\": \"signature\",\n      \"required\": true,\n      \"role\": \"Client\",\n      \"name\": \"client_signature\",\n      \"anchor\": {\n        \"text\": \"[Signature]\",\n        \"offset_x\": 100,\n        \"offset_y\": 0,\n        \"match_case\": false,\n        \"occurrence\": 1\n      },\n      \"width\": 180,\n      \"height\": 40\n    },\n    {\n      \"type\": \"signature\",\n      \"required\": true,\n      \"role\": \"Agency\",\n      \"name\": \"agency_signature\",\n      \"anchor\": {\n        \"text\": \"[Signature]\",\n        \"offset_x\": 100,\n        \"offset_y\": 60,\n        \"match_case\": false,\n        \"occurrence\": 2\n      },\n      \"width\": 180,\n      \"height\": 40\n    }\n  ]\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        512,
+        496
+      ],
+      "id": "44b32825-cbd3-4414-a779-548e60da77df",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.signnow.com/document/{{ $json.id }}/invite",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer a3e92eba9c4cdc3155cd8a1e116effde387764bad32e94c01138e0fa6fabb3ae"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"from\": \"contact@lumoscale.com\",\n  \"to\": [\n    {\n      \"email\": \"vamsivk555@gmail.com\",\n      \"role\": \"Client\",\n      \"order\": 1\n    },\n    {\n      \"email\": \"vamsivk1465@gmail.com\",\n      \"role\": \"Agency\",\n      \"order\": 2\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        464,
+        720
+      ],
+      "id": "4ad082a4-0ef6-47af-9dd2-ed1c639d3055",
+      "name": "HTTP Request5"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://api.signnow.com/document/73308ebd22634fa895d341d91ebf5a5f35bdfbe3",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer a3e92eba9c4cdc3155cd8a1e116effde387764bad32e94c01138e0fa6fabb3ae"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"fields\": [\n    {\n      \"type\": \"signature\",\n      \"required\": true,\n      \"role\": \"Client\",\n      \"page_number\": 2,\n      \"x\": 380,\n      \"y\": 670,\n      \"width\": 180,\n      \"height\": 40,\n      \"name\": \"client_signature\",\n      \"label\": \"Client Signature\"\n    },\n    {\n      \"type\": \"signature\",\n      \"required\": true,\n      \"role\": \"Agency\",\n      \"page_number\": 2,\n      \"x\": 380,\n      \"y\": 740,\n      \"width\": 180,\n      \"height\": 40,\n      \"name\": \"agency_signature\",\n      \"label\": \"Agency Signature\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        256,
+        720
+      ],
+      "id": "6ee6d796-77ca-413f-b78b-07543c95168d",
+      "name": "HTTP Request6"
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Download file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        []
+      ]
+    },
+    "On form submission1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create folder": {
+      "main": [
+        [
+          {
+            "node": "Get a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a document": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Create folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript4": {
+      "main": [
+        [
+          {
+            "node": "HTML1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript5": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Upload file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file1": {
+      "main": [
+        [
+          {
+            "node": "Download file2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request6": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "On form submission": [
+      {
+        "json": {
+          "Client Name": "Vamsi",
+          "Client Email": "Vamsivk555@gmail.com",
+          "Service ": "Lead qualification",
+          "Amount": 5000,
+          "Currency": "INR",
+          "Notes": "No",
+          "Contract date": "2025-11-09",
+          "submittedAt": "2025-11-09T11:15:55.505+01:00",
+          "formMode": "test"
+        }
+      }
+    ],
+    "On form submission1": [
+      {
+        "json": {
+          "client_name": "John",
+          "company": "Lumoguy",
+          "signer_name": "Vamsi",
+          "signer_email": "vamsikrishna2536@gmail.com",
+          "address": "India",
+          "scope": "Building websites",
+          "deliverables": "Website, domain, SSL, Monitoring",
+          "price": 2000,
+          "Currency": "INR",
+          "payment_terms": "50% upfront and 50% after delivery",
+          "kickoff_date": "2025-11-28",
+          "contact_email": "vamsivk1465@gmail.com",
+          "submittedAt": "2025-11-11T18:44:24.558+01:00",
+          "formMode": "test"
+        }
+      }
+    ]
+  },
+  "versionId": "1802c29a-b623-452d-a49a-04ec9051c237",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-11-09T10:10:24.770Z",
+      "createdAt": "2025-11-09T10:10:24.770Z",
+      "role": "workflow:owner",
+      "workflowId": "0dWRDN8wXie8HL9e",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
