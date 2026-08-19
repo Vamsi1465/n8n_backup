@@ -1,0 +1,141 @@
+{
+  "updatedAt": "2025-09-23T14:37:40.000Z",
+  "createdAt": "2025-09-15T15:35:34.857Z",
+  "id": "n6sMmVyLQ4e7UNoh",
+  "name": "Content Generator",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -368,
+        -112
+      ],
+      "id": "b0c630e8-b2aa-4960-aae9-c70d963fe48d",
+      "name": "When chat message received",
+      "webhookId": "1446f599-0362-44ee-82d3-075f6d06a378"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Write 3 LinkedIn post drafts for startup founders about “getting first 10 customers”.\nOutput valid JSON with fields: title, body, hashtags (array), first_comment, tone.\n",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are an expert LinkedIn copywriter for founders.  Follow Lead Magnet Playbook: give immediate utility, show time/money impact,  include a clear CTA to a lead magnet.  Always output valid JSON only."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -160,
+        -112
+      ],
+      "id": "4f4af24d-0256-46f6-9cfa-a75cc4d46641",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"title\": \"Your First 10 Customers\",\n  \"body\": \"Getting your first customers is not about ads. It's about conversations...\",\n  \"hashtags\": [\"#startups\", \"#founders\", \"#growth\"],\n  \"first_comment\": \"Want my free playbook? Comment '10' below.\",\n  \"tone\": \"Professional\"\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -32,
+        48
+      ],
+      "id": "3933efcb-5079-4a9e-8220-5c5105493fe7",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        48
+      ],
+      "id": "64ab8fec-6add-4273-8e18-0ee147eea9c9",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Gq3qNdXZmlzVb7Jg",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        []
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "72b24095-5f34-4a96-8813-4fa1804daaa5",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-15T15:35:34.859Z",
+      "createdAt": "2025-09-15T15:35:34.859Z",
+      "role": "workflow:owner",
+      "workflowId": "n6sMmVyLQ4e7UNoh",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
