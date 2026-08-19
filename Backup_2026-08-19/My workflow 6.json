@@ -1,0 +1,121 @@
+{
+  "updatedAt": "2025-12-27T10:42:10.336Z",
+  "createdAt": "2025-12-27T10:41:02.087Z",
+  "id": "TyIldthSZErAblJy",
+  "name": "My workflow 6",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.vapi.ai/call",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 5859e372-ce7e-4c57-bba4-b26b794cb9df"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"assistantId\": \"{{ $json.AssitantID }}\",\n  \"phoneNumber\": \"{{ $json['Mob no'] }}\",\n  \"assistantOverrides\": {\n    \"firstMessage\": \"Hi, this is Sarah from Lumoscale AI. Is this a good time to talk?\",\n    \"variables\": {\n      \"timezone\": \"Asia/Kolkata\"\n    }\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -48,
+        -16
+      ],
+      "id": "36a75b71-eb5d-4c31-a834-dcb9a5dd92ad",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "86ab95e8-c027-4e5e-b59f-0bbad045dd24",
+              "name": "AssitantID",
+              "value": "730c8719-710b-4cda-ae2c-7b9f59df40af",
+              "type": "string"
+            },
+            {
+              "id": "3f5a7aa9-73a7-40b0-be67-f4344e5f813c",
+              "name": "Mob no",
+              "value": "+918919053970",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -224,
+        -16
+      ],
+      "id": "97a1888e-86cd-4a91-8ad3-592bac84dff7",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        -16
+      ],
+      "id": "0f43af9a-712a-45a8-a10c-46f497b146f0",
+      "name": "When clicking ‘Execute workflow’"
+    }
+  ],
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "9dc0f4d7-7438-4940-a07b-180e4acfff64",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-27T10:41:02.093Z",
+      "createdAt": "2025-12-27T10:41:02.093Z",
+      "role": "workflow:owner",
+      "workflowId": "TyIldthSZErAblJy",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
