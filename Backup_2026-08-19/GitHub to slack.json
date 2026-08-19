@@ -1,0 +1,613 @@
+{
+  "updatedAt": "2026-05-26T09:10:09.037Z",
+  "createdAt": "2026-05-25T04:17:36.052Z",
+  "id": "3M4r1FXoLSOMPeBz",
+  "name": "GitHub to slack",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "owner": {
+          "__rl": true,
+          "value": "Lumoscale555",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "HR",
+          "mode": "list",
+          "cachedResultName": "HR",
+          "cachedResultUrl": "https://github.com/Lumoscale555/HR"
+        },
+        "events": [
+          "push",
+          "pull_request_review_comment",
+          "commit_comment"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.githubTrigger",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        -144
+      ],
+      "id": "2288350d-bb7f-4c06-84b7-cc4e177aec36",
+      "name": "Github Trigger",
+      "webhookId": "f2750826-4914-44cb-9253-68042b938ae7",
+      "credentials": {
+        "githubApi": {
+          "id": "WSVBEY7uRmlbtwRC",
+          "name": "Lumoscale"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d86b450d-eefe-4893-bbb0-5e403b203cd9",
+              "name": "body.repository.full_name",
+              "value": "={{ $json.body.repository.full_name }}",
+              "type": "string"
+            },
+            {
+              "id": "3f750b8c-dcbd-4664-8b40-43e5dc317684",
+              "name": "body.sender.login",
+              "value": "={{ $json.body.sender.login }}",
+              "type": "string"
+            },
+            {
+              "id": "3abd615e-b525-4886-9077-397fc0d7b88e",
+              "name": "body.commits[0].message",
+              "value": "={{ $json.body.commits[0].message }}",
+              "type": "string"
+            },
+            {
+              "id": "f74ac290-baba-4917-b3eb-738bed9af37a",
+              "name": "body.commits[0].timestamp",
+              "value": "={{ $json.body.commits[0].timestamp }}",
+              "type": "string"
+            },
+            {
+              "id": "66a9f446-be42-4e55-b5ff-3031df55b00e",
+              "name": "body.commits[0].author.name",
+              "value": "={{ $json.body.commits[0].author.name }}",
+              "type": "string"
+            },
+            {
+              "id": "a1096981-70a7-4fe9-b7e7-1563d7513c5f",
+              "name": "body.commits[0].author.email",
+              "value": "={{ $json.body.commits[0].author.email }}",
+              "type": "string"
+            },
+            {
+              "id": "d7ff9f7d-f76e-4da0-8d94-b111b0ba297a",
+              "name": "body.repository.default_branch",
+              "value": "={{ $json.body.repository.default_branch }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -112,
+        -144
+      ],
+      "id": "8624cd1c-5189-4b1a-8c74-fef1a0051864",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#github-updates",
+          "mode": "name"
+        },
+        "text": "=----------------------------------------\n\n🚀 Repo Name : {{ $json.body.repository.full_name }}\n🌿 Branch    : {{ $json.body.repository.default_branch }}\n\n👤 Sender    : {{ $json.body.commits[0].author.name }}\n💬 Commit    : {{ $json.body.commits[0].message }}\n🕒 Time      : {{ new Date($json.body.commits[0].timestamp).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true}) }}\n\n----------------------------------------",
+        "otherOptions": {
+          "includeLinkToWorkflow": false,
+          "mrkdwn": false,
+          "unfurl_links": false,
+          "unfurl_media": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        96,
+        -144
+      ],
+      "id": "3b0404dc-2142-4397-8ef1-37cd3faebb6a",
+      "name": "Send a message",
+      "webhookId": "cf2fbeff-8016-4528-9611-249e03061e8d",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "dg1r6OPw6MVm5L75",
+          "name": "Sreeva AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Github actions to slack",
+        "height": 288,
+        "width": 800
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -464,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "e0d8a00a-dbc6-4ab0-8e83-a19ecb113f50",
+      "name": "Sticky Note"
+    }
+  ],
+  "connections": {
+    "Github Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Github Trigger": {
+      "webhookId": 630365447,
+      "webhookEvents": [
+        "push",
+        "pull_request_review_comment",
+        "commit_comment"
+      ]
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Github Trigger": [
+      {
+        "json": {
+          "body": {
+            "ref": "refs/heads/main",
+            "before": "a519af70a950cbc193ba4cd3d0c7751ed01f0522",
+            "after": "391353c656882602a0da37c5bb7a360b7483f182",
+            "repository": {
+              "id": 1177266750,
+              "node_id": "R_kgDORiuqPg",
+              "name": "HR",
+              "full_name": "Lumoscale555/HR",
+              "private": true,
+              "owner": {
+                "name": "Lumoscale555",
+                "email": "Lumoscale@gmail.com",
+                "login": "Lumoscale555",
+                "id": 218214645,
+                "node_id": "U_kgDODQGw9Q",
+                "avatar_url": "https://avatars.githubusercontent.com/u/218214645?v=4",
+                "gravatar_id": "",
+                "url": "https://api.github.com/users/Lumoscale555",
+                "html_url": "https://github.com/Lumoscale555",
+                "followers_url": "https://api.github.com/users/Lumoscale555/followers",
+                "following_url": "https://api.github.com/users/Lumoscale555/following{/other_user}",
+                "gists_url": "https://api.github.com/users/Lumoscale555/gists{/gist_id}",
+                "starred_url": "https://api.github.com/users/Lumoscale555/starred{/owner}{/repo}",
+                "subscriptions_url": "https://api.github.com/users/Lumoscale555/subscriptions",
+                "organizations_url": "https://api.github.com/users/Lumoscale555/orgs",
+                "repos_url": "https://api.github.com/users/Lumoscale555/repos",
+                "events_url": "https://api.github.com/users/Lumoscale555/events{/privacy}",
+                "received_events_url": "https://api.github.com/users/Lumoscale555/received_events",
+                "type": "User",
+                "user_view_type": "public",
+                "site_admin": false
+              },
+              "html_url": "https://github.com/Lumoscale555/HR",
+              "description": null,
+              "fork": false,
+              "url": "https://api.github.com/repos/Lumoscale555/HR",
+              "forks_url": "https://api.github.com/repos/Lumoscale555/HR/forks",
+              "keys_url": "https://api.github.com/repos/Lumoscale555/HR/keys{/key_id}",
+              "collaborators_url": "https://api.github.com/repos/Lumoscale555/HR/collaborators{/collaborator}",
+              "teams_url": "https://api.github.com/repos/Lumoscale555/HR/teams",
+              "hooks_url": "https://api.github.com/repos/Lumoscale555/HR/hooks",
+              "issue_events_url": "https://api.github.com/repos/Lumoscale555/HR/issues/events{/number}",
+              "events_url": "https://api.github.com/repos/Lumoscale555/HR/events",
+              "assignees_url": "https://api.github.com/repos/Lumoscale555/HR/assignees{/user}",
+              "branches_url": "https://api.github.com/repos/Lumoscale555/HR/branches{/branch}",
+              "tags_url": "https://api.github.com/repos/Lumoscale555/HR/tags",
+              "blobs_url": "https://api.github.com/repos/Lumoscale555/HR/git/blobs{/sha}",
+              "git_tags_url": "https://api.github.com/repos/Lumoscale555/HR/git/tags{/sha}",
+              "git_refs_url": "https://api.github.com/repos/Lumoscale555/HR/git/refs{/sha}",
+              "trees_url": "https://api.github.com/repos/Lumoscale555/HR/git/trees{/sha}",
+              "statuses_url": "https://api.github.com/repos/Lumoscale555/HR/statuses/{sha}",
+              "languages_url": "https://api.github.com/repos/Lumoscale555/HR/languages",
+              "stargazers_url": "https://api.github.com/repos/Lumoscale555/HR/stargazers",
+              "contributors_url": "https://api.github.com/repos/Lumoscale555/HR/contributors",
+              "subscribers_url": "https://api.github.com/repos/Lumoscale555/HR/subscribers",
+              "subscription_url": "https://api.github.com/repos/Lumoscale555/HR/subscription",
+              "commits_url": "https://api.github.com/repos/Lumoscale555/HR/commits{/sha}",
+              "git_commits_url": "https://api.github.com/repos/Lumoscale555/HR/git/commits{/sha}",
+              "comments_url": "https://api.github.com/repos/Lumoscale555/HR/comments{/number}",
+              "issue_comment_url": "https://api.github.com/repos/Lumoscale555/HR/issues/comments{/number}",
+              "contents_url": "https://api.github.com/repos/Lumoscale555/HR/contents/{+path}",
+              "compare_url": "https://api.github.com/repos/Lumoscale555/HR/compare/{base}...{head}",
+              "merges_url": "https://api.github.com/repos/Lumoscale555/HR/merges",
+              "archive_url": "https://api.github.com/repos/Lumoscale555/HR/{archive_format}{/ref}",
+              "downloads_url": "https://api.github.com/repos/Lumoscale555/HR/downloads",
+              "issues_url": "https://api.github.com/repos/Lumoscale555/HR/issues{/number}",
+              "pulls_url": "https://api.github.com/repos/Lumoscale555/HR/pulls{/number}",
+              "milestones_url": "https://api.github.com/repos/Lumoscale555/HR/milestones{/number}",
+              "notifications_url": "https://api.github.com/repos/Lumoscale555/HR/notifications{?since,all,participating}",
+              "labels_url": "https://api.github.com/repos/Lumoscale555/HR/labels{/name}",
+              "releases_url": "https://api.github.com/repos/Lumoscale555/HR/releases{/id}",
+              "deployments_url": "https://api.github.com/repos/Lumoscale555/HR/deployments",
+              "created_at": 1773091984,
+              "updated_at": "2026-05-25T18:22:06Z",
+              "pushed_at": 1779734159,
+              "git_url": "git://github.com/Lumoscale555/HR.git",
+              "ssh_url": "git@github.com:Lumoscale555/HR.git",
+              "clone_url": "https://github.com/Lumoscale555/HR.git",
+              "svn_url": "https://github.com/Lumoscale555/HR",
+              "homepage": null,
+              "size": 24727,
+              "stargazers_count": 0,
+              "watchers_count": 0,
+              "language": "TypeScript",
+              "has_issues": true,
+              "has_projects": true,
+              "has_downloads": true,
+              "has_wiki": true,
+              "has_pages": false,
+              "has_discussions": false,
+              "forks_count": 1,
+              "mirror_url": null,
+              "archived": false,
+              "disabled": false,
+              "open_issues_count": 0,
+              "license": null,
+              "allow_forking": true,
+              "is_template": false,
+              "web_commit_signoff_required": false,
+              "has_pull_requests": true,
+              "pull_request_creation_policy": "all",
+              "topics": [],
+              "visibility": "private",
+              "forks": 1,
+              "open_issues": 0,
+              "watchers": 0,
+              "default_branch": "main",
+              "stargazers": 0,
+              "master_branch": "main"
+            },
+            "pusher": {
+              "name": "Lumoscale555",
+              "email": "Lumoscale@gmail.com"
+            },
+            "forced": false,
+            "sender": {
+              "login": "Lumoscale555",
+              "id": 218214645,
+              "node_id": "U_kgDODQGw9Q",
+              "avatar_url": "https://avatars.githubusercontent.com/u/218214645?v=4",
+              "gravatar_id": "",
+              "url": "https://api.github.com/users/Lumoscale555",
+              "html_url": "https://github.com/Lumoscale555",
+              "followers_url": "https://api.github.com/users/Lumoscale555/followers",
+              "following_url": "https://api.github.com/users/Lumoscale555/following{/other_user}",
+              "gists_url": "https://api.github.com/users/Lumoscale555/gists{/gist_id}",
+              "starred_url": "https://api.github.com/users/Lumoscale555/starred{/owner}{/repo}",
+              "subscriptions_url": "https://api.github.com/users/Lumoscale555/subscriptions",
+              "organizations_url": "https://api.github.com/users/Lumoscale555/orgs",
+              "repos_url": "https://api.github.com/users/Lumoscale555/repos",
+              "events_url": "https://api.github.com/users/Lumoscale555/events{/privacy}",
+              "received_events_url": "https://api.github.com/users/Lumoscale555/received_events",
+              "type": "User",
+              "user_view_type": "public",
+              "site_admin": false
+            },
+            "created": false,
+            "deleted": false,
+            "base_ref": null,
+            "compare": "https://github.com/Lumoscale555/HR/compare/a519af70a950...391353c65688",
+            "commits": [
+              {
+                "id": "391353c656882602a0da37c5bb7a360b7483f182",
+                "tree_id": "9929681717874b668f3dd42de3f948de8c397a52",
+                "distinct": true,
+                "message": "repeated question fix",
+                "timestamp": "2026-05-26T00:05:49+05:30",
+                "url": "https://github.com/Lumoscale555/HR/commit/391353c656882602a0da37c5bb7a360b7483f182",
+                "author": {
+                  "name": "Vamsi1465",
+                  "email": "vamsikrishna2536@gmail.com",
+                  "date": "2026-05-26T00:05:49+05:30",
+                  "username": "Vamsi1465"
+                },
+                "committer": {
+                  "name": "Vamsi1465",
+                  "email": "vamsikrishna2536@gmail.com",
+                  "date": "2026-05-26T00:05:49+05:30",
+                  "username": "Vamsi1465"
+                },
+                "added": [],
+                "removed": [],
+                "modified": [
+                  "interview/agent_runtime.py",
+                  "interview/eval_pipeline.py"
+                ]
+              }
+            ],
+            "head_commit": {
+              "id": "391353c656882602a0da37c5bb7a360b7483f182",
+              "tree_id": "9929681717874b668f3dd42de3f948de8c397a52",
+              "distinct": true,
+              "message": "repeated question fix",
+              "timestamp": "2026-05-26T00:05:49+05:30",
+              "url": "https://github.com/Lumoscale555/HR/commit/391353c656882602a0da37c5bb7a360b7483f182",
+              "author": {
+                "name": "Vamsi1465",
+                "email": "vamsikrishna2536@gmail.com",
+                "date": "2026-05-26T00:05:49+05:30",
+                "username": "Vamsi1465"
+              },
+              "committer": {
+                "name": "Vamsi1465",
+                "email": "vamsikrishna2536@gmail.com",
+                "date": "2026-05-26T00:05:49+05:30",
+                "username": "Vamsi1465"
+              },
+              "added": [],
+              "removed": [],
+              "modified": [
+                "interview/agent_runtime.py",
+                "interview/eval_pipeline.py"
+              ]
+            }
+          },
+          "headers": {
+            "host": "n8n.srv1011051.hstgr.cloud",
+            "user-agent": "GitHub-Hookshot/17c9cd1",
+            "content-length": "7555",
+            "accept": "*/*",
+            "content-type": "application/json",
+            "x-forwarded-for": "140.82.115.80",
+            "x-forwarded-host": "n8n.srv1011051.hstgr.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "d3888760db36",
+            "x-github-delivery": "93b9edca-5868-11f1-90c0-ae0a74772ce8",
+            "x-github-event": "push",
+            "x-github-hook-id": "630365447",
+            "x-github-hook-installation-target-id": "1177266750",
+            "x-github-hook-installation-target-type": "repository",
+            "x-real-ip": "140.82.115.80",
+            "accept-encoding": "gzip"
+          },
+          "query": {}
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "60db0f93-0ddc-4803-8cff-39f264b31df2",
+  "activeVersionId": "60db0f93-0ddc-4803-8cff-39f264b31df2",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-05-25T04:17:36.056Z",
+      "createdAt": "2026-05-25T04:17:36.056Z",
+      "role": "workflow:owner",
+      "workflowId": "3M4r1FXoLSOMPeBz",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-05-25T04:54:37.000Z",
+    "createdAt": "2026-05-25T04:54:33.277Z",
+    "versionId": "60db0f93-0ddc-4803-8cff-39f264b31df2",
+    "workflowId": "3M4r1FXoLSOMPeBz",
+    "nodes": [
+      {
+        "parameters": {
+          "owner": {
+            "__rl": true,
+            "value": "Lumoscale555",
+            "mode": "name"
+          },
+          "repository": {
+            "__rl": true,
+            "value": "HR",
+            "mode": "list",
+            "cachedResultName": "HR",
+            "cachedResultUrl": "https://github.com/Lumoscale555/HR"
+          },
+          "events": [
+            "push",
+            "pull_request_review_comment",
+            "commit_comment"
+          ],
+          "options": {}
+        },
+        "type": "n8n-nodes-base.githubTrigger",
+        "typeVersion": 1,
+        "position": [
+          -368,
+          -144
+        ],
+        "id": "2288350d-bb7f-4c06-84b7-cc4e177aec36",
+        "name": "Github Trigger",
+        "webhookId": "f2750826-4914-44cb-9253-68042b938ae7",
+        "credentials": {
+          "githubApi": {
+            "id": "WSVBEY7uRmlbtwRC",
+            "name": "Lumoscale"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "d86b450d-eefe-4893-bbb0-5e403b203cd9",
+                "name": "body.repository.full_name",
+                "value": "={{ $json.body.repository.full_name }}",
+                "type": "string"
+              },
+              {
+                "id": "3f750b8c-dcbd-4664-8b40-43e5dc317684",
+                "name": "body.sender.login",
+                "value": "={{ $json.body.sender.login }}",
+                "type": "string"
+              },
+              {
+                "id": "3abd615e-b525-4886-9077-397fc0d7b88e",
+                "name": "body.commits[0].message",
+                "value": "={{ $json.body.commits[0].message }}",
+                "type": "string"
+              },
+              {
+                "id": "f74ac290-baba-4917-b3eb-738bed9af37a",
+                "name": "body.commits[0].timestamp",
+                "value": "={{ $json.body.commits[0].timestamp }}",
+                "type": "string"
+              },
+              {
+                "id": "66a9f446-be42-4e55-b5ff-3031df55b00e",
+                "name": "body.commits[0].author.name",
+                "value": "={{ $json.body.commits[0].author.name }}",
+                "type": "string"
+              },
+              {
+                "id": "a1096981-70a7-4fe9-b7e7-1563d7513c5f",
+                "name": "body.commits[0].author.email",
+                "value": "={{ $json.body.commits[0].author.email }}",
+                "type": "string"
+              },
+              {
+                "id": "d7ff9f7d-f76e-4da0-8d94-b111b0ba297a",
+                "name": "body.repository.default_branch",
+                "value": "={{ $json.body.repository.default_branch }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          -112,
+          -144
+        ],
+        "id": "8624cd1c-5189-4b1a-8c74-fef1a0051864",
+        "name": "Edit Fields"
+      },
+      {
+        "parameters": {
+          "authentication": "oAuth2",
+          "select": "channel",
+          "channelId": {
+            "__rl": true,
+            "value": "#github-updates",
+            "mode": "name"
+          },
+          "text": "=----------------------------------------\n\n🚀 Repo Name : {{ $json.body.repository.full_name }}\n🌿 Branch    : {{ $json.body.repository.default_branch }}\n\n👤 Sender    : {{ $json.body.commits[0].author.name }}\n💬 Commit    : {{ $json.body.commits[0].message }}\n🕒 Time      : {{ new Date($json.body.commits[0].timestamp).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true}) }}\n\n----------------------------------------",
+          "otherOptions": {
+            "includeLinkToWorkflow": false,
+            "mrkdwn": false,
+            "unfurl_links": false,
+            "unfurl_media": false
+          }
+        },
+        "type": "n8n-nodes-base.slack",
+        "typeVersion": 2.4,
+        "position": [
+          96,
+          -144
+        ],
+        "id": "3b0404dc-2142-4397-8ef1-37cd3faebb6a",
+        "name": "Send a message",
+        "webhookId": "cf2fbeff-8016-4528-9611-249e03061e8d",
+        "credentials": {
+          "slackOAuth2Api": {
+            "id": "dg1r6OPw6MVm5L75",
+            "name": "Sreeva AI"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "content": "# Github actions to slack",
+          "height": 288,
+          "width": 800
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -464,
+          -240
+        ],
+        "typeVersion": 1,
+        "id": "e0d8a00a-dbc6-4ab0-8e83-a19ecb113f50",
+        "name": "Sticky Note"
+      }
+    ],
+    "connections": {
+      "Github Trigger": {
+        "main": [
+          [
+            {
+              "node": "Edit Fields",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Edit Fields": {
+        "main": [
+          [
+            {
+              "node": "Send a message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Vamsi V",
+    "name": "Version 60db0f93",
+    "description": ""
+  },
+  "tags": []
+}
