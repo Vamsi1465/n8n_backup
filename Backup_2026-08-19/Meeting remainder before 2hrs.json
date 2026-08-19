@@ -1,0 +1,485 @@
+{
+  "updatedAt": "2025-11-05T19:26:30.000Z",
+  "createdAt": "2025-10-09T18:34:57.512Z",
+  "id": "UM5l9kZLbmcZce1y",
+  "name": "Meeting remainder before 2hrs",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "vamsivk1465@gmail.com",
+          "mode": "list",
+          "cachedResultName": "vamsivk1465@gmail.com"
+        },
+        "returnAll": true,
+        "timeMin": "={{ $now.toFormat(\"yyyy-MM-dd\") }}",
+        "timeMax": "={{ $now.plus({ days: 3 }).toFormat(\"yyyy-MM-dd\") }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        48,
+        0
+      ],
+      "id": "7315548c-9383-4c3b-945a-63fda242cb5c",
+      "name": "Get many events",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "g4VAMKMrPf3B63WZ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash-lite-preview-06-17",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash-lite-preview-06-17"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.description }},{{ $json.attendeeEmail }},{{ $json.startDateTime }},{{ $json.summary }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {
+          "systemMessage": "You are an assistant for scheduling and reminders. Your task is to write professional, friendly, and concise email messages for users who have booked calls.  Requirements:  If a user books a call, generate a confirmation email.  If the user hasn’t attended, generate a reminder email 2 hours before the scheduled meeting.  Emails should include:  Greeting  Meeting date and time  Polite, friendly reminder or confirmation  Call-to-action if needed  Sign-off  Keep the tone professional, polite, and easy to read.  Make the email concise (3–5 sentences).  Example instructions for the model:  Input: User name, meeting date and time, type of email (confirmation/reminder)  \nOutput: Ready-to-send email text\nNote: Don't forget to enter meeting time"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        -16
+      ],
+      "id": "ad6e1d95-e844-43f4-9023-ee9aac6c98a8",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Gq3qNdXZmlzVb7Jg",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.content.parts[0].text }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Subject",
+              "description": "Take subject out with clear idea",
+              "required": true
+            },
+            {
+              "name": "Body",
+              "description": "Take out body with clear words",
+              "required": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        1360,
+        -16
+      ],
+      "id": "caf5dac6-4eec-4c3b-80ed-23fdfa4a046c",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        304
+      ],
+      "id": "63792db4-2d82-4903-952e-b206c1ff2b96",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Gq3qNdXZmlzVb7Jg",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// CONFIG: set how many hours ahead you want to check\n// For testing: you can set to 48 (next 2 days)\n// For production (2-hour reminder): set to 2\nconst reminderWindowHours = 48; \n\n// Array to store filtered events\nconst filteredItems = [];\n\n// Loop through all incoming events\nfor (const item of items) {\n  // Skip events with no start time\n  if (!item.json.start) continue;\n\n  const eventStart = new Date(item.json.start.dateTime || item.json.start.date);\n  const now = new Date();\n  const diffHours = (eventStart - now) / (1000 * 60 * 60); // difference in hours\n\n  // Only include events within reminder window\n  if (diffHours <= reminderWindowHours && diffHours > 0) {\n    \n    // Skip if no attendees or description\n    if (!Array.isArray(item.json.attendees) || item.json.attendees.length === 0) continue;\n    if (!item.json.description) continue;\n\n    // Get external attendee (not organizer)\n    const attendee = item.json.attendees.find(a => !a.organizer);\n    const attendeeEmail = attendee ? attendee.email : null;\n\n    // Push filtered object with required fields\n    filteredItems.push({\n      json: {\n        id: item.json.id || null,\n        summary: item.json.summary || null,\n        description: item.json.description || null,\n        attendeeEmail: attendeeEmail,\n        startDateTime: item.json.start.dateTime || null,\n        meetingLink: item.json.hangoutLink || (item.json.conferenceData?.entryPoints?.[0]?.uri) || null,\n        calLink: item.json.htmlLink || null,\n      },\n    });\n  }\n}\n\n// Return array of filtered items\nreturn filteredItems;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ],
+      "id": "905c1dd2-f974-4251-955b-3655f4198d89",
+      "name": "Code in JavaScript",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2ebbf926-9f46-405f-82f8-1ed401ea307f",
+              "leftValue": "={{ $json.attendeeEmail }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "33ca3f13-a5fd-477f-9cc5-60efadc22840",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7b7b4362-b384-4b1e-9eb3-2065ecd6bda9",
+              "name": "summary",
+              "value": "={{ $json.summary }}",
+              "type": "string"
+            },
+            {
+              "id": "e34ddb88-7029-4746-9acd-d6f451eba6a5",
+              "name": "description",
+              "value": "={{ $json.description }}",
+              "type": "string"
+            },
+            {
+              "id": "7261187c-19c8-46e0-893b-e7b97d1ebc05",
+              "name": "attendeeEmail",
+              "value": "={{ $json.attendeeEmail }}",
+              "type": "string"
+            },
+            {
+              "id": "43753572-3d0a-4717-98ba-335c66fa11a6",
+              "name": "startDateTime",
+              "value": "={{ $json.startDateTime }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        864,
+        -16
+      ],
+      "id": "a7f169bb-67ff-43cc-acd6-949c8af2f157",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d29af1d5-ecb1-432c-b7db-fa7830d19382",
+              "name": "start.dateTime",
+              "value": "={{ $json.start.dateTime }}",
+              "type": "string"
+            },
+            {
+              "id": "c2a87d46-f505-444e-b309-e2227afb7861",
+              "name": "end.dateTime",
+              "value": "={{ $json.end.dateTime }}",
+              "type": "string"
+            },
+            {
+              "id": "80bf619f-230b-4268-9c2f-9fbf4797ee05",
+              "name": "attendees[0].email",
+              "value": "={{ $json.attendees[0].email }}",
+              "type": "string"
+            },
+            {
+              "id": "99a51e21-8e52-4398-bf48-4910b80a86e1",
+              "name": "description",
+              "value": "={{ $json.description }}",
+              "type": "string"
+            },
+            {
+              "id": "4e29b069-2cab-4491-a194-1be871622371",
+              "name": "summary",
+              "value": "={{ $json.summary }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        256,
+        0
+      ],
+      "id": "f346c3e6-6dc2-47c6-b38c-91b0fdc14862",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "sendTo": "=vamsikrishna2536@gmail.com",
+        "subject": "={{ $json.output.Subject }}",
+        "emailType": "text",
+        "message": "={{ $json.output.Body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1808,
+        -192
+      ],
+      "id": "ed14af7c-f830-4f76-b901-e0c8828fdb36",
+      "name": "Send a message",
+      "webhookId": "8bc0d4d6-8c1c-4bea-9f46-d46cb034971a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UbWO1LFfZ6s8MzMA",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "802657959596026",
+        "recipientPhoneNumber": "+918919053970",
+        "textBody": "Hello",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        1824,
+        16
+      ],
+      "id": "33a651a2-0600-4c30-ad0f-a183ba3d437c",
+      "name": "Send message",
+      "webhookId": "ee19619e-9f28-459b-a7dc-5ab34fa53e53",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "ixk5U1dBT3xISilr",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "23",
+        "text": "HI",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1840,
+        224
+      ],
+      "id": "00fd05a8-9a92-43a5-92b4-af46e332f6f6",
+      "name": "Send a text message",
+      "webhookId": "0b182a8a-c988-4111-a16f-68a83bde7f1f",
+      "credentials": {
+        "telegramApi": {
+          "id": "gwHBxrkrPXY0I5Fk",
+          "name": "Normal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -176,
+        0
+      ],
+      "id": "8048dc1f-b44b-4854-be37-809f06a66d2e",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "connections": {
+    "Get many events": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get many events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "3a555b63-e288-4517-9ea7-664779a1c234",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-09T18:34:57.517Z",
+      "createdAt": "2025-10-09T18:34:57.517Z",
+      "role": "workflow:owner",
+      "workflowId": "UM5l9kZLbmcZce1y",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
