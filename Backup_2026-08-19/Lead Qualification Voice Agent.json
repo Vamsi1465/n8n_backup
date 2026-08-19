@@ -1,0 +1,1496 @@
+{
+  "updatedAt": "2026-01-29T08:18:54.158Z",
+  "createdAt": "2026-01-29T08:17:24.036Z",
+  "id": "G0c39tWcgo186D2J",
+  "name": "Lead Qualification Voice Agent",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1VxAAFch57KhXmRpgClLpklDeB4naAqr8LrLoBd3SiWw",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VxAAFch57KhXmRpgClLpklDeB4naAqr8LrLoBd3SiWw/edit?usp=drivesdk",
+          "cachedResultName": "Lead Qualification Voice Agent Demo v1 (Responses)"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": 1245574619,
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VxAAFch57KhXmRpgClLpklDeB4naAqr8LrLoBd3SiWw/edit#gid=1245574619",
+          "cachedResultName": "Form Responses 1"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "id": "48c90dd9-7c99-4ff5-a13f-1f5327779986",
+      "name": "Google Sheets Trigger",
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "position": [
+        2080,
+        800
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "jiy4CLauc0aInJpJ",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "030f0967-0d16-43db-aa72-ad2d5909f945",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "7bebe000-c969-45e8-9b18-10b201642dbe",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        2096,
+        1168
+      ],
+      "webhookId": "030f0967-0d16-43db-aa72-ad2d5909f945",
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"type\": \"conversation_initiation_client_data\",\n  \"dynamic_variables\": {\n    \"voiceopener\": \"{{ $json.choices[0].message.content['Voice Opener'] }}\"\n  }\n}\n",
+        "options": {}
+      },
+      "id": "b721c3b8-0e95-4184-a6ff-901635d49757",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        3120,
+        1168
+      ],
+      "typeVersion": 1.4
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "37e8d818-8265-43e9-803e-00119da5f3cb",
+        "options": {}
+      },
+      "id": "bda20004-9774-49bd-86e9-53aee7c22e13",
+      "name": "Webhook1",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        2080,
+        1568
+      ],
+      "webhookId": "37e8d818-8265-43e9-803e-00119da5f3cb",
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the webhook data from the input\nconst webhookData = $input.item.json;\n\n// Access the transcript array\nconst transcript = webhookData.body.data.transcript;\n\n// Format the transcript into a clean string\nconst formattedTranscript = transcript.map(entry => {\n  // Capitalize the role for better readability\n  const role = entry.role.charAt(0).toUpperCase() + entry.role.slice(1);\n  return `${role}: ${entry.message}`;\n}).join('\\n'); // Join each line with a newline\n\n// Return the formatted transcript\nreturn {\n  json: {\n    clean_transcript: formattedTranscript\n  }\n};"
+      },
+      "id": "6ca3e8f7-97a0-4832-887a-61fd67cac04d",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2304,
+        1568
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.clean_transcript }}"
+            },
+            {
+              "content": "=You are an expert AI assistant specializing in analyzing sales call transcripts for \"ThinkSpire,\" a custom AI agency. You will be given the full transcript of a conversation between an AI agent named Sarah and a potential client.\n\nYour task is to carefully read the transcript and extract the key information. You MUST respond ONLY with a valid JSON object and nothing else. Do not include any introductory text, backticks, or explanations.\n\nThe JSON object must have the following structure:\n\n{\n  \"callSummary\": \"A concise, one-paragraph summary of the entire conversation, written in the third person.\",\n  \"leadStatus\": \"Analyze the conversation and classify the lead's status. Must be one of the following strings: 'Qualified', 'Not Qualified', 'Follow-up'. 'Qualified' means they explicitly agreed to a follow-up call. 'Not Qualified' means they explicitly said no or were a bad fit. 'Follow-up' means the call was inconclusive or they asked for more information via email first.\",\n  \"projectDetails\": \"Summarize the core requirements and features of the AI solution the client wants to build.\",\n  \"budget\": \"Extract the client's stated budget. Must be one of the following strings: '< INR 50k', 'INR 50k - INR 200k', 'INR 200k - INR 500k', 'INR 500k+', or 'Not Mentioned'.\",\n  \"timeline\": \"Extract the client's stated timeline. Must be one of the following strings: 'ASAP', '1-3 weeks', '3-6 weeks', '6+ weeks', or 'Not Mentioned'.\",\n  \"painPoints\": \"List the key business problems or pain points the client mentioned they are trying to solve.\"\n}",
+              "role": "system"
+            }
+          ]
+        },
+        "simplify": false,
+        "jsonOutput": true,
+        "options": {}
+      },
+      "id": "a50f1ad2-0bdf-433a-8490-ac01f4bfe75e",
+      "name": "Message a model",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        2528,
+        1568
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "8cTwctTGeEBOJeUq",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "1526b36e-0225-48b5-9839-71b4f4a2e017",
+              "operator": {
+                "name": "filter.operator.equals",
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.choices[0].message.content.leadStatus }}",
+              "rightValue": "Qualified"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c403b7f6-37df-40ed-910c-3dec177d8dde",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        2880,
+        1712
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1VxAAFch57KhXmRpgClLpklDeB4naAqr8LrLoBd3SiWw",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VxAAFch57KhXmRpgClLpklDeB4naAqr8LrLoBd3SiWw/edit?usp=drivesdk",
+          "cachedResultName": "Lead Qualification Voice Agent Demo v1 (Responses)"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": 1245574619,
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VxAAFch57KhXmRpgClLpklDeB4naAqr8LrLoBd3SiWw/edit#gid=1245574619",
+          "cachedResultName": "Form Responses 1"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Phone Number (Please enter + country code)",
+              "lookupValue": "={{ $('Webhook1').item.json.body.data.conversation_initiation_client_data.dynamic_variables.system__called_number }}"
+            }
+          ]
+        },
+        "combineFilters": "OR",
+        "options": {}
+      },
+      "id": "21bfb797-2ca9-4316-97e4-cc5298522a5d",
+      "name": "Get row(s) in sheet1",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        3328,
+        1680
+      ],
+      "typeVersion": 4.7,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f90161bd-2afe-472c-bb45-22b2da435bb9",
+              "name": "country_code",
+              "type": "string",
+              "value": "={{$('Webhook1').item.json.body.data.metadata.phone_call.external_number.match(/^\\+(\\d{1,2})/)[1]}}"
+            },
+            {
+              "id": "fe128657-11d8-457f-b31e-27806ae3ab3f",
+              "name": "phone_number",
+              "type": "string",
+              "value": "={{$('Webhook1').item.json.body.data.metadata.phone_call.external_number.replace(/^\\+\\d{1,2}/, '')}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "927d8544-bb38-4553-ba6c-b0052548929f",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        2880,
+        1472
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "8a412e49-ab8d-41d3-a0f4-f464bf73c3e8",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        3120,
+        1648
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Hi  {{ $json['First Name'] }}, your request: {{ $json['Service Request'] }}"
+            },
+            {
+              "content": "=Your name is Anika. You work with Thinkspire AI. You are an expert in following up with potential leads.\n\nWrite a friendly, yet concise, outbound call opener using the lead’s {{ $json['First Name'] }} and referencing their requested service: {{ $json['Service Request'] }} . Make sure the sentence is grammatically correct.\n\nLabel the output as \"Voice Opener\"",
+              "role": "system"
+            }
+          ]
+        },
+        "simplify": false,
+        "jsonOutput": true,
+        "options": {}
+      },
+      "id": "8b228aab-4e11-4c72-8cf9-027b7845e44a",
+      "name": "Message a model1",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        2800,
+        1168
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "8cTwctTGeEBOJeUq",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 2. Fetch Client Data ##",
+        "height": 288,
+        "width": 1296
+      },
+      "id": "b3c50191-083e-447f-993f-f168a2ca676f",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2032,
+        1072
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 3. Outbound Call Processing ##",
+        "height": 464,
+        "width": 1728,
+        "color": 4
+      },
+      "id": "e4ce9bcb-bd7d-4eb8-97bb-9ae073900809",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2032,
+        1424
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 1. Initiate Call ##",
+        "height": 272,
+        "width": 480,
+        "color": 5
+      },
+      "id": "0d1a03ff-e8ac-48c4-86c3-a21acaa6c1a4",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2032,
+        720
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e726c247-bf1a-451a-910c-49beee3fe548",
+              "name": "country_code",
+              "type": "string",
+              "value": "={{$json.body.called_number.match(/^\\+(\\d{1,2})/)[1]}}"
+            },
+            {
+              "id": "058cde1e-76ba-4dee-9da8-141e154f6a8c",
+              "name": "phone_number",
+              "type": "string",
+              "value": "={{$json.body.called_number.replace(/^\\+\\d{1,2}/, '')}}"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "6295cd06-827a-4994-a2ff-39caee24832d",
+      "name": "Edit Fields1",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        2336,
+        1168
+      ],
+      "typeVersion": 3.4,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1VxAAFch57KhXmRpgClLpklDeB4naAqr8LrLoBd3SiWw",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VxAAFch57KhXmRpgClLpklDeB4naAqr8LrLoBd3SiWw/edit?usp=drivesdk",
+          "cachedResultName": "Lead Qualification Voice Agent Demo v1 (Responses)"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": 1245574619,
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VxAAFch57KhXmRpgClLpklDeB4naAqr8LrLoBd3SiWw/edit#gid=1245574619",
+          "cachedResultName": "Form Responses 1"
+        },
+        "columns": {
+          "value": {
+            "Budget": "={{ $('Message a model').item.json.choices[0].message.content.budget }}",
+            "Timeline": "={{ $('Message a model').item.json.choices[0].message.content.timeline }}",
+            "Transcript": "={{ $('Webhook1').item.json.body.data.analysis.transcript_summary }}",
+            "Lead status": "={{ $('Message a model').item.json.choices[0].message.content.leadStatus }}",
+            "Call summary": "={{ $('Message a model').item.json.choices[0].message.content.callSummary }}",
+            "Phone Number (Please enter + country code)": "={{ $('Webhook1').item.json.body.data.conversation_initiation_client_data.dynamic_variables.system__called_number }}"
+          },
+          "schema": [
+            {
+              "id": "Timestamp",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "Timestamp",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "First Name",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "First Name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last Name",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Last Name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Email",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone Number (Please enter + country code)",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "Phone Number (Please enter + country code)",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Service Request",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Service Request",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Budget",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Budget",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Timeline",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Timeline",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Call summary",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Call summary",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Lead status",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Lead status",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Transcript",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Transcript",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Voice opener",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Voice opener",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Modified At",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Modified At",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "Phone Number (Please enter + country code)"
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "997d4d43-cd8d-414f-b6d1-53656714c906",
+      "name": "Update Call Data",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        3120,
+        1472
+      ],
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1VxAAFch57KhXmRpgClLpklDeB4naAqr8LrLoBd3SiWw",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VxAAFch57KhXmRpgClLpklDeB4naAqr8LrLoBd3SiWw/edit?usp=drivesdk",
+          "cachedResultName": "Lead Qualification Voice Agent Demo v1 (Responses)"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": 1245574619,
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VxAAFch57KhXmRpgClLpklDeB4naAqr8LrLoBd3SiWw/edit#gid=1245574619",
+          "cachedResultName": "Form Responses 1"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Phone Number (Please enter + country code)",
+              "lookupValue": "={{ $json.body.called_number }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "19cb1aa0-9f86-4849-bd5e-37d362b14d5b",
+      "name": "Look up Customer Data",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        2576,
+        1168
+      ],
+      "typeVersion": 4.7,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "Thinkspire Meeting",
+        "emailType": "text",
+        "message": "=Hi {{ $json['First Name']}},\n\nIt was great talking to you, below is our meeting calendar - https://calendar.app.google/Zs7VjMjbwWeaPvAH7 \n\nJust click the link, pick a time that works best for you, and we will see you in the meeting!\n",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "5279320f-455a-47dc-a163-6d8eba508550",
+      "name": "Send Schedule Request",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        3552,
+        1680
+      ],
+      "webhookId": "2ae2636b-48c1-49bd-9aac-8fb23ba202a7",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "OEcIZm1duf4dQunn",
+          "name": "Vamsi2536"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/convai/twilio/outbound-call",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "agent_id",
+              "value": "agent_0501k5kszqfxe65byc7m2ebkg498"
+            },
+            {
+              "name": "agent_phone_number_id",
+              "value": "phnum_1201k5ksx9cmehgah78rf8es27jf"
+            },
+            {
+              "name": "to_number",
+              "value": "={{ $json[\"Phone Number (Please enter + country code)\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b6ec303a-dd96-4f05-832f-a1ac4b3ac1a6",
+      "name": "Outbound Call",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2288,
+        800
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "UN0zuUGZRefT8YIB",
+          "name": "Twitter API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Update Call Data",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Look up Customer Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Send Schedule Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Outbound Call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Look up Customer Data": {
+      "main": [
+        [
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Webhook1": [
+      {
+        "json": {
+          "body": {
+            "data": {
+              "status": "done",
+              "user_id": null,
+              "agent_id": "agent_0501k5kszqfxe65byc7m2ebkg498",
+              "analysis": {
+                "call_successful": "success",
+                "call_summary_title": "Automate Appointment Booking Inquiry",
+                "transcript_summary": "Thinkspire AI's Sarah contacted John regarding his interest in automating appointment booking. John wants to automate bookings and increase them, with a budget of 1 lakh rupees and a 2-week timeline. Sarah proposed a discovery session with an AI strategist and will send a calendar link to schedule it. John agreed.\n",
+                "data_collection_results": {},
+                "evaluation_criteria_results": {}
+              },
+              "metadata": {
+                "cost": 1285,
+                "error": null,
+                "charging": {
+                  "tier": "free",
+                  "is_burst": false,
+                  "llm_price": 0.0007876000000000001,
+                  "llm_usage": {
+                    "initiated_generation": {
+                      "model_usage": {
+                        "gemini-2.0-flash-001": {
+                          "input": {
+                            "price": 0.0006964,
+                            "tokens": 6964
+                          },
+                          "output_total": {
+                            "price": 0.00009120000000000001,
+                            "tokens": 228
+                          },
+                          "input_cache_read": {
+                            "price": 0,
+                            "tokens": 0
+                          },
+                          "input_cache_write": {
+                            "price": 0,
+                            "tokens": 0
+                          }
+                        }
+                      }
+                    },
+                    "irreversible_generation": {
+                      "model_usage": {
+                        "gemini-2.0-flash-001": {
+                          "input": {
+                            "price": 0.0005844,
+                            "tokens": 5844
+                          },
+                          "output_total": {
+                            "price": 0.00008400000000000001,
+                            "tokens": 210
+                          },
+                          "input_cache_read": {
+                            "price": 0,
+                            "tokens": 0
+                          },
+                          "input_cache_write": {
+                            "price": 0,
+                            "tokens": 0
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "llm_charge": 8,
+                  "call_charge": 1277,
+                  "dev_discount": false,
+                  "free_minutes_consumed": 0,
+                  "free_llm_dollars_consumed": 0
+                },
+                "feedback": {
+                  "likes": 0,
+                  "dislikes": 0,
+                  "overall_score": null
+                },
+                "timezone": null,
+                "rag_usage": null,
+                "text_only": false,
+                "batch_call": null,
+                "phone_call": {
+                  "type": "twilio",
+                  "call_sid": "CA54c75fabc12cea508b6459ac812cfdcd",
+                  "direction": "outbound",
+                  "stream_sid": "MZ4078e9ed8d961b06f1fb0845619b55ca",
+                  "agent_number": "+18787866860",
+                  "external_number": "+919833046559",
+                  "phone_number_id": "phnum_1201k5ksx9cmehgah78rf8es27jf"
+                },
+                "initiator_id": null,
+                "main_language": "en",
+                "features_usage": {
+                  "workflow": {
+                    "enabled": false,
+                    "tool_node": {
+                      "used": false,
+                      "enabled": false
+                    }
+                  },
+                  "dtmf_tones": {
+                    "used": false,
+                    "enabled": false
+                  },
+                  "is_livekit": false,
+                  "multivoice": {
+                    "used": false,
+                    "enabled": false
+                  },
+                  "agent_testing": {
+                    "enabled": false,
+                    "tests_ran_in_last_7_days": false,
+                    "tests_ran_after_last_modification": false
+                  },
+                  "pii_zrm_agent": false,
+                  "pii_zrm_workspace": false,
+                  "transfer_to_agent": {
+                    "used": false,
+                    "enabled": false
+                  },
+                  "language_detection": {
+                    "used": false,
+                    "enabled": false
+                  },
+                  "transfer_to_number": {
+                    "used": false,
+                    "enabled": false
+                  },
+                  "voicemail_detection": {
+                    "used": false,
+                    "enabled": false
+                  },
+                  "external_mcp_servers": {
+                    "used": false,
+                    "enabled": false
+                  },
+                  "tool_dynamic_variable_updates": {
+                    "used": false,
+                    "enabled": false
+                  }
+                },
+                "eleven_assistant": {
+                  "is_eleven_assistant": false
+                },
+                "deletion_settings": {
+                  "delete_audio": false,
+                  "deletion_time_unix_secs": null,
+                  "delete_transcript_and_pii": false,
+                  "deleted_logs_at_time_unix_secs": null,
+                  "deleted_audio_at_time_unix_secs": null,
+                  "deleted_transcript_at_time_unix_secs": null
+                },
+                "call_duration_secs": 115,
+                "termination_reason": "Call ended by remote party",
+                "authorization_method": "signed_url",
+                "start_time_unix_secs": 1759756324,
+                "accepted_time_unix_secs": 1759756324,
+                "conversation_initiation_source": "twilio",
+                "conversation_initiation_source_version": null
+              },
+              "transcript": [
+                {
+                  "role": "agent",
+                  "message": "Hi John, this is Sarah from Thinkspire AI. I noticed you requested information about automating appointment booking, and I’m here to help you with that!",
+                  "feedback": null,
+                  "llm_usage": null,
+                  "tool_calls": [],
+                  "interrupted": false,
+                  "llm_override": null,
+                  "tool_results": [],
+                  "source_medium": null,
+                  "agent_metadata": {
+                    "agent_id": "agent_0501k5kszqfxe65byc7m2ebkg498",
+                    "workflow_node_id": null
+                  },
+                  "original_message": null,
+                  "time_in_call_secs": 1,
+                  "multivoice_message": null,
+                  "rag_retrieval_info": null,
+                  "conversation_turn_metrics": {
+                    "metrics": {
+                      "convai_tts_service_ttfb": {
+                        "elapsed_time": 0.5635368379880674
+                      }
+                    }
+                  }
+                },
+                {
+                  "role": "user",
+                  "message": "Hi, so yeah how can you help me with that?",
+                  "feedback": null,
+                  "llm_usage": null,
+                  "tool_calls": [],
+                  "interrupted": false,
+                  "llm_override": null,
+                  "tool_results": [],
+                  "source_medium": "audio",
+                  "agent_metadata": null,
+                  "original_message": null,
+                  "time_in_call_secs": 14,
+                  "multivoice_message": null,
+                  "rag_retrieval_info": null,
+                  "conversation_turn_metrics": {
+                    "metrics": {
+                      "convai_asr_trailing_service_latency": {
+                        "elapsed_time": 0.12325029399653431
+                      }
+                    }
+                  }
+                },
+                {
+                  "role": "agent",
+                  "message": "Great, thank you. To make sure we fully understand your vision, I just have three quick questions... First, could you tell me a little more about the core problem you're hoping to solve with this AI agent? What does a successful outcome look like for your business?\n",
+                  "feedback": null,
+                  "llm_usage": {
+                    "model_usage": {
+                      "gemini-2.0-flash-001": {
+                        "input": {
+                          "price": 0.0001055,
+                          "tokens": 1055
+                        },
+                        "output_total": {
+                          "price": 0.000022800000000000002,
+                          "tokens": 57
+                        },
+                        "input_cache_read": {
+                          "price": 0,
+                          "tokens": 0
+                        },
+                        "input_cache_write": {
+                          "price": 0,
+                          "tokens": 0
+                        }
+                      }
+                    }
+                  },
+                  "tool_calls": [],
+                  "interrupted": false,
+                  "llm_override": null,
+                  "tool_results": [],
+                  "source_medium": null,
+                  "agent_metadata": {
+                    "agent_id": "agent_0501k5kszqfxe65byc7m2ebkg498",
+                    "workflow_node_id": null
+                  },
+                  "original_message": null,
+                  "time_in_call_secs": 18,
+                  "multivoice_message": null,
+                  "rag_retrieval_info": null,
+                  "conversation_turn_metrics": {
+                    "metrics": {
+                      "convai_llm_service_ttfb": {
+                        "elapsed_time": 0.3215819909964921
+                      },
+                      "convai_tts_service_ttfb": {
+                        "elapsed_time": 0.19393545400816947
+                      },
+                      "convai_llm_service_ttf_sentence": {
+                        "elapsed_time": 0.4416125149873551
+                      },
+                      "convai_llm_service_tt_last_sentence": {
+                        "elapsed_time": 0.6158950379904127
+                      }
+                    }
+                  }
+                },
+                {
+                  "role": "user",
+                  "message": "So I want to make sure that my appointments are booked automatically and I can increase my appointment bookings.",
+                  "feedback": null,
+                  "llm_usage": null,
+                  "tool_calls": [],
+                  "interrupted": false,
+                  "llm_override": null,
+                  "tool_results": [],
+                  "source_medium": "audio",
+                  "agent_metadata": null,
+                  "original_message": null,
+                  "time_in_call_secs": 40,
+                  "multivoice_message": null,
+                  "rag_retrieval_info": null,
+                  "conversation_turn_metrics": {
+                    "metrics": {
+                      "convai_asr_trailing_service_latency": {
+                        "elapsed_time": 0.22823749399685767
+                      }
+                    }
+                  }
+                },
+                {
+                  "role": "agent",
+                  "message": "Thank you, that's helpful. And to help us scope the project correctly, do you have a rough budget range in mind? It's perfectly fine if it's just an estimate.\n",
+                  "feedback": null,
+                  "llm_usage": {
+                    "model_usage": {
+                      "gemini-2.0-flash-001": {
+                        "input": {
+                          "price": 0.0001132,
+                          "tokens": 1132
+                        },
+                        "output_total": {
+                          "price": 0.000016400000000000002,
+                          "tokens": 41
+                        },
+                        "input_cache_read": {
+                          "price": 0,
+                          "tokens": 0
+                        },
+                        "input_cache_write": {
+                          "price": 0,
+                          "tokens": 0
+                        }
+                      }
+                    }
+                  },
+                  "tool_calls": [],
+                  "interrupted": false,
+                  "llm_override": null,
+                  "tool_results": [],
+                  "source_medium": null,
+                  "agent_metadata": {
+                    "agent_id": "agent_0501k5kszqfxe65byc7m2ebkg498",
+                    "workflow_node_id": null
+                  },
+                  "original_message": null,
+                  "time_in_call_secs": 49,
+                  "multivoice_message": null,
+                  "rag_retrieval_info": null,
+                  "conversation_turn_metrics": {
+                    "metrics": {
+                      "convai_llm_service_ttfb": {
+                        "elapsed_time": 0.45740470799501054
+                      },
+                      "convai_tts_service_ttfb": {
+                        "elapsed_time": 0.21295881099649705
+                      },
+                      "convai_llm_service_ttf_sentence": {
+                        "elapsed_time": 0.5848784309928305
+                      },
+                      "convai_llm_service_tt_last_sentence": {
+                        "elapsed_time": 0.7382965579890879
+                      }
+                    }
+                  }
+                },
+                {
+                  "role": "user",
+                  "message": "I'm thinking say around 1 lakh rupees.",
+                  "feedback": null,
+                  "llm_usage": null,
+                  "tool_calls": [],
+                  "interrupted": false,
+                  "llm_override": null,
+                  "tool_results": [],
+                  "source_medium": "audio",
+                  "agent_metadata": null,
+                  "original_message": null,
+                  "time_in_call_secs": 61,
+                  "multivoice_message": null,
+                  "rag_retrieval_info": null,
+                  "conversation_turn_metrics": {
+                    "metrics": {
+                      "convai_asr_trailing_service_latency": {
+                        "elapsed_time": 0.1772567540028831
+                      }
+                    }
+                  }
+                },
+                {
+                  "role": "agent",
+                  "message": "And finally, what is your ideal timeline for getting a solution like this implemented?\n",
+                  "feedback": null,
+                  "llm_usage": {
+                    "model_usage": {
+                      "gemini-2.0-flash-001": {
+                        "input": {
+                          "price": 0.0001184,
+                          "tokens": 1184
+                        },
+                        "output_total": {
+                          "price": 0.000006800000000000001,
+                          "tokens": 17
+                        },
+                        "input_cache_read": {
+                          "price": 0,
+                          "tokens": 0
+                        },
+                        "input_cache_write": {
+                          "price": 0,
+                          "tokens": 0
+                        }
+                      }
+                    }
+                  },
+                  "tool_calls": [],
+                  "interrupted": false,
+                  "llm_override": null,
+                  "tool_results": [],
+                  "source_medium": null,
+                  "agent_metadata": {
+                    "agent_id": "agent_0501k5kszqfxe65byc7m2ebkg498",
+                    "workflow_node_id": null
+                  },
+                  "original_message": null,
+                  "time_in_call_secs": 67,
+                  "multivoice_message": null,
+                  "rag_retrieval_info": null,
+                  "conversation_turn_metrics": {
+                    "metrics": {
+                      "convai_llm_service_ttfb": {
+                        "elapsed_time": 0.3226360460103024
+                      },
+                      "convai_tts_service_ttfb": {
+                        "elapsed_time": 0.3127467209997121
+                      },
+                      "convai_llm_service_ttf_sentence": {
+                        "elapsed_time": 0.43684441500226967
+                      },
+                      "convai_llm_service_tt_last_sentence": {
+                        "elapsed_time": 0.4368247920065187
+                      }
+                    }
+                  }
+                },
+                {
+                  "role": "user",
+                  "message": "Say 2 weeks.",
+                  "feedback": null,
+                  "llm_usage": null,
+                  "tool_calls": [],
+                  "interrupted": false,
+                  "llm_override": null,
+                  "tool_results": [],
+                  "source_medium": "audio",
+                  "agent_metadata": null,
+                  "original_message": null,
+                  "time_in_call_secs": 76,
+                  "multivoice_message": null,
+                  "rag_retrieval_info": null,
+                  "conversation_turn_metrics": {
+                    "metrics": {
+                      "convai_asr_trailing_service_latency": {
+                        "elapsed_time": 0.12408081999456044
+                      }
+                    }
+                  }
+                },
+                {
+                  "role": "agent",
+                  "message": "Thank you, that's all incredibly helpful. Based on what you've described, this is DEFINITELY the kind of project our team excels at. The next step would be a complimentary discovery session with one of our lead AI strategists... Would you be open to scheduling that?\n",
+                  "feedback": null,
+                  "llm_usage": {
+                    "model_usage": {
+                      "gemini-2.0-flash-001": {
+                        "input": {
+                          "price": 0.0001206,
+                          "tokens": 1206
+                        },
+                        "output_total": {
+                          "price": 0.0000236,
+                          "tokens": 59
+                        },
+                        "input_cache_read": {
+                          "price": 0,
+                          "tokens": 0
+                        },
+                        "input_cache_write": {
+                          "price": 0,
+                          "tokens": 0
+                        }
+                      }
+                    }
+                  },
+                  "tool_calls": [],
+                  "interrupted": false,
+                  "llm_override": null,
+                  "tool_results": [],
+                  "source_medium": null,
+                  "agent_metadata": {
+                    "agent_id": "agent_0501k5kszqfxe65byc7m2ebkg498",
+                    "workflow_node_id": null
+                  },
+                  "original_message": null,
+                  "time_in_call_secs": 79,
+                  "multivoice_message": null,
+                  "rag_retrieval_info": null,
+                  "conversation_turn_metrics": {
+                    "metrics": {
+                      "convai_llm_service_ttfb": {
+                        "elapsed_time": 0.38657523899746593
+                      },
+                      "convai_tts_service_ttfb": {
+                        "elapsed_time": 0.20987241200054996
+                      },
+                      "convai_llm_service_ttf_sentence": {
+                        "elapsed_time": 0.4594701989990426
+                      },
+                      "convai_llm_service_tt_last_sentence": {
+                        "elapsed_time": 0.637054448001436
+                      }
+                    }
+                  }
+                },
+                {
+                  "role": "user",
+                  "message": "Yes!",
+                  "feedback": null,
+                  "llm_usage": null,
+                  "tool_calls": [],
+                  "interrupted": false,
+                  "llm_override": null,
+                  "tool_results": [],
+                  "source_medium": "audio",
+                  "agent_metadata": null,
+                  "original_message": null,
+                  "time_in_call_secs": 100,
+                  "multivoice_message": null,
+                  "rag_retrieval_info": null,
+                  "conversation_turn_metrics": {
+                    "metrics": {
+                      "convai_asr_trailing_service_latency": {
+                        "elapsed_time": 0.12549964401114266
+                      }
+                    }
+                  }
+                },
+                {
+                  "role": "agent",
+                  "message": "PERFECT. I'll send a calendar link to your email so you can pick a time that works best. We're looking forward to digging into this with you!\n",
+                  "feedback": null,
+                  "llm_usage": {
+                    "model_usage": {
+                      "gemini-2.0-flash-001": {
+                        "input": {
+                          "price": 0.0001267,
+                          "tokens": 1267
+                        },
+                        "output_total": {
+                          "price": 0.000014400000000000001,
+                          "tokens": 36
+                        },
+                        "input_cache_read": {
+                          "price": 0,
+                          "tokens": 0
+                        },
+                        "input_cache_write": {
+                          "price": 0,
+                          "tokens": 0
+                        }
+                      }
+                    }
+                  },
+                  "tool_calls": [],
+                  "interrupted": false,
+                  "llm_override": null,
+                  "tool_results": [],
+                  "source_medium": null,
+                  "agent_metadata": {
+                    "agent_id": "agent_0501k5kszqfxe65byc7m2ebkg498",
+                    "workflow_node_id": null
+                  },
+                  "original_message": null,
+                  "time_in_call_secs": 101,
+                  "multivoice_message": null,
+                  "rag_retrieval_info": null,
+                  "conversation_turn_metrics": {
+                    "metrics": {
+                      "convai_llm_service_ttfb": {
+                        "elapsed_time": 0.32276430199272
+                      },
+                      "convai_tts_service_ttfb": {
+                        "elapsed_time": 0.1420015589974355
+                      },
+                      "convai_llm_service_ttf_sentence": {
+                        "elapsed_time": 0.3504939279955579
+                      },
+                      "convai_llm_service_tt_last_sentence": {
+                        "elapsed_time": 0.4730485329928342
+                      }
+                    }
+                  }
+                },
+                {
+                  "role": "user",
+                  "message": "Alright, thank you",
+                  "feedback": null,
+                  "llm_usage": null,
+                  "tool_calls": [],
+                  "interrupted": false,
+                  "llm_override": null,
+                  "tool_results": [],
+                  "source_medium": null,
+                  "agent_metadata": null,
+                  "original_message": null,
+                  "time_in_call_secs": 111,
+                  "multivoice_message": null,
+                  "rag_retrieval_info": null,
+                  "conversation_turn_metrics": null
+                }
+              ],
+              "conversation_id": "conv_1201k6wtcpzre27tv3ncknecfvqq",
+              "conversation_initiation_client_data": {
+                "user_id": null,
+                "source_info": {
+                  "source": null,
+                  "version": null
+                },
+                "dynamic_variables": {
+                  "voiceopener": "Hi John, this is Sarah from Thinkspire AI. I noticed you requested information about automating appointment booking, and I’m here to help you with that!",
+                  "system__time": "Monday, 13:13 06 October 2025",
+                  "system__agent_id": "agent_0501k5kszqfxe65byc7m2ebkg498",
+                  "system__call_sid": "CA54c75fabc12cea508b6459ac812cfdcd",
+                  "system__time_utc": "2025-10-06T13:13:59.048631+00:00",
+                  "system__timezone": null,
+                  "system__caller_id": "+18787866860",
+                  "system__called_number": "+919833046559",
+                  "system__conversation_id": "conv_1201k6wtcpzre27tv3ncknecfvqq",
+                  "system__current_agent_id": "agent_0501k5kszqfxe65byc7m2ebkg498",
+                  "system__call_duration_secs": 115
+                },
+                "custom_llm_extra_body": {},
+                "conversation_config_override": {
+                  "tts": null,
+                  "agent": null,
+                  "conversation": null
+                }
+              }
+            },
+            "type": "post_call_transcription",
+            "event_timestamp": 1759756444
+          },
+          "query": {},
+          "params": {},
+          "headers": {
+            "host": "thinkspire.app.n8n.cloud",
+            "accept": "*/*",
+            "cf-ray": "98a56b7183b9f851-ORD",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-ew-via": "15",
+            "cf-worker": "n8n.cloud",
+            "x-real-ip": "34.59.11.47",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "user-agent": "ElevenLabs/1.0",
+            "cf-ipcountry": "US",
+            "content-type": "application/json",
+            "x-is-trusted": "yes",
+            "content-length": "13329",
+            "accept-encoding": "gzip, br",
+            "x-forwarded-for": "34.59.11.47, 172.70.130.205",
+            "cf-connecting-ip": "34.59.11.47",
+            "x-forwarded-host": "thinkspire.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-gwc-27-56cf765df-nxh6x",
+            "elevenlabs-signature": "t=1759756444,v0=01820bd4dc1f5313cf70a9cc6e79be54778365cd800326a105683c8589ada606"
+          },
+          "webhookUrl": "https://thinkspire.app.n8n.cloud/webhook/37e8d818-8265-43e9-803e-00119da5f3cb",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "versionId": "c7b09a2b-1b26-4eab-b4b8-7bd1870ad9bc",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-01-29T08:17:24.041Z",
+      "createdAt": "2026-01-29T08:17:24.041Z",
+      "role": "workflow:owner",
+      "workflowId": "G0c39tWcgo186D2J",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
