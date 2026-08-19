@@ -1,0 +1,857 @@
+{
+  "updatedAt": "2025-12-05T18:16:23.000Z",
+  "createdAt": "2025-11-16T20:00:25.485Z",
+  "id": "2XrZwU8ltiI4fnfW",
+  "name": "Gmail Reply detection",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "includeSpamTrash": false,
+          "q": "in:inbox -from:your@email.com",
+          "readStatus": "unread"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a96433ff-6b64-48f3-aa4f-08069f5e4ab4",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UbWO1LFfZ6s8MzMA",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5b0bd6dc-5c9b-4185-9189-29688b8ea024",
+              "leftValue": "={{\n  ($json.subject && $json.subject.toLowerCase().trim().startsWith(\"re:\")) \n  ||\n  ($json.threadId && $json.snippet && $json.snippet.toLowerCase().includes(\"wrote:\"))\n}}",
+              "rightValue": "=",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "807977c6-b29f-4263-9405-58be230c7332",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1IUNIvKOc2s6qmjwrMZLpuhgvvK_py2sXskapsOswS04",
+          "mode": "list",
+          "cachedResultName": "Lead Qualification System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IUNIvKOc2s6qmjwrMZLpuhgvvK_py2sXskapsOswS04/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Website",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IUNIvKOc2s6qmjwrMZLpuhgvvK_py2sXskapsOswS04/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $json.senderEmail }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        704,
+        -192
+      ],
+      "id": "9f99b64f-b5b0-4b1e-9f55-c1356f256b46",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const from = $json.From || \"\";\nconst snippet = $json.snippet || \"\";\nconst subjectRaw = $json.Subject || \"\";\n\n// Extract name and email from From field\nconst match = from.match(/^(.*?)(?:\\s*<([^>]+)>)$/);\n\nlet senderName = \"\";\nlet senderEmail = \"\";\n\nif (match) {\n  senderName = match[1].trim();\n  senderEmail = match[2].trim();\n} else {\n  senderEmail = from.trim();\n}\n\n// Clean subject, remove Re:, RE:, Fwd:, FW:\nlet cleanSubject = subjectRaw\n  .replace(/^(re:|fwd:|fw:)\\s*/i, \"\")\n  .trim();\n\n// Return structured output\nreturn [{\n  json: {\n    senderName,\n    senderEmail,\n    subject: cleanSubject,\n    message: snippet\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        -16
+      ],
+      "id": "98579352-f62a-46a3-ab11-6cf8ef8c2991",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1IUNIvKOc2s6qmjwrMZLpuhgvvK_py2sXskapsOswS04",
+          "mode": "list",
+          "cachedResultName": "Lead Qualification System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IUNIvKOc2s6qmjwrMZLpuhgvvK_py2sXskapsOswS04/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1573018970,
+          "mode": "list",
+          "cachedResultName": "Gmail",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IUNIvKOc2s6qmjwrMZLpuhgvvK_py2sXskapsOswS04/edit#gid=1573018970"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $json.senderEmail }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        704,
+        48
+      ],
+      "id": "1e590bc3-eb8e-4396-a17f-25ecf6a2ad39",
+      "name": "Get row(s) in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3MsYFPOz6gYs3lBk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1232,
+        -80
+      ],
+      "id": "16c30d91-7002-4de9-850d-5e2e368cfda1",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "afa6cff2-dc1a-4f63-ae2a-f6acf4c61917",
+              "name": "Source",
+              "value": "Website",
+              "type": "string"
+            },
+            {
+              "id": "e68c0ddf-a15d-40a8-8bd4-f61e2faf64f7",
+              "name": "Date",
+              "value": "={{ $json.Date }}",
+              "type": "string"
+            },
+            {
+              "id": "cc96a67d-3158-4860-a8d2-b54069fef0f6",
+              "name": "Name",
+              "value": "={{ $json.Name }}",
+              "type": "string"
+            },
+            {
+              "id": "124670c6-aba9-4b4d-ab14-addf40294f18",
+              "name": "Email",
+              "value": "={{ $json.Email }}",
+              "type": "string"
+            },
+            {
+              "id": "ed63db48-6d4b-47f1-b698-71c7bc0c7ce6",
+              "name": "Problem Summary",
+              "value": "={{ $json['Problem Summary'] }}",
+              "type": "string"
+            },
+            {
+              "id": "a77b36df-9ff7-4203-99e6-ee4746a4c084",
+              "name": "Need type",
+              "value": "={{ $json['Need type'] }}",
+              "type": "string"
+            },
+            {
+              "id": "9473c520-491b-4d10-aff8-60ff9d57d74e",
+              "name": "Intent Score",
+              "value": "={{ $json['Intent Score'] }}",
+              "type": "string"
+            },
+            {
+              "id": "092b2686-3b61-4f19-bcc6-15835ff44fc5",
+              "name": "Lead Stage",
+              "value": "={{ $json['Lead Stage'] }}",
+              "type": "string"
+            },
+            {
+              "id": "e9f0fae2-6f6f-497b-bd93-a71ee02ccf89",
+              "name": "Reason",
+              "value": "={{ $json.Reason }}",
+              "type": "string"
+            },
+            {
+              "id": "41f19642-ab00-4edf-8fca-3e8f1784847a",
+              "name": "Pain Intensity",
+              "value": "={{ $json['Pain Intensity'] }}",
+              "type": "string"
+            },
+            {
+              "id": "66817137-c8b6-4809-983b-c6d0836dd706",
+              "name": "Coach notes",
+              "value": "={{ $json['Coach notes'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        912,
+        -192
+      ],
+      "id": "d2a7027d-38a7-46b2-a66d-645596a42818",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c239d0f1-13cb-43aa-8550-6d00c41799a2",
+              "name": "Source",
+              "value": "Email",
+              "type": "string"
+            },
+            {
+              "id": "96c1ccd4-37f2-45b2-a260-cb5230415cd4",
+              "name": "Date",
+              "value": "={{ $json.Date }}",
+              "type": "string"
+            },
+            {
+              "id": "9dd2e311-ce48-4e2a-8b76-f610fa0ea377",
+              "name": "Name",
+              "value": "={{ $json.Name }}",
+              "type": "string"
+            },
+            {
+              "id": "48f4bc94-f0b9-4a19-bbf2-dc9607bd84a9",
+              "name": "Email",
+              "value": "={{ $json.Email }}",
+              "type": "string"
+            },
+            {
+              "id": "5257526a-be1c-4d0a-8e4d-0b288fe421f1",
+              "name": "Text",
+              "value": "={{ $json.Text }}",
+              "type": "string"
+            },
+            {
+              "id": "b733967b-b54b-4226-896b-155c8e9254a0",
+              "name": "problem_summary",
+              "value": "={{ $json.problem_summary }}",
+              "type": "string"
+            },
+            {
+              "id": "bebdade6-263c-417b-997d-8d09aa160544",
+              "name": "need_type",
+              "value": "={{ $json.need_type }}",
+              "type": "string"
+            },
+            {
+              "id": "7d4483ed-4b78-43b8-a371-b28005fb2294",
+              "name": "lead_score",
+              "value": "={{ $json.lead_score }}",
+              "type": "string"
+            },
+            {
+              "id": "8a7e84f9-8f35-4622-b9d7-7b427085394d",
+              "name": "Lead Stage",
+              "value": "={{ $json['Lead Stage'] }}",
+              "type": "string"
+            },
+            {
+              "id": "eaa370c9-c40f-4b34-a91e-65eb20d8e6e4",
+              "name": "reason",
+              "value": "={{ $json.reason }}",
+              "type": "string"
+            },
+            {
+              "id": "59a03613-91b7-4b72-bae8-283b3574fd9b",
+              "name": "coach_notes",
+              "value": "={{ $json.coach_notes }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        912,
+        48
+      ],
+      "id": "75cbd8cd-b687-423e-b628-24be12cdd84c",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.problem_summary }}, {{ $json.need_type }}, {{ $json.lead_score }}, {{ $json['Lead Stage'] }}, {{ $json.reason }}, {{ $json.coach_notes }}",
+        "options": {
+          "systemMessage": "You are a helpful assistant who acts as Gmail reply assistant Gmail drafter"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        -80
+      ],
+      "id": "97c79d40-7026-4095-b9e5-b9ef620eb504",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite-preview-09-2025",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1392,
+        112
+      ],
+      "id": "d947df89-3de8-4c3e-bb1a-9dba38a07031",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Gq3qNdXZmlzVb7Jg",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash-preview-09-2025",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash-preview-09-2025"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Find hot, warm or cold \n {{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        1840,
+        144
+      ],
+      "id": "d1774ef4-e5d6-4631-a8e6-f73ee22762b4",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Gq3qNdXZmlzVb7Jg",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "cabd7052-a179-408c-b210-b12f13575419"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Hot"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "2a5b0105-d99e-44fa-bb72-599152159328",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Warm"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b3b4e0f1-147c-4b49-b517-c0b6e2a68842",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Cold"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a5ff0609-d0a8-4017-91d1-dd616ad986c3",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Unqualified"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        160,
+        816
+      ],
+      "id": "6966e1d9-6998-453d-aad5-dba47393f274",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        800,
+        624
+      ],
+      "id": "b969168f-ebbb-47bf-b2ac-e029538bd9aa",
+      "name": "Send a message1",
+      "webhookId": "6a2b9f64-ba30-44f8-84df-d6d785fdfe89",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "Rb7HyhAgq0iIU3TT",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        800,
+        464
+      ],
+      "id": "bce7c274-336d-4378-aada-7da97d8161bf",
+      "name": "Hot",
+      "webhookId": "17bb9b32-67f3-4fbd-89ca-142bcaf53ee8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "OEcIZm1duf4dQunn",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        800,
+        784
+      ],
+      "id": "8b2dea35-d8b8-41e2-bdcb-cd25af57c567",
+      "name": "Warm",
+      "webhookId": "17bb9b32-67f3-4fbd-89ca-142bcaf53ee8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "OEcIZm1duf4dQunn",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        816,
+        960
+      ],
+      "id": "ebd24a5e-2916-4cb6-ba1f-68ce5e94e185",
+      "name": "Cold",
+      "webhookId": "846dbb77-8175-4394-a894-433d8757e090",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "OEcIZm1duf4dQunn",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        832,
+        1136
+      ],
+      "id": "dc769327-77fa-4703-bc46-b2f352a027db",
+      "name": "Unqualified",
+      "webhookId": "d8ca2972-6853-4976-9232-13919b431faf",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "OEcIZm1duf4dQunn",
+          "name": "Gmail account 2"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Hot",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Warm",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cold",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Unqualified",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Gmail Trigger": [
+      {
+        "json": {
+          "id": "19aeb2aa28fbfb92",
+          "threadId": "19aeaa9d8c3a8056",
+          "snippet": "Good I will Book a call On Fri, 5 Dec 2025, 12:09 am , &lt;vamsivk1465@gmail.com&gt; wrote: Hi Vamsi, I read your note about and I am confident we can make progress quickly. Here is my calendar link so",
+          "payload": {
+            "mimeType": "multipart/alternative"
+          },
+          "sizeEstimate": 8237,
+          "historyId": "392482",
+          "internalDate": "1764882017000",
+          "labels": [
+            {
+              "id": "INBOX",
+              "name": "INBOX"
+            },
+            {
+              "id": "IMPORTANT",
+              "name": "IMPORTANT"
+            },
+            {
+              "id": "CATEGORY_PERSONAL",
+              "name": "CATEGORY_PERSONAL"
+            },
+            {
+              "id": "UNREAD",
+              "name": "UNREAD"
+            }
+          ],
+          "From": "Vamsi Krishna <vamsikrishna2536@gmail.com>",
+          "Subject": "Re: New Lead",
+          "To": "Vamsivk <vamsivk1465@gmail.com>"
+        }
+      }
+    ]
+  },
+  "versionId": "6b8722b7-fc43-460f-92e8-3412b28944f1",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-11-16T20:00:25.488Z",
+      "createdAt": "2025-11-16T20:00:25.488Z",
+      "role": "workflow:owner",
+      "workflowId": "2XrZwU8ltiI4fnfW",
+      "projectId": "VDyoKZWt3i5eAZSO"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
